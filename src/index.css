@@ -1,0 +1,58 @@
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  background: #f8f9fa;
+}
+
+.hero h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.host-cards, .request-card, .onboarding {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.host-card, .request-card {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  width: 180px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+input[type="text"], input[type="file"] {
+  padding: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  padding: 8px 12px;
+  cursor: pointer;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 6px;
+}
+
+.tab-buttons button {
+  background: #f0f0f0;
+  color: black;
+}
+
+.tab-buttons button:hover {
+  background: #007bff;
+  color: white;
+}

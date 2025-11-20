@@ -1,0 +1,25 @@
+{
+  "version": "5",
+  "remote": {
+    "https://cdn.jsdelivr.net/npm/@supabase/auth-js@2.83.0/+esm": "84a713ebfbcda6c7f553864f4e26b0463eee4a8788adbcd78013add4b3ebbe46",
+    "https://cdn.jsdelivr.net/npm/@supabase/functions-js@2.83.0/+esm": "1a716ad8caf133bffb3b03af4d5f556b8e88c644534b1306241ebf9b1d86fe4a",
+    "https://cdn.jsdelivr.net/npm/@supabase/postgrest-js@2.83.0/+esm": "61eef0edefe27d7c1e1e2672ec0ad14f42549d3e7dd677517636ae800ad95784",
+    "https://cdn.jsdelivr.net/npm/@supabase/realtime-js@2.83.0/+esm": "ecdb525963fb11602caacdd579b851ce899305daf08aeaa26647fa0bb2c96ab4",
+    "https://cdn.jsdelivr.net/npm/@supabase/storage-js@2.83.0/+esm": "210d4d27fc77ad2e08935beb29f27de988fd9b93876c4314c6d2388690d0568a",
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm": "477dbe472d6af4ef54622a17baddf46e80dbd4de8a65663cdc1e3bacabe8f676",
+    "https://cdn.jsdelivr.net/npm/tslib@2.8.1/+esm": "63dd5e931cca88877daff82bc8424da8e423f07834cb5c15fbfb9e66c84b63d7",
+    "https://deno.land/std@0.203.0/async/delay.ts": "a6142eb44cdd856b645086af2b811b1fcce08ec06bb7d50969e6a872ee9b8659",
+    "https://deno.land/std@0.203.0/http/server.ts": "1b2403b3c544c0624ad23e8ca4e05877e65380d9e0d75d04957432d65c3d5f41"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:@supabase/supabase-js@^2.35.0",
+        "npm:@vitejs/plugin-react@^3.1.0",
+        "npm:react-dom@^18.2.0",
+        "npm:react@^18.2.0",
+        "npm:vite@5"
+      ]
+    }
+  }
+}

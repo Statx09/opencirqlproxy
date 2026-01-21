@@ -1,25 +1,35 @@
-import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://pjllwvqutytxtskzxwka.supabase.co";
-const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqbGx3dnF1dHl0eHRza3p4d2thIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Mjc2ODQ5NCwiZXhwIjoyMDc4MzQ0NDk0fQ.mpou-UB-5DOC7oMMmE5GpKu534dUeV2H_zKAb4bO1n8";
-
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
-
-serve(async (req) => {
+export async function handler(req) {
   try {
-    const { name, keywords, avatarUrl } = await req.json();
+    const { userId } = await req.json();
 
-    if (!name || !avatarUrl) throw new Error("Name and avatar required");
+    // TODO: early user check (first 100)
+    const earlyUser = false;
 
-    const { data, error } = await supabase
-      .from("hosts")
-      .insert([{ name, keywords, avatar: avatarUrl }]);
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: earlyUser ? "payment" : "subscription",
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: earlyUser ? "Lifetime Access" : "Cirql Subscription",
+            },
+            unit_amount: earlyUser ? 0 : 200,
+            recurring: earlyUser ? undefined : { interval: "month" },
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.origin}/cancel`,
+      metadata: { userId },
+    });
 
-    if (error) throw error;
-
-    return new Response(JSON.stringify({ success: true, data }), {
+    return new Response(JSON.stringify({ sessionId: session.id }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -29,5 +39,5 @@ serve(async (req) => {
       headers: { "Content-Type": "application/json" },
     });
   }
-});
+}
 

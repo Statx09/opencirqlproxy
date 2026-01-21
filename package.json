@@ -5,15 +5,27 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server.js"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^5.4.0",
+    "@stripe/stripe-js": "^8.5.2",
+    "@supabase/supabase-js": "^2.90.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "@supabase/supabase-js": "^2.35.0"
+    "stripe": "^20.1.2",
+    "vite": "^4.5.14"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
     "@vitejs/plugin-react": "^3.1.0"
-  }
+  },
+  "description": "",
+  "main": "server.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

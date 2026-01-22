@@ -43,8 +43,8 @@ export default function ProfileTab({ user, onLogin }) {
         setUsdtWallet(data.usdt_wallet || "");
         setKofi(data.kofi || "");
         setStripe(data.stripe || "");
-        setTopics(data.topics || "");
-        setIntentTags(data.intent_tags || "");
+        setTopics(data.topics ? data.topics.join(", ") : "");
+        setIntentTags(data.intent_tags ? data.intent_tags.join(", ") : "");
         setBio(data.bio || "");
       }
     } catch (err) {
@@ -72,8 +72,8 @@ export default function ProfileTab({ user, onLogin }) {
         usdt_wallet: usdtWallet,
         kofi,
         stripe,
-        topics,
-        intent_tags: intentTags,
+        topics: topics ? topics.split(",").map(t => t.trim()) : [],
+        intent_tags: intentTags ? intentTags.split(",").map(t => t.trim()) : [],
         bio,
         avatar_url: avatarUrl,
         updated_at: new Date(),

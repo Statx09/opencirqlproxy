@@ -17,6 +17,7 @@ export default function LandingPage() {
   const [selectedHost, setSelectedHost] = useState(null);
   const [activeTab, setActiveTab] = useState("Directory");
   const [user, setUser] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
 
   // Load hosts from Supabase
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function LandingPage() {
       try {
         const data = await fetchHosts();
         if (Array.isArray(data)) setHosts(data);
+        console.log("=== Hosts loaded ===", data);
       } catch (err) {
         console.error("Error loading hosts:", err);
       }
@@ -77,6 +79,30 @@ export default function LandingPage() {
     if (error) console.error("Google login error:", error);
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const toggleOnlineStatus = async () => {
+    if (!user) return;
+    setStatusLoading(true);
+    try {
+      const newStatus = !user.islive;
+      const { error } = await supabase
+        .from("profiles")
+        .update({ islive: newStatus })
+        .eq("email", user.email);
+      if (error) throw error;
+      setUser({ ...user, islive: newStatus });
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      alert("Failed to update status. Try again.");
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
   // Filter hosts by search topic
   const filteredHosts = hosts.filter((host) =>
     host.topics?.toLowerCase().includes(searchTopic.toLowerCase())
@@ -96,7 +122,7 @@ export default function LandingPage() {
         />
       </div>
 
-      {/* Tabs + login/profile */}
+      {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16, alignItems: "center" }}>
         {["Directory", "Chat Requests", "Profile", "Referral Commission"].map((tab) => (
           <button
@@ -117,32 +143,85 @@ export default function LandingPage() {
           </button>
         ))}
 
-        {!user && (
-          <button
-            onClick={handleGoogleLogin}
-            style={{
-              marginLeft: "auto",
-              padding: "8px 16px",
-              borderRadius: 8,
-              border: "none",
-              backgroundColor: "#3b82f6",
-              color: "#fff",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            Login / Sign Up
-          </button>
-        )}
+        {/* Right-aligned user controls */}
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          {user && (
+            <>
+              {/* Online/Offline two-sided toggle */}
+              <div
+                onClick={toggleOnlineStatus}
+                style={{
+                  display: "flex",
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  cursor: "pointer",
+                  userSelect: "none",
+                  fontWeight: 600,
+                  color: "#fff",
+                  border: "1px solid #ccc",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    backgroundColor: user.islive ? "#22c55e" : "#6b7280", // green when online
+                    transition: "all 0.2s",
+                  }}
+                >
+                  Online
+                </div>
+                <div
+                  style={{
+                    padding: "8px 12px",
+                    backgroundColor: !user.islive ? "#ef4444" : "#6b7280", // red when offline
+                    transition: "all 0.2s",
+                  }}
+                >
+                  Offline
+                </div>
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  backgroundColor: "#3b82f6",
+                  color: "#fff",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Logout
+              </button>
+            </>
+          )}
+
+          {!user && (
+            <button
+              onClick={handleGoogleLogin}
+              style={{
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: "none",
+                backgroundColor: "#3b82f6",
+                color: "#fff",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Login / Sign Up
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tab content */}
       {activeTab === "Directory" && (
         <>
-          {/* Topic search bar with dropdown suggestions */}
           <TopicSearchBar value={searchTopic} onChange={setSearchTopic} />
-
-          {/* Host cards filtered by topic */}
           {filteredHosts.length > 0 ? (
             <HostCards
               hosts={filteredHosts}
@@ -164,11 +243,11 @@ export default function LandingPage() {
         <ReferralCommisionTab user={user} onLogin={handleGoogleLogin} />
       )}
 
-      {/* Tip modal */}
       {showTipModal && selectedHost && (
         <TipHostButton host={selectedHost} onClose={() => setShowTipModal(false)} />
       )}
     </div>
   );
 }
+
 

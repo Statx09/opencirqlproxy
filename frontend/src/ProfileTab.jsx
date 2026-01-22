@@ -13,13 +13,16 @@ export default function ProfileTab({ user, onLogin }) {
   const [usdtWallet, setUsdtWallet] = useState("");
   const [kofi, setKofi] = useState("");
   const [stripe, setStripe] = useState("");
+  const [topics, setTopics] = useState("");
+  const [intentTags, setIntentTags] = useState("");
+  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (user?.email) {
-      setEmail(user.email);
+    if (user?.id) {
       fetchProfile();
+      setEmail(user.email || "");
     }
   }, [user]);
 
@@ -28,7 +31,7 @@ export default function ProfileTab({ user, onLogin }) {
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("email", user.email)
+        .eq("user_id", user.id)
         .single();
       if (error && error.code !== "PGRST116") throw error;
       if (data) {
@@ -40,6 +43,9 @@ export default function ProfileTab({ user, onLogin }) {
         setUsdtWallet(data.usdt_wallet || "");
         setKofi(data.kofi || "");
         setStripe(data.stripe || "");
+        setTopics(data.topics || "");
+        setIntentTags(data.intent_tags || "");
+        setBio(data.bio || "");
       }
     } catch (err) {
       console.error(err);
@@ -53,24 +59,29 @@ export default function ProfileTab({ user, onLogin }) {
   };
 
   const saveProfile = async () => {
+    if (!user?.id) return;
     setLoading(true);
     try {
       const updates = {
+        user_id: user.id,
         email,
         name,
         location,
-        age,
+        age: age ? parseInt(age) : null,
         language,
         usdt_wallet: usdtWallet,
         kofi,
         stripe,
-        avatar_url: avatarUrl, // preview until saved to bucket
+        topics,
+        intent_tags: intentTags,
+        bio,
+        avatar_url: avatarUrl,
         updated_at: new Date(),
       };
 
       const { error } = await supabase
         .from("profiles")
-        .upsert(updates, { onConflict: ["email"] });
+        .upsert(updates, { onConflict: ["user_id"] });
 
       if (error) throw error;
       setMessage("Profile saved successfully!");
@@ -132,34 +143,22 @@ export default function ProfileTab({ user, onLogin }) {
           <input
             type="file"
             accept="image/*"
-            onChange={(e) => e.target.files[0] && uploadAvatar(e.target.files[0])}
+            onChange={(e) =>
+              e.target.files[0] && uploadAvatar(e.target.files[0])
+            }
           />
         </div>
       </div>
 
-      {/* Email + Change Email Button */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+      {/* Email */}
+      <div style={{ marginBottom: 16 }}>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
-          style={{ flex: 1, padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
         />
-        <button
-          onClick={saveProfile}
-          style={{
-            padding: "8px 12px",
-            borderRadius: 4,
-            border: "none",
-            backgroundColor: "#3b82f6",
-            color: "#fff",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Change Email
-        </button>
       </div>
 
       {/* Name */}
@@ -202,6 +201,38 @@ export default function ProfileTab({ user, onLogin }) {
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
           placeholder="Language"
+          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+        />
+      </div>
+
+      {/* Topics */}
+      <div style={{ marginBottom: 16 }}>
+        <input
+          type="text"
+          value={topics}
+          onChange={(e) => setTopics(e.target.value)}
+          placeholder="Topics (comma separated)"
+          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+        />
+      </div>
+
+      {/* Intent Tags */}
+      <div style={{ marginBottom: 16 }}>
+        <input
+          type="text"
+          value={intentTags}
+          onChange={(e) => setIntentTags(e.target.value)}
+          placeholder="Intent Tags (e.g., 'Hire me', 'Promote')"
+          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+        />
+      </div>
+
+      {/* Bio */}
+      <div style={{ marginBottom: 16 }}>
+        <textarea
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          placeholder="Short bio or description"
           style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
         />
       </div>

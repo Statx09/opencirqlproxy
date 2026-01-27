@@ -1,7 +1,8 @@
+// src/HostCards.jsx
 import React from "react";
 import HostCard from "./HostCard";
 
-export default function HostCards({ hosts, onJoin, onTip }) {
+export default function HostCards({ hosts, onJoin, onTip, onViewProfile }) {
   return (
     <div
       style={{
@@ -11,7 +12,13 @@ export default function HostCards({ hosts, onJoin, onTip }) {
       }}
     >
       {hosts.map((host) => (
-        <HostCard key={host.id} host={host} onJoin={() => onJoin(host)} onTip={() => onTip(host)} />
+        <HostCard
+          key={host.id}
+          host={host}
+          onJoin={() => onJoin(host)}
+          onTip={() => onTip(host)}
+          onViewProfile={() => onViewProfile(host)}
+        />
       ))}
     </div>
   );

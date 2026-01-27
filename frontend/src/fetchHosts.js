@@ -1,5 +1,5 @@
 // src/fetchHosts.js
-import { supabase } from "./supabaseClient";
+import { supabase } from "./supabaseClient.js";
 
 export async function fetchHosts() {
   try {
@@ -10,12 +10,16 @@ export async function fetchHosts() {
       return [];
     }
 
-    // Minimal normalization for safe frontend use
     const normalized = (data || []).map((host) => ({
       ...host,
-      topics: host.topics || "",
-      islive: host.islive === true,  // already boolean
-      livelink: host.livelink || null,
+      // convert topics from comma string to array
+      topics: typeof host.topics === "string"
+        ? host.topics.split(",").map(t => t.trim())
+        : [],
+      // ensure intent_tags is array
+      intent_tags: Array.isArray(host.intent_tags) ? host.intent_tags : [],
+      avatar: host.avatar || "/default-avatar.png",
+      islive: host.islive === true,
     }));
 
     console.log("Normalized hosts:", normalized);

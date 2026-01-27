@@ -1,11 +1,13 @@
+// src/LandingPage.jsx
 import React, { useState, useEffect } from "react";
 import Hero from "./Hero.jsx";
 import HostCards from "./HostCards.jsx";
-import TipHostButton from "./TipHostButton.jsx";
 import ChatRequests from "./ChatRequests.jsx";
 import TopicSearchBar from "./TopicSearchBar.jsx";
 import ProfileTab from "./ProfileTab.jsx";
 import ReferralCommisionTab from "./ReferralCommisionTab.jsx";
+import ProfileModal from "./ProfileModal.jsx";
+import TipHostButton from "./TipHostButton.jsx";
 import { supabase } from "./supabaseClient.js";
 import { fetchHosts } from "./fetchHosts.js";
 
@@ -13,27 +15,22 @@ export default function LandingPage() {
   const [hosts, setHosts] = useState([]);
   const [searchTopic, setSearchTopic] = useState("");
   const [currentHostLink, setCurrentHostLink] = useState("");
-  const [showTipModal, setShowTipModal] = useState(false);
   const [selectedHost, setSelectedHost] = useState(null);
+  const [showTipModal, setShowTipModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileHost, setProfileHost] = useState(null);
   const [activeTab, setActiveTab] = useState("Directory");
   const [user, setUser] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
-  // Load hosts from Supabase
   useEffect(() => {
     async function loadHosts() {
-      try {
-        const data = await fetchHosts();
-        if (Array.isArray(data)) setHosts(data);
-        console.log("=== Hosts loaded ===", data);
-      } catch (err) {
-        console.error("Error loading hosts:", err);
-      }
+      const data = await fetchHosts();
+      setHosts(Array.isArray(data) ? data : []);
     }
     loadHosts();
   }, []);
 
-  // Supabase auth listener
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setUser(data.session?.user || null));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -43,40 +40,24 @@ export default function LandingPage() {
   }, []);
 
   const handleJoin = (host) => {
-    if (!user) {
-      alert("Please login to join the call.");
-      return;
-    }
-    if (host.livelink) {
-      setCurrentHostLink(host.livelink);
-    } else {
-      alert(`${host.name} is currently offline or has no active link.`);
-    }
-  };
-
-  const handleMessage = (host) => {
-    if (!user) {
-      alert("Please login to send a message.");
-      return;
-    }
-    alert(`Messaging ${host.name}... (feature to be implemented)`);
+    if (!user) return alert("Please login to join the call.");
+    if (host.livelink) setCurrentHostLink(host.livelink);
+    else alert(`${host.name} is currently offline or has no active link.`);
   };
 
   const handleTip = (host) => {
-    if (!user) {
-      alert("Please login to tip a host.");
-      return;
-    }
+    if (!user) return alert("Please login to tip a host.");
     setSelectedHost(host);
     setShowTipModal(true);
   };
 
+  const handleViewProfile = (host) => {
+    setProfileHost(host);
+    setShowProfileModal(true);
+  };
+
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin },
-    });
-    if (error) console.error("Google login error:", error);
+    await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: window.location.origin } });
   };
 
   const handleLogout = async () => {
@@ -89,30 +70,25 @@ export default function LandingPage() {
     setStatusLoading(true);
     try {
       const newStatus = !user.islive;
-      const { error } = await supabase
-        .from("profiles")
-        .update({ islive: newStatus })
-        .eq("email", user.email);
-      if (error) throw error;
+      await supabase.from("profiles").update({ islive: newStatus }).eq("email", user.email);
       setUser({ ...user, islive: newStatus });
     } catch (err) {
-      console.error("Failed to update status:", err);
-      alert("Failed to update status. Try again.");
+      console.error(err);
     } finally {
       setStatusLoading(false);
     }
   };
 
-  // Filter hosts by search topic
-  const filteredHosts = hosts.filter((host) =>
-    host.topics?.toLowerCase().includes(searchTopic.toLowerCase())
-  );
+  const filteredHosts = hosts.filter((host) => {
+    if (!searchTopic) return true; // show all if search empty
+    if (!Array.isArray(host.topics)) return false;
+    return host.topics.some((t) => t.toLowerCase().includes(searchTopic.toLowerCase()));
+  });
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: 16 }}>
       <Hero />
 
-      {/* Jitsi embed */}
       <div style={{ margin: "20px 0" }}>
         <iframe
           title="Jitsi Video"
@@ -136,18 +112,15 @@ export default function LandingPage() {
               fontWeight: 600,
               backgroundColor: activeTab === tab ? "#22c55e" : "#e5e7eb",
               color: activeTab === tab ? "#fff" : "#111827",
-              transition: "all 0.2s",
             }}
           >
             {tab}
           </button>
         ))}
 
-        {/* Right-aligned user controls */}
         <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
-          {user && (
+          {user ? (
             <>
-              {/* Online/Offline two-sided toggle */}
               <div
                 onClick={toggleOnlineStatus}
                 style={{
@@ -155,80 +128,35 @@ export default function LandingPage() {
                   borderRadius: 8,
                   overflow: "hidden",
                   cursor: "pointer",
-                  userSelect: "none",
                   fontWeight: 600,
                   color: "#fff",
-                  border: "1px solid #ccc",
                 }}
               >
-                <div
-                  style={{
-                    padding: "8px 12px",
-                    backgroundColor: user.islive ? "#22c55e" : "#6b7280", // green when online
-                    transition: "all 0.2s",
-                  }}
-                >
+                <div style={{ padding: "8px 12px", backgroundColor: user.islive ? "#22c55e" : "#6b7280" }}>
                   Online
                 </div>
-                <div
-                  style={{
-                    padding: "8px 12px",
-                    backgroundColor: !user.islive ? "#ef4444" : "#6b7280", // red when offline
-                    transition: "all 0.2s",
-                  }}
-                >
+                <div style={{ padding: "8px 12px", backgroundColor: !user.islive ? "#ef4444" : "#6b7280" }}>
                   Offline
                 </div>
               </div>
-
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: 8,
-                  border: "none",
-                  backgroundColor: "#3b82f6",
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
+              <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: 8, border: "none", backgroundColor: "#3b82f6", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
                 Logout
               </button>
             </>
-          )}
-
-          {!user && (
-            <button
-              onClick={handleGoogleLogin}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 8,
-                border: "none",
-                backgroundColor: "#3b82f6",
-                color: "#fff",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
+          ) : (
+            <button onClick={handleGoogleLogin} style={{ padding: "8px 16px", borderRadius: 8, border: "none", backgroundColor: "#3b82f6", color: "#fff", fontWeight: 600, cursor: "pointer" }}>
               Login / Sign Up
             </button>
           )}
         </div>
       </div>
 
-      {/* Tab content */}
+      {/* Tab Content */}
       {activeTab === "Directory" && (
         <>
           <TopicSearchBar value={searchTopic} onChange={setSearchTopic} />
           {filteredHosts.length > 0 ? (
-            <HostCards
-              hosts={filteredHosts}
-              onJoin={handleJoin}
-              onMessage={handleMessage}
-              onTip={handleTip}
-            />
+            <HostCards hosts={filteredHosts} onJoin={handleJoin} onTip={handleTip} onViewProfile={handleViewProfile} />
           ) : (
             <p style={{ textAlign: "center" }}>No hosts available now.</p>
           )}
@@ -236,16 +164,11 @@ export default function LandingPage() {
       )}
 
       {activeTab === "Chat Requests" && <ChatRequests />}
-
       {activeTab === "Profile" && <ProfileTab user={user} onLogin={handleGoogleLogin} />}
+      {activeTab === "Referral Commission" && <ReferralCommisionTab user={user} onLogin={handleGoogleLogin} />}
 
-      {activeTab === "Referral Commission" && (
-        <ReferralCommisionTab user={user} onLogin={handleGoogleLogin} />
-      )}
-
-      {showTipModal && selectedHost && (
-        <TipHostButton host={selectedHost} onClose={() => setShowTipModal(false)} />
-      )}
+      {showProfileModal && profileHost && <ProfileModal host={profileHost} onClose={() => setShowProfileModal(false)} onJoin={() => handleJoin(profileHost)} onTip={() => handleTip(profileHost)} />}
+      {showTipModal && selectedHost && <TipHostButton host={selectedHost} onClose={() => setShowTipModal(false)} />}
     </div>
   );
 }

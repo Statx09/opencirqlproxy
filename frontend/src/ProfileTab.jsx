@@ -2,6 +2,15 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "./supabaseClient";
 
+const INTENT_OPTIONS = [
+  "Chat",
+  "Dating",
+  "Friendship",
+  "Promote",
+  "Hire Me",
+  "Learn Languages / Language Practice",
+];
+
 export default function ProfileTab({ user, onLogin }) {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -14,8 +23,9 @@ export default function ProfileTab({ user, onLogin }) {
   const [kofi, setKofi] = useState("");
   const [stripe, setStripe] = useState("");
   const [topics, setTopics] = useState("");
-  const [intentTags, setIntentTags] = useState("");
+  const [intentTags, setIntentTags] = useState([]);
   const [bio, setBio] = useState("");
+  const [socialLinks, setSocialLinks] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -44,8 +54,9 @@ export default function ProfileTab({ user, onLogin }) {
         setKofi(data.kofi || "");
         setStripe(data.stripe || "");
         setTopics(data.topics ? data.topics.join(", ") : "");
-        setIntentTags(data.intent_tags ? data.intent_tags.join(", ") : "");
+        setIntentTags(data.intent_tags || []);
         setBio(data.bio || "");
+        setSocialLinks(data.social_links ? data.social_links.join(", ") : "");
       }
     } catch (err) {
       console.error(err);
@@ -56,6 +67,14 @@ export default function ProfileTab({ user, onLogin }) {
     setAvatarFile(file);
     const url = URL.createObjectURL(file);
     setAvatarUrl(url); // preview only
+  };
+
+  const handleIntentChange = (intent) => {
+    if (intentTags.includes(intent)) {
+      setIntentTags(intentTags.filter((i) => i !== intent));
+    } else {
+      setIntentTags([...intentTags, intent]);
+    }
   };
 
   const saveProfile = async () => {
@@ -72,10 +91,11 @@ export default function ProfileTab({ user, onLogin }) {
         usdt_wallet: usdtWallet,
         kofi,
         stripe,
-        topics: topics ? topics.split(",").map(t => t.trim()) : [],
-        intent_tags: intentTags ? intentTags.split(",").map(t => t.trim()) : [],
+        topics: topics ? topics.split(",").map((t) => t.trim()) : [],
+        intent_tags: intentTags,
         bio,
         avatar_url: avatarUrl,
+        social_links: socialLinks ? socialLinks.split(",").map((s) => s.trim()) : [],
         updated_at: new Date(),
       };
 
@@ -218,13 +238,19 @@ export default function ProfileTab({ user, onLogin }) {
 
       {/* Intent Tags */}
       <div style={{ marginBottom: 16 }}>
-        <input
-          type="text"
-          value={intentTags}
-          onChange={(e) => setIntentTags(e.target.value)}
-          placeholder="Intent Tags (e.g., 'Hire me', 'Promote')"
-          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
-        />
+        <p style={{ fontWeight: 600, marginBottom: 4 }}>Select your intents:</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {INTENT_OPTIONS.map((intent) => (
+            <label key={intent} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <input
+                type="checkbox"
+                checked={intentTags.includes(intent)}
+                onChange={() => handleIntentChange(intent)}
+              />
+              {intent}
+            </label>
+          ))}
+        </div>
       </div>
 
       {/* Bio */}
@@ -233,6 +259,17 @@ export default function ProfileTab({ user, onLogin }) {
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           placeholder="Short bio or description"
+          style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
+        />
+      </div>
+
+      {/* Social / Website / Affiliate Links */}
+      <div style={{ marginBottom: 16 }}>
+        <input
+          type="text"
+          value={socialLinks}
+          onChange={(e) => setSocialLinks(e.target.value)}
+          placeholder="Social / Website / Affiliate Links (comma separated)"
           style={{ width: "100%", padding: 8, borderRadius: 4, border: "1px solid #ccc" }}
         />
       </div>
@@ -298,3 +335,6 @@ export default function ProfileTab({ user, onLogin }) {
     </div>
   );
 }
+
+
+

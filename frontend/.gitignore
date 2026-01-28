@@ -6,3 +6,5 @@ dist
 CirqlBackup/
 CirqlProxy back up final template/
 server/
+node_modules
+dist

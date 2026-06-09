@@ -1,0 +1,212 @@
+import React, { useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient";
+
+export default function RequestsTab({
+  user,
+  onOpenProfile,
+}) {
+  const [requests, setRequests] = useState([]);
+  const [profiles, setProfiles] = useState({});
+
+  const loadRequests = async () => {
+    if (!user?.id) return;
+
+    const { data } = await supabase
+      .from("connections")
+      .select("*")
+      .eq("user_b", user.id)
+      .eq("status", "pending");
+
+    if (!data) return;
+
+    setRequests(data);
+
+    const senderIds = data.map((r) => r.user_a);
+
+    if (senderIds.length === 0) {
+      setProfiles({});
+      return;
+    }
+
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("*")
+      .in("user_id", senderIds);
+
+    const map = {};
+
+    (profs || []).forEach((p) => {
+      map[p.user_id] = p;
+    });
+
+    setProfiles(map);
+  };
+
+  useEffect(() => {
+    loadRequests();
+
+    const interval = setInterval(
+      loadRequests,
+      5000
+    );
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const acceptRequest = async (request) => {
+    await supabase
+      .from("connections")
+      .update({
+        status: "accepted",
+      })
+      .eq("id", request.id);
+
+    loadRequests();
+  };
+
+  const declineRequest = async (request) => {
+    await supabase
+      .from("connections")
+      .update({
+        status: "declined",
+      })
+      .eq("id", request.id);
+
+    loadRequests();
+  };
+
+  if (!user) {
+    return (
+      <div style={{ padding: 20 }}>
+        Login to view requests
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h2 style={{ marginBottom: 16 }}>
+        Connection Requests
+      </h2>
+
+      {requests.length === 0 && (
+        <p>No pending requests.</p>
+      )}
+
+      <div
+        style={{
+          display: "grid",
+          gap: 12,
+        }}
+      >
+        {requests.map((r) => {
+          const profile = profiles[r.user_a];
+
+          if (!profile) return null;
+
+          return (
+            <div
+              key={r.id}
+              style={card}
+            >
+              <img
+                src={
+                  profile.avatar_url ||
+                  "https://placehold.co/100x100"
+                }
+                style={avatar}
+                onClick={() =>
+                  onOpenProfile?.(profile)
+                }
+              />
+
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    fontWeight: 700,
+                  }}
+                >
+                  {profile.alias ||
+                    profile.name}
+                </div>
+
+                <div style={subText}>
+                  Wants to connect with you
+                </div>
+              </div>
+
+              <div style={actions}>
+                <button
+                  onClick={() =>
+                    acceptRequest(r)
+                  }
+                  style={acceptBtn}
+                >
+                  Accept
+                </button>
+
+                <button
+                  onClick={() =>
+                    declineRequest(r)
+                  }
+                  style={declineBtn}
+                >
+                  Decline
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const card = {
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  padding: 12,
+  borderRadius: 16,
+  background: "#fff",
+  boxShadow:
+    "0 2px 10px rgba(0,0,0,0.06)",
+};
+
+const avatar = {
+  width: 52,
+  height: 52,
+  borderRadius: "50%",
+  objectFit: "cover",
+  cursor: "pointer",
+};
+
+const subText = {
+  fontSize: 13,
+  color: "#666",
+};
+
+const actions = {
+  display: "flex",
+  gap: 8,
+};
+
+const acceptBtn = {
+  border: "none",
+  borderRadius: 10,
+  padding: "8px 12px",
+  background: "#22c55e",
+  color: "#fff",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const declineBtn = {
+  border: "none",
+  borderRadius: 10,
+  padding: "8px 12px",
+  background: "#ef4444",
+  color: "#fff",
+  fontWeight: 700,
+  cursor: "pointer",
+};

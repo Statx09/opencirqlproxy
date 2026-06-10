@@ -110,14 +110,20 @@ function HostCard({ host, user, onViewProfile, hasProfile, openMedia }) {
       {/* CONTENT */}
       <div style={{ position: "relative", padding: "0 14px 14px" }}>
         <img
-          src={avatarSrc}
+  loading="lazy"
+  decoding="async"
+  src={avatarSrc}
           loading="lazy"
           decoding="async"
           onClick={() => handleMedia(avatarSrc)}
           style={avatarStyle}
         />
 
-        <button onClick={handleWave} style={waveFloat}>
+        <button
+  onClick={handleWave}
+  style={waveFloat}
+  type="button"
+>
           👋
         </button>
 
@@ -188,7 +194,8 @@ export default memo(HostCard);
 /* ================= STYLES ================= */
 
 const card = {
-  width: 220,
+  width: "100%",
+  maxWidth: 340,
   borderRadius: 18,
   overflow: "hidden",
   background: "#fff",

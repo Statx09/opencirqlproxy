@@ -208,11 +208,11 @@ const overlay = {
 };
 
 const modal = {
-  width: "95%",
+  width: "100%",
   maxWidth: 700,
-  height: "85vh",
+  height: "100vh",
   background: "#fff",
-  borderRadius: 20,
+  borderRadius: 0,
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
@@ -254,8 +254,9 @@ const closeBtn = {
 
 const chatArea = {
   flex: 1,
-  padding: 16,
+  padding: 12,
   overflowY: "auto",
+  WebkitOverflowScrolling: "touch",
   background: "#fafafa",
 };
 

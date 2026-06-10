@@ -141,11 +141,11 @@ export default function CallModal({
         </h3>
 
         <iframe
-          src={callLink}
-          allow="camera; microphone; fullscreen; display-capture"
-          style={{
-            width: "100%",
-            height: "80vh",
+  src={callLink}
+  allow="camera; microphone; fullscreen; display-capture"
+  style={{
+    width: "100%",
+    height: "calc(100vh - 80px)",
             border: "none",
             borderRadius: 14,
           }}
@@ -168,10 +168,10 @@ const overlay = {
 };
 
 const container = {
-  width: "95%",
-  maxWidth: 1100,
+  width: "100vw",
+  height: "100vh",
   background: "#fff",
-  borderRadius: 22,
+  borderRadius: 0,
   padding: 18,
   position: "relative",
 };

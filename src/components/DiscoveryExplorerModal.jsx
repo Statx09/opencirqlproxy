@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import HostCard from "./HostCard";
 
 export default function DiscoveryExplorerModal({
@@ -9,12 +9,33 @@ export default function DiscoveryExplorerModal({
 }) {
   const [index, setIndex] = useState(0);
 
+  const prev = useCallback(
+    (e) => {
+      e.stopPropagation();
+      setIndex((i) => (i - 1 + hosts.length) % hosts.length);
+    },
+    [hosts.length]
+  );
+
+  const next = useCallback(
+    (e) => {
+      e.stopPropagation();
+      setIndex((i) => (i + 1) % hosts.length);
+    },
+    [hosts.length]
+  );
+
+  const currentItem = hosts[index];
+  const currentHost = currentItem?.host || currentItem;
+
   if (!hosts.length) {
     return (
       <div style={backdrop}>
         <div style={modal}>
           <div style={header}>
-            <h2 style={{ margin: 0 }}>🔍 Discovery Feed</h2>
+            <div>
+              <h2 style={{ margin: 0 }}>🔍 Discovery Feed</h2>
+            </div>
 
             <button onClick={onClose} style={closeBtn}>
               ✕
@@ -29,27 +50,13 @@ export default function DiscoveryExplorerModal({
     );
   }
 
-  const currentItem = hosts[index];
-  const currentHost = currentItem?.host || currentItem;
-
-  const prev = (e) => {
-    e.stopPropagation();
-    setIndex((i) => (i - 1 + hosts.length) % hosts.length);
-  };
-
-  const next = (e) => {
-    e.stopPropagation();
-    setIndex((i) => (i + 1) % hosts.length);
-  };
-
   return (
-    <div style={backdrop}>
-      <div style={modal}>
+    <div style={backdrop} onClick={onClose}>
+      <div style={modal} onClick={(e) => e.stopPropagation()}>
         {/* HEADER */}
         <div style={header}>
           <div>
             <h2 style={{ margin: 0 }}>🔍 Discovery Feed</h2>
-
             <div style={subText}>
               Browse recommended people one profile at a time
             </div>
@@ -60,21 +67,19 @@ export default function DiscoveryExplorerModal({
           </button>
         </div>
 
-        {/* MAIN */}
+        {/* MAIN CONTENT */}
         <div style={content}>
           <button onClick={prev} style={arrowBtn}>
             ‹
           </button>
 
           <div style={cardStage}>
-            <div style={cardScale}>
-              <HostCard
-                host={currentHost}
-                user={user}
-                hasProfile={!!user}
-               onViewProfile={() => onOpenHost?.(currentHost)}
-              />
-            </div>
+            <HostCard
+              host={currentHost}
+              user={user}
+              hasProfile={!!user}
+              onViewProfile={onOpenHost}
+            />
           </div>
 
           <button onClick={next} style={arrowBtn}>
@@ -96,8 +101,11 @@ export default function DiscoveryExplorerModal({
 const backdrop = {
   position: "fixed",
   inset: 0,
-  background: "rgba(0,0,0,0.88)",
+  background: "rgba(0,0,0,0.85)",
   zIndex: 9000,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
 };
 
 const modal = {
@@ -107,6 +115,8 @@ const modal = {
   color: "#fff",
   display: "flex",
   flexDirection: "column",
+  overflowY: "auto",
+  WebkitOverflowScrolling: "touch",
 };
 
 const header = {
@@ -134,10 +144,11 @@ const closeBtn = {
 const content = {
   flex: 1,
   display: "flex",
+  flexDirection: window.innerWidth < 768 ? "column" : "row",
   alignItems: "center",
   justifyContent: "center",
-  gap: 20,
-  padding: 20,
+  gap: 12,
+  padding: 12,
 };
 
 const cardStage = {
@@ -147,19 +158,14 @@ const cardStage = {
   alignItems: "center",
 };
 
-const cardScale = {
-  transform: "scale(1.55)",
-  transformOrigin: "center",
-};
-
 const arrowBtn = {
-  width: 58,
-  height: 58,
-  borderRadius: 14,
+  width: 60,
+  height: 60,
+  borderRadius: 12,
   border: "none",
   background: "rgba(255,255,255,0.08)",
   color: "#fff",
-  fontSize: 34,
+  fontSize: 28,
   fontWeight: 700,
   cursor: "pointer",
   flexShrink: 0,
@@ -167,7 +173,7 @@ const arrowBtn = {
 
 const footer = {
   textAlign: "center",
-  padding: "14px",
+  padding: "12px",
   opacity: 0.7,
   borderTop: "1px solid rgba(255,255,255,0.08)",
 };

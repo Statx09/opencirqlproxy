@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useMemo, useState } from "react";
 import HostCard from "./HostCard";
 
 export default function DiscoveryExplorerModal({
@@ -7,89 +7,115 @@ export default function DiscoveryExplorerModal({
   onClose,
   onOpenHost,
 }) {
-  const [index, setIndex] = useState(0);
+  const [search, setSearch] = useState("");
 
-  const prev = useCallback(
-    (e) => {
-      e.stopPropagation();
-      setIndex((i) => (i - 1 + hosts.length) % hosts.length);
-    },
-    [hosts.length]
-  );
+  const filteredHosts = useMemo(() => {
+    if (!search.trim()) return hosts;
 
-  const next = useCallback(
-    (e) => {
-      e.stopPropagation();
-      setIndex((i) => (i + 1) % hosts.length);
-    },
-    [hosts.length]
-  );
+    const q = search.toLowerCase();
 
-  const currentItem = hosts[index];
-  const currentHost = currentItem?.host || currentItem;
+    return hosts.filter((item) => {
+      const host = item?.host || item;
 
-  if (!hosts.length) {
-    return (
-      <div style={backdrop}>
-        <div style={modal}>
-          <div style={header}>
-            <div>
-              <h2 style={{ margin: 0 }}>🔍 Discovery Feed</h2>
-            </div>
+      const topics = Array.isArray(host?.topics)
+        ? host.topics
+        : [];
 
-            <button onClick={onClose} style={closeBtn}>
-              ✕
-            </button>
-          </div>
+      const intents = Array.isArray(host?.intent_tags)
+        ? host.intent_tags
+        : [];
 
-          <div style={emptyState}>
-            No recommendations available yet.
-          </div>
-        </div>
-      </div>
-    );
-  }
+      const alias = host?.alias || "";
+      const name = host?.name || "";
+
+      return (
+        alias.toLowerCase().includes(q) ||
+        name.toLowerCase().includes(q) ||
+        topics.some((t) =>
+          String(t).toLowerCase().includes(q)
+        ) ||
+        intents.some((t) =>
+          String(t).toLowerCase().includes(q)
+        )
+      );
+    });
+  }, [hosts, search]);
 
   return (
     <div style={backdrop} onClick={onClose}>
-      <div style={modal} onClick={(e) => e.stopPropagation()}>
+      <div
+        style={modal}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* HEADER */}
         <div style={header}>
           <div>
-            <h2 style={{ margin: 0 }}>🔍 Discovery Feed</h2>
+            <h2 style={{ margin: 0 }}>
+              🔍 Discover People
+            </h2>
+
             <div style={subText}>
-              Browse recommended people one profile at a time
+              Search by topic, intent or name
             </div>
           </div>
 
-          <button onClick={onClose} style={closeBtn}>
+          <button
+            onClick={onClose}
+            style={closeBtn}
+          >
             ✕
           </button>
         </div>
 
-        {/* MAIN CONTENT */}
-        <div style={content}>
-          <button onClick={prev} style={arrowBtn}>
-            ‹
-          </button>
+        {/* SEARCH */}
+        <div style={searchWrap}>
+          <input
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+            placeholder="Search gaming, crypto, fitness..."
+            style={searchInput}
+          />
+        </div>
 
-          <div style={cardStage}>
-            <HostCard
-              host={currentHost}
-              user={user}
-              hasProfile={!!user}
-              onViewProfile={onOpenHost}
-            />
-          </div>
+        {/* RESULTS */}
+        <div style={resultsArea}>
+          {filteredHosts.length === 0 ? (
+            <div style={emptyState}>
+              No matching profiles found.
+            </div>
+          ) : (
+            filteredHosts.map((item, i) => {
+              const host =
+                item?.host || item;
 
-          <button onClick={next} style={arrowBtn}>
-            ›
-          </button>
+              return (
+                <div
+                  key={
+                    host?.user_id ||
+                    host?.id ||
+                    i
+                  }
+                  style={cardWrap}
+                >
+                  <HostCard
+                    host={host}
+                    user={user}
+                    hasProfile={!!user}
+                    onViewProfile={() =>
+                      onOpenHost?.(host)
+                    }
+                  />
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* FOOTER */}
         <div style={footer}>
-          {index + 1} / {hosts.length}
+          {filteredHosts.length} profiles
         </div>
       </div>
     </div>
@@ -115,8 +141,6 @@ const modal = {
   color: "#fff",
   display: "flex",
   flexDirection: "column",
-  overflowY: "auto",
-  WebkitOverflowScrolling: "touch",
 };
 
 const header = {
@@ -124,7 +148,8 @@ const header = {
   justifyContent: "space-between",
   alignItems: "flex-start",
   padding: "16px",
-  borderBottom: "1px solid rgba(255,255,255,0.08)",
+  borderBottom:
+    "1px solid rgba(255,255,255,0.08)",
 };
 
 const subText = {
@@ -141,47 +166,50 @@ const closeBtn = {
   cursor: "pointer",
 };
 
-const content = {
-  flex: 1,
-  display: "flex",
-  flexDirection: window.innerWidth < 768 ? "column" : "row",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 12,
+const searchWrap = {
   padding: 12,
+  borderBottom:
+    "1px solid rgba(255,255,255,0.08)",
 };
 
-const cardStage = {
-  flex: 1,
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
-
-const arrowBtn = {
-  width: 60,
-  height: 60,
+const searchInput = {
+  width: "100%",
+  padding: 12,
   borderRadius: 12,
   border: "none",
-  background: "rgba(255,255,255,0.08)",
-  color: "#fff",
-  fontSize: 28,
-  fontWeight: 700,
-  cursor: "pointer",
-  flexShrink: 0,
+  outline: "none",
+  fontSize: 15,
+};
+
+const resultsArea = {
+  flex: 1,
+  overflowY: "auto",
+  WebkitOverflowScrolling: "touch",
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "center",
+  gap: 16,
+  padding: 16,
+};
+
+const cardWrap = {
+  display: "flex",
+  justifyContent: "center",
 };
 
 const footer = {
   textAlign: "center",
-  padding: "12px",
+  padding: 12,
   opacity: 0.7,
-  borderTop: "1px solid rgba(255,255,255,0.08)",
+  borderTop:
+    "1px solid rgba(255,255,255,0.08)",
 };
 
 const emptyState = {
-  flex: 1,
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
+  width: "100%",
+  minHeight: 200,
   opacity: 0.7,
 };

@@ -5,7 +5,16 @@ import CallModal from "./CallModal";
 import SupportModal from "./SupportModal";
 import { getRelationship, canCall } from "../lib/interactionRules";
 
-function HostCard({ host, user, onViewProfile, hasProfile, openMedia }) {
+function HostCard({
+  host,
+  user,
+  onViewProfile,
+  onOpenExplorer,   // ✅ ADDED for Discover button
+  hasProfile,
+  openMedia,
+}) {
+  if (!host) return null;
+
   const {
     name,
     alias,
@@ -50,19 +59,6 @@ function HostCard({ host, user, onViewProfile, hasProfile, openMedia }) {
     [openMedia]
   );
 
-  const handleWave = useCallback(async () => {
-    if (!user?.id) return alert("Please login.");
-    if (!user_id) return alert("Invalid host.");
-
-    await fetch("/api/wave", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ from_user: user.id, to_user: user_id }),
-    });
-
-    alert("👋 Wave sent!");
-  }, [user?.id, user_id]);
-
   const handleCallClick = useCallback(
     async (type) => {
       if (!user?.id) return alert("Login required");
@@ -77,25 +73,38 @@ function HostCard({ host, user, onViewProfile, hasProfile, openMedia }) {
       setCallType(type);
       setShowCallModal(true);
     },
-    [user?.id, user_id, hasProfile]
+    [user, user_id, hasProfile]
   );
 
   return (
     <div style={card}>
+
       {/* BANNER */}
       <div
         style={{
-          height: 90,
+          height: "100vh",
           backgroundImage: banner_url
             ? `url(${banner_url})`
             : "linear-gradient(135deg,#7c3aed,#3b82f6)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           position: "relative",
-          cursor: "pointer",
         }}
         onClick={() => banner_url && handleMedia(banner_url)}
       >
+
+        {/* 🔍 DISCOVER BUTTON (opens Explorer) */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenExplorer?.();
+          }}
+          style={discoverBtn}
+        >
+          🔍 Discover
+        </button>
+
+        {/* 👤 VIEW PROFILE BUTTON (top right) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -108,59 +117,51 @@ function HostCard({ host, user, onViewProfile, hasProfile, openMedia }) {
       </div>
 
       {/* CONTENT */}
-      <div style={{ position: "relative", padding: "0 14px 14px" }}>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          width: "100%",
+          padding: 14,
+        }}
+      >
         <img
-  loading="lazy"
-  decoding="async"
-  src={avatarSrc}
-          loading="lazy"
-          decoding="async"
+          src={avatarSrc}
           onClick={() => handleMedia(avatarSrc)}
           style={avatarStyle}
         />
-
-        <button
-  onClick={handleWave}
-  style={waveFloat}
-  type="button"
->
-          👋
-        </button>
 
         <h3 style={title}>{displayName}</h3>
 
         <div style={tagRow}>
           {normalizedIntent.map((t, i) => (
-            <span key={i} style={intentTag}>
-              {t}
-            </span>
+            <span key={i} style={intentTag}>{t}</span>
           ))}
         </div>
 
         <div style={tagRow}>
           {normalizedTopics.map((t, i) => (
-            <span key={i} style={topicTag}>
-              {t}
-            </span>
+            <span key={i} style={topicTag}>{t}</span>
           ))}
         </div>
 
         <div style={grid}>
-          <button onClick={() => setShowMessageModal(true)} style={purpleBtn}>
+          <button style={purpleBtn} onClick={() => setShowMessageModal(true)}>
             Message
           </button>
-          <button onClick={() => handleCallClick("voice")} style={greenBtn}>
+          <button style={greenBtn} onClick={() => handleCallClick("voice")}>
             Voice
           </button>
-          <button onClick={() => handleCallClick("video")} style={blueBtn}>
+          <button style={blueBtn} onClick={() => handleCallClick("video")}>
             Video
           </button>
-          <button onClick={() => setShowSupportModal(true)} style={darkBtn}>
+          <button style={darkBtn} onClick={() => setShowSupportModal(true)}>
             Support ❤️
           </button>
         </div>
       </div>
 
+      {/* MODALS */}
       {showMessageModal && (
         <MessagesModal
           host={host}
@@ -194,60 +195,60 @@ export default memo(HostCard);
 /* ================= STYLES ================= */
 
 const card = {
+  height: "100vh",
   width: "100%",
-  maxWidth: 340,
-  borderRadius: 18,
   overflow: "hidden",
-  background: "#fff",
-  boxShadow: "0 4px 14px rgba(0,0,0,0.08)",
+  background: "#000",
+  position: "relative",
+};
+
+const discoverBtn = {
+  position: "absolute",
+  top: 12,
+  left: 12,
+  background: "rgba(124, 58, 237, 0.95)",
+  color: "#fff",
+  border: "none",
+  padding: "6px 10px",
+  borderRadius: 10,
+  fontSize: 12,
+  fontWeight: 700,
+  zIndex: 10,
 };
 
 const viewBtn = {
   position: "absolute",
-  top: 8,
-  right: 8,
-  background: "rgba(0,0,0,0.7)",
+  top: 12,
+  right: 12,
+  background: "rgba(0,0,0,0.6)",
   color: "#fff",
   border: "none",
-  padding: "5px 8px",
-  borderRadius: 8,
-  fontSize: 11,
+  padding: "6px 10px",
+  borderRadius: 10,
+  fontSize: 12,
+  fontWeight: 700,
+  zIndex: 10,
 };
 
 const avatarStyle = {
-  width: 72,
-  height: 72,
+  width: 70,
+  height: 70,
   borderRadius: "50%",
-  marginTop: -36,
-  cursor: "pointer",
-  border: "4px solid white",
-};
-
-const waveFloat = {
-  position: "absolute",
-  top: 6,
-  right: 10,
-  width: 28,
-  height: 28,
-  borderRadius: "50%",
-  background: "#000",
-  color: "#fff",
-  border: "none",
-  cursor: "pointer",
+  border: "3px solid white",
 };
 
 const title = {
+  color: "#fff",
+  fontSize: 18,
   marginTop: 10,
-  marginBottom: 8,
-  fontSize: 15,
   fontWeight: 700,
 };
 
 const tagRow = {
   display: "flex",
-  flexWrap: "wrap",
   gap: 6,
-  marginBottom: 8,
+  flexWrap: "wrap",
+  marginTop: 6,
 };
 
 const intentTag = {
@@ -256,7 +257,6 @@ const intentTag = {
   padding: "3px 6px",
   borderRadius: 6,
   fontSize: 10,
-  fontWeight: 600,
 };
 
 const topicTag = {
@@ -271,6 +271,7 @@ const grid = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
   gap: 6,
+  marginTop: 10,
 };
 
 const purpleBtn = { background: "#7c3aed", color: "#fff", border: "none", padding: 8 };

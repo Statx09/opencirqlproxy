@@ -10,7 +10,7 @@ export default function Hero({
   const [deck, setDeck] = useState([]);
   const [index, setIndex] = useState(0);
 
-  // ================= BUILD DECK =================
+  // build deck (unchanged logic)
   useEffect(() => {
     if (!suggestedMatch) return;
 
@@ -27,7 +27,6 @@ export default function Hero({
   const safeIndex = deck.length ? index % deck.length : 0;
   const current = deck[safeIndex]?.host;
 
-  // ================= NAV =================
   const goLeft = (e) => {
     e.stopPropagation();
     if (!deck.length) return;
@@ -41,52 +40,53 @@ export default function Hero({
   };
 
   if (!current) {
-    return <div style={heroStyle}>Finding live people...</div>;
+    return (
+      <div style={heroStyle}>
+        Finding live people...
+      </div>
+    );
   }
 
   return (
     <div style={heroStyle}>
-
-      {/* ================= LEFT ================= */}
+      {/* LEFT TEXT */}
       <div style={{ flex: 1 }}>
         <h1 style={{ fontSize: 32, margin: 0 }}>CirqlProxy</h1>
-
         <p style={{ opacity: 0.7, marginTop: 4, fontSize: 13 }}>
           Live people. Real connections. No feeds.
         </p>
       </div>
 
-      {/* ================= RIGHT ================= */}
+      {/* RIGHT CARD AREA */}
       <div style={rightSide}>
-
-        {/* LEFT ARROW */}
         <button onClick={goLeft} style={arrowBtn}>
           ‹
         </button>
 
-        {/* CARD WRAPPER */}
+        {/* CARD WRAP (IMPORTANT FIXED POSITION CONTEXT) */}
         <div style={cardWrap}>
-
-          {/* HOST CARD */}
           <HostCard
             host={current}
             user={user}
-            onViewProfile={() => onOpenHost?.(current)}
             hasProfile={!!user}
+            onViewProfile={() => onOpenHost?.(current)}
           />
 
-          {/* DISCOVER BUTTON (OVERLAY TOP LEFT) */}
-          <button onClick={onOpenExplorer} style={discoverBtn}>
+          {/* 🔥 DISCOVER BUTTON (FIXED + ALWAYS VISIBLE) */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenExplorer?.();
+            }}
+            style={discoverBtn}
+          >
             🔍 Discover
           </button>
-
         </div>
 
-        {/* RIGHT ARROW */}
         <button onClick={goRight} style={arrowBtn}>
           ›
         </button>
-
       </div>
     </div>
   );
@@ -110,9 +110,9 @@ const rightSide = {
   gap: 10,
 };
 
+/* 🔥 IMPORTANT: must be relative for overlay button */
 const cardWrap = {
   position: "relative",
-  transform: "translateX(-6px)", // slight left shift for balance
 };
 
 const arrowBtn = {
@@ -130,19 +130,14 @@ const discoverBtn = {
   position: "absolute",
   top: 8,
   left: 8,
-
   padding: "5px 9px",
   borderRadius: 10,
-
   border: "none",
   background: "rgba(124, 58, 237, 0.95)",
   color: "#fff",
-
   fontWeight: 700,
   fontSize: 10,
-
   cursor: "pointer",
-  zIndex: 10,
-
+  zIndex: 50,
   boxShadow: "0 6px 16px rgba(124,58,237,0.25)",
 };

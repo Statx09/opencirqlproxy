@@ -166,9 +166,10 @@ export default memo(HostCard);
 /* ================= STYLES ================= */
 
 const card = {
-  height: "100%",
-  minHeight: "100vh",   // ✅ key fix
-  width: "100%",
+  height: "100dvh",
+  width: "100vw",
+  margin: 0,
+  padding: 0,
   overflow: "hidden",
   background: "#000",
   position: "relative",
@@ -191,15 +192,19 @@ const discoverBtn = {
 
 const viewProfileBtn = {
   position: "absolute",
-  top: 14,
-  right: 14,
-  background: "rgba(0,0,0,0.6)",
+  top: 16,
+  right: 16,
+
+  background: "rgba(0,0,0,0.65)",
   color: "#fff",
-  border: "1px solid rgba(255,255,255,0.2)",
-  padding: "10px 14px",
-  borderRadius: 12,
-  fontSize: 13,
-  fontWeight: 700,
+  border: "1px solid rgba(255,255,255,0.25)",
+
+  padding: "14px 18px",   // 🔥 bigger
+  borderRadius: 14,
+
+  fontSize: 15,           // 🔥 bigger text
+  fontWeight: 800,
+
   zIndex: 10,
 };
 
@@ -221,7 +226,7 @@ const waveBtn = {
 /* CONTENT */
 const content = {
   position: "absolute",
-  bottom: 80,   // ✅ IMPORTANT: creates space for dock
+  bottom: 120,   // ⬆ move UP (was 80)
   width: "100%",
   padding: 16,
   color: "#fff",

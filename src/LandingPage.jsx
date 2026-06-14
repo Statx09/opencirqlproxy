@@ -214,29 +214,32 @@ export default function LandingPage() {
 /* ================= STYLES ================= */
 
 const page = {
-  height: "100vh",
-  width: "100vw",
+  height: "100%",
+  width: "100%",
   margin: 0,
   padding: 0,
   overflow: "hidden",
-  background: "#0b1220",
   display: "flex",
   flexDirection: "column",
 };
-
 const wrap = {
   flex: 1,
+  width: "100vw",
+  height: "100dvh",
   display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  position: "relative",
-  pointerEvents: "auto",
-};
-
-const tabPage = {
-  flex: 1,
+  flexDirection: "column",   
+  alignItems: "stretch",     
+  justifyContent: "stretch",
   position: "relative",
   overflow: "hidden",
+};
+const tabPage = {
+  flex: 1,
+  width: "100%",
+  height: "100%",
+  position: "relative",
+  overflow: "hidden",
+  display: "flex",
 };
 
 const closeBtn = {
@@ -256,8 +259,8 @@ const closeBtn = {
   fontSize: 18,
 
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+alignItems: "stretch",
+justifyContent: "stretch",
 
   backdropFilter: "blur(10px)",
   cursor: "pointer",
@@ -267,7 +270,7 @@ const closeBtn = {
 
 const bottomWrap = {
   position: "fixed",
-  bottom: 28,     // 🔥 balanced spacing
+  bottom: 10,     // 🔥 balanced spacing
   left: 0,
   right: 0,
 
@@ -349,7 +352,7 @@ const badge = {
 
 const sideArrowBase = {
   position: "fixed",
-  bottom: 38,
+  bottom: 90,
 
   width: 52,
   height: 52,
@@ -386,27 +389,26 @@ const sideArrowRight = {
 /* ================= DISCOVER BUTTON ================= */
 
 const discoverBtn = {
-position: "absolute",
-top: 14,
-left: 14,
+  position: "absolute",
+  top: 35,
+  left: 18,
 
-background: "#7c3aed",
-color: "#fff",
+  background: "#7c3aed",
+  color: "#fff",
 
-border: "none",
-borderRadius: 14,
+  border: "none",
+  borderRadius: 16,
 
-padding: "10px 14px",
+  padding: "14px 18px",   
+  fontSize: 16,           
+  fontWeight: 900,
 
-display: "flex",
-alignItems: "center",
-gap: 8,
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
 
-fontSize: 14,
-fontWeight: 800,
+  zIndex: 30,
+  cursor: "pointer",
 
-zIndex: 30,
-cursor: "pointer",
-
-boxShadow: "0 8px 20px rgba(124,58,237,0.35)",
+  boxShadow: "0 10px 25px rgba(124,58,237,0.4)",
 };

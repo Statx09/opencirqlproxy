@@ -18,7 +18,7 @@ const INTENTS = [
   "Learning",
 ];
 
-export default function ProfileTab({ user, onLogin, onSaved }) {
+export default function ProfileTab({ user, onLogout }) {
   const [loading, setLoading] = useState(false);
 
   const [alias, setAlias] = useState("");
@@ -235,14 +235,36 @@ export default function ProfileTab({ user, onLogin, onSaved }) {
   };
 
   // ---------------- LOGIN BLOCK ----------------
-  if (!user) {
-    return (
-      <div style={{ padding: 20 }}>
-        <h2>Please login first</h2>
-        <button onClick={onLogin}>Login / Sign Up</button>
-      </div>
-    );
-  }
+if (!user) {
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>Please login first</h2>
+
+      <button
+        onClick={() =>
+          supabase.auth.signInWithOAuth({ provider: "google" })
+        }
+      >
+        Login / Sign Up
+      </button>
+
+      <button
+        onClick={onLogout}
+        style={{
+          marginTop: 10,
+          padding: "10px 14px",
+          background: "#ef4444",
+          color: "#fff",
+          border: "none",
+          borderRadius: 10,
+          cursor: "pointer"
+        }}
+      >
+        Logout
+      </button>
+    </div>
+  );
+}
 
   // ---------------- UI ----------------
   return (
@@ -254,6 +276,24 @@ export default function ProfileTab({ user, onLogin, onSaved }) {
         minHeight: "100vh",
       }}
     >
+<button
+  onClick={onLogout}
+  style={{
+    position: "fixed",
+    top: 12,
+    right: 12,
+    padding: "10px 14px",
+    background: "#ef4444",
+    color: "#fff",
+    border: "none",
+    borderRadius: 10,
+    fontWeight: 700,
+    cursor: "pointer",
+    zIndex: 99999
+  }}
+>
+  Logout
+</button>
       {/* BANNER */}
       <div
         style={{

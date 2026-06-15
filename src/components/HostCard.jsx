@@ -1,4 +1,5 @@
 import React, { useState, useCallback, memo } from "react";
+import { MessageCircle, Phone } from "lucide-react";
 
 import MessagesModal from "./MessagesModal";
 import CallModal from "./CallModal";
@@ -39,10 +40,11 @@ function HostCard({ host, user, onViewProfile, onOpenExplorer, hasProfile, openM
   const normalizedTopics = normalizeArray(topics);
   const normalizedIntent = normalizeArray(intent_tags);
 
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [showCallModal, setShowCallModal] = useState(false);
-  const [callType, setCallType] = useState(null);
-  const [showSupportModal, setShowSupportModal] = useState(false);
+// ================= MODAL STATE =================
+const [showMessageModal, setShowMessageModal] = useState(false);
+const [showCallModal, setShowCallModal] = useState(false);
+const [callType, setCallType] = useState(null);
+const [showSupportModal, setShowSupportModal] = useState(false);
 
   const handleMedia = useCallback(
     (url) => {
@@ -172,21 +174,20 @@ return (
 
   {/* MESSAGE */}
   <button
-    style={messageButton}
-    onClick={() => setShowMessageModal(true)}
-  >
-    <span>Message</span>
-    <span>💬</span>
-  </button>
+  style={messageButton}
+  onClick={() => setShowMessageModal(true)}
+>
+  <span>Message</span>
+  <MessageCircle size={28} color="#3b82f6" />
+</button>
 
-  {/* CALL */}
-  <button
-    style={callButton}
-    onClick={() => handleCallClick("video")}
-  >
-    <span>Voice / Video</span>
-    <span>📞</span>
-  </button>
+<button
+  style={callButton}
+  onClick={() => handleCallClick("video")}
+>
+  <span>Voice / Video</span>
+  <Phone size={28} color="#22c55e" />
+</button>
 
 </div>
 
@@ -239,7 +240,7 @@ const discoverBtn = {
 
 const viewProfileBtn = {
   position: "absolute",
-  top: 16,
+  top: 40,
   right: 16,
 
   background: "rgba(0,0,0,0.65)",
@@ -258,7 +259,7 @@ const viewProfileBtn = {
 /* WAVE */
 const actionRail = {
   position: "absolute",
-  top: 70,
+  top: 100,
   right: 14,
   display: "flex",
   flexDirection: "column",
@@ -281,7 +282,7 @@ const railBtn = {
 /* CONTENT */
 const content = {
   position: "absolute",
-  bottom: 140,   // ⬆ move UP (was 80)
+  bottom: 170,   // ⬆ move UP (was 80)
   width: "100%",
   padding: 16,
   color: "#fff",

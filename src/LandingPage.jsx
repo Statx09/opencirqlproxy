@@ -18,16 +18,47 @@ export default function LandingPage() {
   const [hosts, setHosts] = useState([]);
   const [user, setUser] = useState(null);
 
+  const isLoggedIn = !!user;
+
   const [index, setIndex] = useState(0);
   const [activeTab, setActiveTab] = useState("Discover");
 
   const [selectedHost, setSelectedHost] = useState(null);
   const [explorerOpen, setExplorerOpen] = useState(false);
 
-  const [suggestedMatch, setSuggestedMatch] = useState(null);
-  const current = hosts[index];
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([]);
+  // ================= STATE =================
+const [suggestedMatch, setSuggestedMatch] = useState(null);
+const [showNotifications, setShowNotifications] = useState(false);
+const [notifications, setNotifications] = useState([]);
+
+const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+// ================= DERIVED VALUES =================
+const current = hosts[index];
+const profileBtnStyle = {
+  ...iconBtn,
+
+  border: isLoggedIn
+    ? "1px solid rgba(34,197,94,0.8)"   // green (logged in)
+    : "1px solid rgba(239,68,68,0.8)",  // red (logged out)
+
+  boxShadow: isLoggedIn
+    ? "0 0 14px rgba(34,197,94,0.45)"
+    : "0 0 14px rgba(239,68,68,0.45)",
+};
+
+// ================= AUTH HELPER =================
+const requireLogin = () => {
+  if (!user) {
+    supabase.auth.signInWithOAuth({ provider: "google" });
+    return false;
+  }
+  return true;
+};
+const logout = async () => {
+  await supabase.auth.signOut();
+  setUser(null);
+};
 
 
   // SWIPE STATE
@@ -61,6 +92,15 @@ export default function LandingPage() {
       setUser(data?.session?.user || null);
     });
   }, []);
+useEffect(() => {
+  const { data: listener } = supabase.auth.onAuthStateChange(
+    (_event, session) => {
+      setUser(session?.user || null);
+    }
+  );
+
+  return () => listener.subscription.unsubscribe();
+}, []);
 
   useEffect(() => {
     fetchHosts().then(setHosts);
@@ -89,6 +129,8 @@ export default function LandingPage() {
     onTouchStart={handleStart}
     onTouchEnd={handleEnd}
   >
+
+    {/* DISCOVER BUTTON */}
     <button
       style={{ ...discoverBtn, zIndex: 999999 }}
       onClick={() => setExplorerOpen(true)}
@@ -96,6 +138,7 @@ export default function LandingPage() {
       🔍 Discover
     </button>
 
+    {/* HOST CARD */}
     <HostCard
       host={current}
       user={user}
@@ -104,6 +147,7 @@ export default function LandingPage() {
       onOpenExplorer={() => setExplorerOpen(true)}
     />
 
+    {/* NAV ARROWS */}
     <button style={sideArrowLeft} onClick={prev}>
       ◀
     </button>
@@ -112,13 +156,11 @@ export default function LandingPage() {
       ▶
     </button>
 
+    {/* BOTTOM TABS */}
     <div style={bottomWrap}>
       <div style={tabs}>
         <button onClick={() => setShowNotifications(true)} style={iconBtn}>
           <Bell size={28} strokeWidth={2.5} />
-          {notifications?.length > 0 && (
-            <span style={badge}>{notifications.length}</span>
-          )}
         </button>
 
         <button onClick={() => setActiveTab("Chats")} style={iconBtn}>
@@ -129,11 +171,22 @@ export default function LandingPage() {
           <Users size={28} strokeWidth={2.5} />
         </button>
 
-        <button onClick={() => setActiveTab("Profile")} style={iconBtn}>
-          <User size={28} strokeWidth={2.5} />
-        </button>
+        <button
+  style={profileBtnStyle}
+  onClick={() => {
+  if (!isLoggedIn) {
+    supabase.auth.signInWithOAuth({ provider: "google" });
+    return;
+  }
+
+  setActiveTab("Profile");
+}}
+>
+  <User size={28} strokeWidth={2.5} />
+</button>
       </div>
     </div>
+
   </div>
 )}
 
@@ -162,7 +215,7 @@ export default function LandingPage() {
           <button style={closeBtn} onClick={() => setActiveTab("Discover")}>
             ✕
           </button>
-          <ProfileTab user={user} />
+          <ProfileTab user={user} onLogout={logout} />
         </div>
       )}
 
@@ -222,7 +275,10 @@ const tabPage = {
   width: "100%",
   height: "100%",
   position: "relative",
-  overflow: "hidden",
+
+  overflowY: "auto",   // ✅ allow scrolling
+  overflowX: "hidden",
+
   display: "flex",
 };
 

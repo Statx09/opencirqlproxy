@@ -392,7 +392,7 @@ const badge = {
 
 const sideArrowBase = {
   position: "fixed",
-  bottom: 90,
+  bottom: 120,
 
   width: 52,
   height: 52,

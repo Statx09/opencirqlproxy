@@ -52,34 +52,42 @@ function HostCard({ host, user, onViewProfile, onOpenExplorer, hasProfile, openM
   );
 
   const handleWave = useCallback(async () => {
+  if (!user?.id) return alert("Login required");
+  if (!user_id) return alert("Invalid host");
+
+  await fetch("/api/wave", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ from_user: user.id, to_user: user_id }),
+  });
+
+  alert("👋 Wave sent!");
+}, [user?.id, user_id]);
+
+const handleLove = () => {
+  alert("❤️ Added to favorites");
+};
+
+const handleTip = () => {
+  setShowSupportModal(true);
+};
+
+const handleCallClick = useCallback(
+  async (type) => {
     if (!user?.id) return alert("Login required");
-    if (!user_id) return alert("Invalid host");
+    if (!hasProfile) return alert("Create profile first");
 
-    await fetch("/api/wave", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ from_user: user.id, to_user: user_id }),
-    });
+    const relation = await getRelationship(user.id, user_id);
+    if (!canCall(relation)) return alert("You need a connection");
 
-    alert("👋 Wave sent!");
-  }, [user?.id, user_id]);
+    setCallType(type);
+    setShowCallModal(true);
+  },
+  [user?.id, user_id, hasProfile]
+);
 
-  const handleCallClick = useCallback(
-    async (type) => {
-      if (!user?.id) return alert("Login required");
-      if (!hasProfile) return alert("Create profile first");
-
-      const relation = await getRelationship(user.id, user_id);
-      if (!canCall(relation)) return alert("You need a connection");
-
-      setCallType(type);
-      setShowCallModal(true);
-    },
-    [user?.id, user_id, hasProfile]
-  );
-
-  return (
-    <div style={card}>
+return (
+  <div style={card}>
 
       {/* BANNER */}
       <div
@@ -110,40 +118,79 @@ function HostCard({ host, user, onViewProfile, onOpenExplorer, hasProfile, openM
         View Profile
       </button>
 
-      {/* WAVE BUTTON */}
-      <button style={waveBtn} onClick={handleWave}>
-        👋
-      </button>
+      <div style={actionRail}>
+
+  <button
+    style={railBtn}
+    onClick={handleWave}
+  >
+    👋
+  </button>
+
+  <button
+    style={railBtn}
+    onClick={handleLove}
+  >
+    ❤️
+  </button>
+
+  <button
+    style={railBtn}
+    onClick={handleTip}
+  >
+    💰
+  </button>
+
+</div>
 
       {/* CONTENT */}
-      <div style={content}>
-        <img
-          src={avatarSrc}
-          onClick={() => handleMedia(avatarSrc)}
-          style={avatarStyle}
-        />
+      {/* CONTENT */}
+<div style={content}>
 
-        <h3 style={title}>{displayName}</h3>
+  <img
+    src={avatarSrc}
+    onClick={() => handleMedia(avatarSrc)}
+    style={avatarStyle}
+  />
 
-        <div style={tagRow}>
-          {normalizedIntent.map((t, i) => (
-            <span key={i} style={intentTag}>{t}</span>
-          ))}
-        </div>
+  <h3 style={title}>{displayName}</h3>
 
-        <div style={tagRow}>
-          {normalizedTopics.map((t, i) => (
-            <span key={i} style={topicTag}>{t}</span>
-          ))}
-        </div>
+  <div style={tagRow}>
+    {normalizedIntent.map((t, i) => (
+      <span key={i} style={intentTag}>{t}</span>
+    ))}
+  </div>
 
-        <div style={grid}>
-          <button style={purpleBtn} onClick={() => setShowMessageModal(true)}>Message</button>
-          <button style={greenBtn} onClick={() => handleCallClick("voice")}>Voice</button>
-          <button style={blueBtn} onClick={() => handleCallClick("video")}>Video</button>
-          <button style={darkBtn} onClick={() => setShowSupportModal(true)}>Support ❤️</button>
-        </div>
-      </div>
+  <div style={tagRow}>
+    {normalizedTopics.map((t, i) => (
+      <span key={i} style={topicTag}>{t}</span>
+    ))}
+  </div>
+
+  {/* ACTION BUTTONS */}
+  <div style={actionButtons}>
+
+  {/* MESSAGE */}
+  <button
+    style={messageButton}
+    onClick={() => setShowMessageModal(true)}
+  >
+    <span>Message</span>
+    <span>💬</span>
+  </button>
+
+  {/* CALL */}
+  <button
+    style={callButton}
+    onClick={() => handleCallClick("video")}
+  >
+    <span>Voice / Video</span>
+    <span>📞</span>
+  </button>
+
+</div>
+
+</div>   {/* 👈 THIS IS CRITICAL */}
 
       {/* MODALS */}
       {showMessageModal && (
@@ -209,24 +256,32 @@ const viewProfileBtn = {
 };
 
 /* WAVE */
-const waveBtn = {
+const actionRail = {
   position: "absolute",
   top: 70,
   right: 14,
-  width: 46,
-  height: 46,
-  borderRadius: "50%",
-  background: "#111",
-  color: "#fff",
-  border: "1px solid rgba(255,255,255,0.2)",
-  fontSize: 18,
+  display: "flex",
+  flexDirection: "column",
+  gap: 10,
   zIndex: 10,
+};
+
+const railBtn = {
+  width: 48,
+  height: 48,
+  borderRadius: "50%",
+  background: "rgba(0,0,0,0.55)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  border: "1px solid rgba(255,255,255,0.15)",
+  color: "#fff",
+  fontSize: 18,
 };
 
 /* CONTENT */
 const content = {
   position: "absolute",
-  bottom: 120,   // ⬆ move UP (was 80)
+  bottom: 140,   // ⬆ move UP (was 80)
   width: "100%",
   padding: 16,
   color: "#fff",
@@ -260,28 +315,66 @@ const tagRow = {
 const intentTag = {
   background: "#d1fae5",
   color: "#065f46",
-  padding: "3px 6px",
-  borderRadius: 6,
-  fontSize: 10,
+  padding: "6px 10px",   // ⬆ bigger
+  borderRadius: 10,
+  fontSize: 12,          // ⬆ bigger
+  fontWeight: 700,
 };
 
 const topicTag = {
   background: "#ede9fe",
   color: "#5b21b6",
-  padding: "3px 6px",
-  borderRadius: 6,
-  fontSize: 10,
+  padding: "6px 10px",   // ⬆ bigger
+  borderRadius: 10,
+  fontSize: 12,          // ⬆ bigger
+  fontWeight: 700,
 };
 
 /* BUTTON GRID */
-const grid = {
+const actionButtons = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
-  gap: 8,
-  marginTop: 12,
+  gap: 10,
+  marginTop: 14,
 };
 
-const purpleBtn = { background: "#7c3aed", color: "#fff", border: "none", padding: 10 };
-const greenBtn = { background: "#22c55e", color: "#fff", border: "none", padding: 10 };
-const blueBtn = { background: "#0ea5e9", color: "#fff", border: "none", padding: 10 };
-const darkBtn = { background: "#111827", color: "#fff", border: "none", padding: 10 };
+const glassButton = {
+  background: "rgba(255,255,255,0.12)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(255,255,255,0.15)",
+  color: "#fff",
+  borderRadius: 14,
+  padding: "14px 12px",
+  fontWeight: 700,
+  fontSize: 14,
+};
+const messageButton = {
+  background: "rgba(59,130,246,0.12)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(59,130,246,0.35)",
+  color: "#60a5fa",
+  borderRadius: 14,
+  padding: "14px 12px",
+  fontWeight: 700,
+  fontSize: 14,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};
+
+const callButton = {
+  background: "rgba(34,197,94,0.12)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+  border: "1px solid rgba(34,197,94,0.35)",
+  color: "#22c55e",
+  borderRadius: 14,
+  padding: "14px 12px",
+  fontWeight: 700,
+  fontSize: 14,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+};

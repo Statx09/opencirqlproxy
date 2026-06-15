@@ -25,9 +25,10 @@ export default function LandingPage() {
   const [explorerOpen, setExplorerOpen] = useState(false);
 
   const [suggestedMatch, setSuggestedMatch] = useState(null);
-
+  const current = hosts[index];
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
+
 
   // SWIPE STATE
   const [startX, setStartX] = useState(null);
@@ -70,14 +71,17 @@ export default function LandingPage() {
     setSuggestedMatch(getSuggestedHost(hosts, user));
   }, [hosts, user]);
 
-  const current = hosts[index];
+  const isModalOpen =
+  explorerOpen ||
+  selectedHost ||
+  showNotifications ||
+  activeTab !== "Discover";
 
   return (
     <div style={page}>
 
       {/* ================= DISCOVER ================= */}
-      {activeTab === "Discover" && current && (
-
+      {activeTab === "Discover" && current && !isModalOpen && (
   <div
     style={wrap}
     onMouseDown={handleStart}
@@ -86,70 +90,50 @@ export default function LandingPage() {
     onTouchEnd={handleEnd}
   >
     <button
-  style={{
-    ...discoverBtn,
-    zIndex: 999999,
-  }}
-  onClick={() => setExplorerOpen(true)}
->
-  🔍 Discover
-</button>
-
-```
-<HostCard
-  host={current}
-  user={user}
-  hasProfile={!!user}
-  onViewProfile={() => setSelectedHost(current)}
-  onOpenExplorer={() => setExplorerOpen(true)}
-/>
-
-<button style={sideArrowLeft} onClick={prev}>
-  ◀
-</button>
-
-<button style={sideArrowRight} onClick={next}>
-  ▶
-</button>
-
-<div style={bottomWrap}>
-  <div style={tabs}>
-
-    <button
-      onClick={() => setShowNotifications(true)}
-      style={iconBtn}
+      style={{ ...discoverBtn, zIndex: 999999 }}
+      onClick={() => setExplorerOpen(true)}
     >
-      <Bell size={28} strokeWidth={2.5} />
-      {notifications?.length > 0 && (
-        <span style={badge}>{notifications.length}</span>
-      )}
+      🔍 Discover
     </button>
 
-    <button
-      onClick={() => setActiveTab("Chats")}
-      style={iconBtn}
-    >
-      <MessageCircle size={28} strokeWidth={2.5} />
+    <HostCard
+      host={current}
+      user={user}
+      hasProfile={!!user}
+      onViewProfile={() => setSelectedHost(current)}
+      onOpenExplorer={() => setExplorerOpen(true)}
+    />
+
+    <button style={sideArrowLeft} onClick={prev}>
+      ◀
     </button>
 
-    <button
-      onClick={() => setActiveTab("Connections")}
-      style={iconBtn}
-    >
-      <Users size={28} strokeWidth={2.5} />
+    <button style={sideArrowRight} onClick={next}>
+      ▶
     </button>
 
-    <button
-      onClick={() => setActiveTab("Profile")}
-      style={iconBtn}
-    >
-      <User size={28} strokeWidth={2.5} />
-    </button>
+    <div style={bottomWrap}>
+      <div style={tabs}>
+        <button onClick={() => setShowNotifications(true)} style={iconBtn}>
+          <Bell size={28} strokeWidth={2.5} />
+          {notifications?.length > 0 && (
+            <span style={badge}>{notifications.length}</span>
+          )}
+        </button>
 
-  </div>
-</div>
-```
+        <button onClick={() => setActiveTab("Chats")} style={iconBtn}>
+          <MessageCircle size={28} strokeWidth={2.5} />
+        </button>
 
+        <button onClick={() => setActiveTab("Connections")} style={iconBtn}>
+          <Users size={28} strokeWidth={2.5} />
+        </button>
+
+        <button onClick={() => setActiveTab("Profile")} style={iconBtn}>
+          <User size={28} strokeWidth={2.5} />
+        </button>
+      </div>
+    </div>
   </div>
 )}
 

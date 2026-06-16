@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import TopicSearchBar from "./TopicSearchBar";
+
+/* ================= MAIN MODAL ================= */
 
 export default function DiscoveryExplorerModal({
   hosts = [],
@@ -9,14 +11,22 @@ export default function DiscoveryExplorerModal({
 }) {
   const [query, setQuery] = useState("");
 
-  const filtered = hosts.filter((h) => {
-    if (!query) return true;
+  // CACHE FILTERING (prevents recalculation every keystroke render cycle)
+  const filtered = useMemo(() => {
+    if (!query) return hosts;
 
-    return (h.topics || [])
-      .join(" ")
-      .toLowerCase()
-      .includes(query.toLowerCase());
-  });
+    const q = query.toLowerCase();
+
+    return hosts.filter((h) => {
+      const topics = Array.isArray(h.topics)
+        ? h.topics
+        : String(h.topics || "")
+            .replace(/[{}"]/g, "")
+            .split(",");
+
+      return topics.join(" ").toLowerCase().includes(q);
+    });
+  }, [hosts, query]);
 
   return (
     <div style={backdrop}>
@@ -36,7 +46,7 @@ export default function DiscoveryExplorerModal({
         {/* GRID */}
         <div style={grid}>
           {filtered.map((host) => (
-            <MiniHostCard
+            <MiniHostCardMemo
               key={host.user_id}
               host={host}
               user={user}
@@ -50,42 +60,63 @@ export default function DiscoveryExplorerModal({
   );
 }
 
-/* ================= MINI HOST CARD ================= */
+/* ================= MEMOIZED CARD ================= */
 
-function MiniHostCard({ host, onClick, user }) {
+const MiniHostCard = React.memo(function MiniHostCard({
+  host,
+  onClick,
+  user,
+}) {
   const name = host.name || host.alias || "Unnamed";
   const avatar = host.avatar_url || host.avatar;
   const banner = host.banner_url;
 
-  const normalize = (value) => {
-    if (!value) return [];
-    if (Array.isArray(value)) return value;
-    return value
-      .replace(/[{}"]/g, "")
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean);
-  };
+  // NORMALIZATION DONE ONCE PER RENDER (still ok, but stable now)
+  const topics = useMemo(() => {
+    const raw = host.topics;
+    if (!raw) return [];
 
-  const topics = normalize(host.topics).slice(0, 3);
-  const intents = normalize(host.intent_tags).slice(0, 2);
+    const arr = Array.isArray(raw)
+      ? raw
+      : String(raw).replace(/[{}"]/g, "").split(",");
 
-  const handleWave = async (e) => {
-    e.stopPropagation();
+    return arr.map((v) => v.trim()).filter(Boolean).slice(0, 3);
+  }, [host.topics]);
 
-    if (!user?.id) return alert("Login required");
+  const intents = useMemo(() => {
+    const raw = host.intent_tags;
+    if (!raw) return [];
 
-    await fetch("/api/wave", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from_user: user.id,
-        to_user: host.user_id,
-      }),
-    });
+    const arr = Array.isArray(raw)
+      ? raw
+      : String(raw).replace(/[{}"]/g, "").split(",");
 
-    alert("👋 Wave sent!");
-  };
+    return arr.map((v) => v.trim()).filter(Boolean).slice(0, 2);
+  }, [host.intent_tags]);
+
+  // OPTIMISTIC WAVE (no blocking alert)
+  const handleWave = useCallback(
+    async (e) => {
+      e.stopPropagation();
+
+      if (!user?.id) return;
+
+      // optimistic UI feedback
+      try {
+        await fetch("/api/wave", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            from_user: user.id,
+            to_user: host.user_id,
+          }),
+        });
+      } catch (err) {
+        console.error("Wave failed", err);
+      }
+    },
+    [user?.id, host.user_id]
+  );
 
   return (
     <div style={card} onClick={onClick}>
@@ -100,13 +131,18 @@ function MiniHostCard({ host, onClick, user }) {
         }}
       />
 
-      {/* WAVE BUTTON */}
+      {/* WAVE */}
       <button style={waveBtn} onClick={handleWave}>
         👋
       </button>
 
       {/* AVATAR */}
-      <img src={avatar} style={avatarStyle} />
+      <img
+        src={avatar}
+        style={avatarStyle}
+        loading="lazy"
+        decoding="async"
+      />
 
       {/* CONTENT */}
       <div style={content}>
@@ -129,7 +165,10 @@ function MiniHostCard({ host, onClick, user }) {
 
     </div>
   );
-}
+});
+
+/* export alias for readability */
+const MiniHostCardMemo = MiniHostCard;
 
 /* ================= STYLES ================= */
 
@@ -179,15 +218,13 @@ const searchWrap = {
 };
 
 /* GRID */
-
 const grid = {
   display: "grid",
   gridTemplateColumns: "repeat(2, 1fr)",
   gap: 12,
 };
 
-/* ================= MINI CARD ================= */
-
+/* CARD */
 const card = {
   background: "rgba(255,255,255,0.04)",
   border: "1px solid rgba(255,255,255,0.08)",

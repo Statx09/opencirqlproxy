@@ -7,6 +7,8 @@ import ChatsTab from "./components/ChatsTab";
 import ConnectionsTab from "./components/ConnectionsTab";
 import ProfileTab from "./components/ProfileTab";
 import NotificationsModal from "./components/NotificationsModal";
+import { useSwipe } from "./hooks/useSwipe";
+import MessagesModal from "./components/MessagesModal";
 
 import { Bell, MessageCircle, Users, User } from "lucide-react";
 
@@ -17,6 +19,15 @@ import { getSuggestedHost } from "./lib/matchEngine";
 export default function LandingPage() {
   const [hosts, setHosts] = useState([]);
   const [user, setUser] = useState(null);
+  const next = () =>
+  setIndex((i) => (i + 1) % (hosts.length || 1));
+
+const prev = () =>
+  setIndex((i) => (i - 1 + hosts.length) % (hosts.length || 1));
+    const { handleStart, handleMove, handleEnd, dragX } = useSwipe({
+  onSwipeLeft: next,
+  onSwipeRight: prev,
+});
 
   const isLoggedIn = !!user;
 
@@ -24,7 +35,8 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState("Discover");
 
   const [selectedHost, setSelectedHost] = useState(null);
-  const [explorerOpen, setExplorerOpen] = useState(false);
+const [explorerOpen, setExplorerOpen] = useState(false);
+const [messagesHost, setMessagesHost] = useState(null);
 
   // ================= STATE =================
 const [suggestedMatch, setSuggestedMatch] = useState(null);
@@ -55,37 +67,17 @@ const requireLogin = () => {
   }
   return true;
 };
+const openMessages = (host) => {
+  if (!user) {
+    setShowLoginPrompt(true);
+    return;
+  }
+  setMessagesHost(host);
+};
 const logout = async () => {
   await supabase.auth.signOut();
   setUser(null);
 };
-
-
-  // SWIPE STATE
-  const [startX, setStartX] = useState(null);
-
-  const next = () =>
-    setIndex((i) => (i + 1) % (hosts.length || 1));
-
-  const prev = () =>
-    setIndex((i) => (i - 1 + hosts.length) % (hosts.length || 1));
-
-  const handleStart = (e) => {
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    setStartX(x);
-  };
-
-  const handleEnd = (e) => {
-    if (startX === null) return;
-
-    const x = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-    const diff = x - startX;
-
-    if (diff > 80) prev();
-    if (diff < -80) next();
-
-    setStartX(null);
-  };
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -123,12 +115,28 @@ useEffect(() => {
       {/* ================= DISCOVER ================= */}
       {activeTab === "Discover" && current && !isModalOpen && (
   <div
-    style={wrap}
-    onMouseDown={handleStart}
-    onMouseUp={handleEnd}
-    onTouchStart={handleStart}
-    onTouchEnd={handleEnd}
-  >
+  style={{
+  ...wrap,
+
+  transform: `
+    translateX(${dragX}px)
+    scale(${1 - Math.min(Math.abs(dragX) / 1500, 0.03)})
+  `,
+
+  transition: dragX === 0
+  ? "transform 0.42s cubic-bezier(0.16, 1, 0.3, 1)"
+  : "none",
+
+  willChange: "transform",
+}}
+  onMouseDown={handleStart}
+  onMouseMove={handleMove}
+  onMouseUp={handleEnd}
+  onMouseLeave={handleEnd}
+  onTouchStart={handleStart}
+  onTouchMove={handleMove}
+  onTouchEnd={handleEnd}
+>
 
     {/* DISCOVER BUTTON */}
     <button
@@ -140,12 +148,24 @@ useEffect(() => {
 
     {/* HOST CARD */}
     <HostCard
-      host={current}
-      user={user}
-      hasProfile={!!user}
-      onViewProfile={() => setSelectedHost(current)}
-      onOpenExplorer={() => setExplorerOpen(true)}
-    />
+  host={current}
+  user={user}
+  hasProfile={!!user}
+
+  onViewProfile={() => setSelectedHost(current)}
+
+  onOpenExplorer={() => setExplorerOpen(true)}
+
+  onOpenMessage={openMessages}
+
+  onOpenCall={(payload) => {
+    console.log("CALL CLICK", payload);
+  }}
+
+  onOpenSupport={(host) => {
+    console.log("SUPPORT CLICK", host);
+  }}
+/>
 
     {/* NAV ARROWS */}
     <button style={sideArrowLeft} onClick={prev}>
@@ -220,29 +240,36 @@ useEffect(() => {
       )}
 
       {/* MODALS */}
-      {explorerOpen && (
-        <DiscoveryExplorerModal
-          hosts={hosts}
-          user={user}
-          onClose={() => setExplorerOpen(false)}
-          onOpenHost={setSelectedHost}
-        />
-      )}
+{explorerOpen && (
+  <DiscoveryExplorerModal
+    hosts={hosts}
+    user={user}
+    onClose={() => setExplorerOpen(false)}
+    onOpenHost={setSelectedHost}
+  />
+)}
 
-      {selectedHost && (
-        <ProfileModal
-          host={selectedHost}
-          onClose={() => setSelectedHost(null)}
-        />
-      )}
+{selectedHost && (
+  <ProfileModal
+    host={selectedHost}
+    onClose={() => setSelectedHost(null)}
+  />
+)}
 
-      {showNotifications && (
-        <NotificationsModal
-          notifications={notifications}
-          onClose={() => setShowNotifications(false)}
-        />
-      )}
+{messagesHost && (
+  <MessagesModal
+    host={messagesHost}
+    user={user}
+    onClose={() => setMessagesHost(null)}
+  />
+)}
 
+{showNotifications && (
+  <NotificationsModal
+    notifications={notifications}
+    onClose={() => setShowNotifications(false)}
+  />
+)}
     </div>
   );
 }

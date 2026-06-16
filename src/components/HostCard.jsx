@@ -1,13 +1,20 @@
-import React, { useState, useCallback, memo } from "react";
+import React, { useState, useCallback, memo, useMemo } from "react";
 import { MessageCircle, Phone } from "lucide-react";
 
-import MessagesModal from "./MessagesModal";
-import CallModal from "./CallModal";
-import SupportModal from "./SupportModal";
 import { getRelationship, canCall } from "../lib/interactionRules";
 
-function HostCard({ host, user, onViewProfile, onOpenExplorer, hasProfile, openMedia }) {
+/* ================= HOST CARD ================= */
 
+function HostCard({
+  host,
+  user,
+  onViewProfile,
+  openMedia,
+  hasProfile,
+  onOpenMessage,
+  onOpenCall,
+  onOpenSupport,
+}) {
   const {
     name,
     alias,
@@ -22,29 +29,33 @@ function HostCard({ host, user, onViewProfile, onOpenExplorer, hasProfile, openM
   const displayName = name || alias || "Unnamed";
   const avatarSrc = avatar_url || avatar;
 
-  const normalizeArray = useCallback((value) => {
-    if (!value) return [];
-    if (Array.isArray(value)) return value;
+  /* ---------------- FAST NORMALIZATION (memoized) ---------------- */
 
-    if (typeof value === "string") {
-      return value
-        .replace(/[{}"]/g, "")
-        .split(",")
-        .map((v) => v.trim())
-        .filter(Boolean);
-    }
+  const normalizedTopics = useMemo(() => {
+    if (!topics) return [];
+    if (Array.isArray(topics)) return topics;
 
-    return [];
-  }, []);
+    return String(topics)
+      .replace(/[{}"]/g, "")
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean)
+      .slice(0, 3);
+  }, [topics]);
 
-  const normalizedTopics = normalizeArray(topics);
-  const normalizedIntent = normalizeArray(intent_tags);
+  const normalizedIntent = useMemo(() => {
+    if (!intent_tags) return [];
+    if (Array.isArray(intent_tags)) return intent_tags;
 
-// ================= MODAL STATE =================
-const [showMessageModal, setShowMessageModal] = useState(false);
-const [showCallModal, setShowCallModal] = useState(false);
-const [callType, setCallType] = useState(null);
-const [showSupportModal, setShowSupportModal] = useState(false);
+    return String(intent_tags)
+      .replace(/[{}"]/g, "")
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean)
+      .slice(0, 2);
+  }, [intent_tags]);
+
+  /* ---------------- ACTIONS ---------------- */
 
   const handleMedia = useCallback(
     (url) => {
@@ -54,62 +65,50 @@ const [showSupportModal, setShowSupportModal] = useState(false);
   );
 
   const handleWave = useCallback(async () => {
-  if (!user?.id) return alert("Login required");
-  if (!user_id) return alert("Invalid host");
+    if (!user?.id) return;
 
-  await fetch("/api/wave", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ from_user: user.id, to_user: user_id }),
-  });
+    if (!user_id) return;
 
-  alert("👋 Wave sent!");
-}, [user?.id, user_id]);
+    await fetch("/api/wave", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from_user: user.id,
+        to_user: user_id,
+      }),
+    });
+  }, [user?.id, user_id]);
 
-const handleLove = () => {
-  alert("❤️ Added to favorites");
-};
+  const handleCallClick = useCallback(
+    async (type) => {
+      if (!user?.id) return;
+      if (!hasProfile) return;
 
-const handleTip = () => {
-  setShowSupportModal(true);
-};
+      const relation = await getRelationship(user.id, user_id);
+      if (!canCall(relation)) return;
 
-const handleCallClick = useCallback(
-  async (type) => {
-    if (!user?.id) return alert("Login required");
-    if (!hasProfile) return alert("Create profile first");
+      onOpenCall?.({ host, type });
+    },
+    [user?.id, user_id, hasProfile, host, onOpenCall]
+  );
 
-    const relation = await getRelationship(user.id, user_id);
-    if (!canCall(relation)) return alert("You need a connection");
+  return (
+    <div style={card}>
 
-    setCallType(type);
-    setShowCallModal(true);
-  },
-  [user?.id, user_id, hasProfile]
-);
+      {/* ---------------- BANNER (OPTIMIZED) ---------------- */}
+      {banner_url ? (
+        <img
+          src={banner_url}
+          loading="lazy"
+          decoding="async"
+          style={bannerImg}
+          onClick={() => handleMedia(banner_url)}
+        />
+      ) : (
+        <div style={fallbackBanner} />
+      )}
 
-return (
-  <div style={card}>
-
-      {/* BANNER */}
-      <div
-        style={{
-          height: "100%",
-          width: "100%",
-          backgroundImage: banner_url
-            ? `url(${banner_url})`
-            : "linear-gradient(135deg,#7c3aed,#3b82f6)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          position: "absolute",
-          inset: 0,
-        }}
-        onClick={() => banner_url && handleMedia(banner_url)}
-      />
-
-  
-
-      {/* TOP RIGHT - VIEW PROFILE */}
+      {/* VIEW PROFILE */}
       <button
         style={viewProfileBtn}
         onClick={(e) => {
@@ -120,91 +119,62 @@ return (
         View Profile
       </button>
 
+      {/* ACTION RAIL */}
       <div style={actionRail}>
-
-  <button
-    style={railBtn}
-    onClick={handleWave}
-  >
-    👋
-  </button>
-
-  <button
-    style={railBtn}
-    onClick={handleLove}
-  >
-    ❤️
-  </button>
-
-  <button
-    style={railBtn}
-    onClick={handleTip}
-  >
-    💰
-  </button>
-
-</div>
+        <button style={railBtn} onClick={handleWave}>👋</button>
+        <button style={railBtn}>❤️</button>
+        <button style={railBtn} onClick={() => onOpenSupport?.(host)}>💰</button>
+      </div>
 
       {/* CONTENT */}
-      {/* CONTENT */}
-<div style={content}>
+      <div style={content}>
 
-  <img
-    src={avatarSrc}
-    onClick={() => handleMedia(avatarSrc)}
-    style={avatarStyle}
-  />
+        {/* AVATAR */}
+        <img
+          src={avatarSrc}
+          loading="lazy"
+          decoding="async"
+          onClick={() => handleMedia(avatarSrc)}
+          style={avatarStyle}
+        />
 
-  <h3 style={title}>{displayName}</h3>
+        <h3 style={title}>{displayName}</h3>
 
-  <div style={tagRow}>
-    {normalizedIntent.map((t, i) => (
-      <span key={i} style={intentTag}>{t}</span>
-    ))}
-  </div>
+        <div style={tagRow}>
+          {normalizedIntent.map((t, i) => (
+            <span key={i} style={intentTag}>{t}</span>
+          ))}
+        </div>
 
-  <div style={tagRow}>
-    {normalizedTopics.map((t, i) => (
-      <span key={i} style={topicTag}>{t}</span>
-    ))}
-  </div>
+        <div style={tagRow}>
+          {normalizedTopics.map((t, i) => (
+            <span key={i} style={topicTag}>{t}</span>
+          ))}
+        </div>
 
-  {/* ACTION BUTTONS */}
-  <div style={actionButtons}>
+        {/* ACTION BUTTONS */}
+        <div style={actionButtons}>
 
-  {/* MESSAGE */}
-  <button
-  style={messageButton}
-  onClick={() => setShowMessageModal(true)}
->
-  <span>Message</span>
-  <MessageCircle size={28} color="#3b82f6" />
-</button>
+          <button
+            style={messageButton}
+            onClick={() => onOpenMessage?.(host)}
+          >
+            <span>Message</span>
+            <MessageCircle size={26} />
+          </button>
 
-<button
-  style={callButton}
-  onClick={() => handleCallClick("video")}
->
-  <span>Voice / Video</span>
-  <Phone size={28} color="#22c55e" />
-</button>
+          <button
+            style={callButton}
+            onClick={() => handleCallClick("video")}
+          >
+            <span>Call</span>
+            <Phone size={26} />
+          </button>
 
-</div>
+        </div>
 
-</div>   {/* 👈 THIS IS CRITICAL */}
+      </div>
 
-      {/* MODALS */}
-      {showMessageModal && (
-        <MessagesModal host={host} user={user} onClose={() => setShowMessageModal(false)} />
-      )}
-
-      {showCallModal && (
-        <CallModal host={host} user={user} callType={callType} onClose={() => setShowCallModal(false)} />
-      )}
-
-      {showSupportModal && (
-        <SupportModal host={host} user={user} onClose={() => setShowSupportModal(false)} />
-      )}
     </div>
   );
 }
@@ -223,40 +193,35 @@ const card = {
   position: "relative",
 };
 
-/* TOP BUTTONS */
-const discoverBtn = {
+/* BANNER IMG (KEY FIX) */
+const bannerImg = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
   position: "absolute",
-  top: 14,
-  left: 14,
-  background: "#7c3aed",
-  color: "#fff",
-  border: "none",
-  padding: "10px 14px",
-  borderRadius: 12,
-  fontSize: 14,
-  fontWeight: 800,
-  zIndex: 10,
+  inset: 0,
+};
+
+const fallbackBanner = {
+  position: "absolute",
+  inset: 0,
+  background: "linear-gradient(135deg,#7c3aed,#3b82f6)",
 };
 
 const viewProfileBtn = {
   position: "absolute",
   top: 40,
   right: 16,
-
   background: "rgba(0,0,0,0.65)",
   color: "#fff",
   border: "1px solid rgba(255,255,255,0.25)",
-
-  padding: "14px 18px",   // 🔥 bigger
+  padding: "14px 18px",
   borderRadius: 14,
-
-  fontSize: 15,           // 🔥 bigger text
+  fontSize: 15,
   fontWeight: 800,
-
   zIndex: 10,
 };
 
-/* WAVE */
 const actionRail = {
   position: "absolute",
   top: 100,
@@ -272,24 +237,20 @@ const railBtn = {
   height: 48,
   borderRadius: "50%",
   background: "rgba(0,0,0,0.55)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
   border: "1px solid rgba(255,255,255,0.15)",
   color: "#fff",
   fontSize: 18,
 };
 
-/* CONTENT */
 const content = {
   position: "absolute",
-  bottom: 170,   // ⬆ move UP (was 80)
+  bottom: 170,
   width: "100%",
   padding: 16,
   color: "#fff",
   zIndex: 5,
 };
 
-/* AVATAR (FIXED ROUND + BIGGER) */
 const avatarStyle = {
   width: 120,
   height: 120,
@@ -298,14 +259,12 @@ const avatarStyle = {
   objectFit: "cover",
 };
 
-/* TEXT */
 const title = {
   fontSize: 22,
   fontWeight: 800,
   marginTop: 10,
 };
 
-/* TAGS */
 const tagRow = {
   display: "flex",
   gap: 6,
@@ -316,22 +275,21 @@ const tagRow = {
 const intentTag = {
   background: "#d1fae5",
   color: "#065f46",
-  padding: "6px 10px",   // ⬆ bigger
+  padding: "6px 10px",
   borderRadius: 10,
-  fontSize: 12,          // ⬆ bigger
+  fontSize: 12,
   fontWeight: 700,
 };
 
 const topicTag = {
   background: "#ede9fe",
   color: "#5b21b6",
-  padding: "6px 10px",   // ⬆ bigger
+  padding: "6px 10px",
   borderRadius: 10,
-  fontSize: 12,          // ⬆ bigger
+  fontSize: 12,
   fontWeight: 700,
 };
 
-/* BUTTON GRID */
 const actionButtons = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
@@ -339,27 +297,13 @@ const actionButtons = {
   marginTop: 14,
 };
 
-const glassButton = {
-  background: "rgba(255,255,255,0.12)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
-  border: "1px solid rgba(255,255,255,0.15)",
-  color: "#fff",
-  borderRadius: 14,
-  padding: "14px 12px",
-  fontWeight: 700,
-  fontSize: 14,
-};
 const messageButton = {
   background: "rgba(59,130,246,0.12)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
   border: "1px solid rgba(59,130,246,0.35)",
   color: "#60a5fa",
   borderRadius: 14,
   padding: "14px 12px",
   fontWeight: 700,
-  fontSize: 14,
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
@@ -367,14 +311,11 @@ const messageButton = {
 
 const callButton = {
   background: "rgba(34,197,94,0.12)",
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
   border: "1px solid rgba(34,197,94,0.35)",
   color: "#22c55e",
   borderRadius: 14,
   padding: "14px 12px",
   fontWeight: 700,
-  fontSize: 14,
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",

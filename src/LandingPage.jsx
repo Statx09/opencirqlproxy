@@ -103,17 +103,12 @@ useEffect(() => {
     setSuggestedMatch(getSuggestedHost(hosts, user));
   }, [hosts, user]);
 
-  const isModalOpen =
-  explorerOpen ||
-  selectedHost ||
-  showNotifications ||
-  activeTab !== "Discover";
 
   return (
     <div style={page}>
 
       {/* ================= DISCOVER ================= */}
-      {activeTab === "Discover" && current && !isModalOpen && (
+      {activeTab === "Discover" && current && (
   <div
   style={{
   ...wrap,

@@ -222,42 +222,6 @@ export default function ProfileModal({ host, onClose }) {
   );
 }
 
-/* ================= STYLES ================= */
-
-const overlay = {
-  position: "fixed",
-  inset: 0,
-  background: "rgba(0,0,0,0.65)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 9999,
-};
-
-const modal = {
-  width: "95%",
-  maxWidth: 650,
-  maxHeight: "90vh",
-  background: "#111827",
-  borderRadius: 18,
-  overflowY: "auto",
-  color: "#fff",
-  position: "relative",
-  paddingBottom: 20,
-};
-
-const closeBtn = {
-  position: "absolute",
-  right: 12,
-  top: 12,
-  background: "#000",
-  color: "#fff",
-  border: "none",
-  borderRadius: 10,
-  padding: "6px 10px",
-  cursor: "pointer",
-};
-
 const bannerWrap = { width: "100%", height: 140, overflow: "hidden" };
 const bannerImg = { width: "100%", height: "100%", objectFit: "cover" };
 
@@ -376,4 +340,37 @@ const imageThumb = {
   objectFit: "cover",
   cursor: "pointer",
   flexShrink: 0,
+};
+const overlay = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.65)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
+};
+
+const modal = {
+  width: "95%",
+  maxWidth: 650,
+  maxHeight: "90vh",
+  background: "#111827",
+  borderRadius: 18,
+  overflowY: "auto",
+  color: "#fff",
+  position: "relative",
+  paddingBottom: 20,
+};
+
+const closeBtn = {
+  position: "absolute",
+  right: 12,
+  top: 12,
+  background: "#000",
+  color: "#fff",
+  border: "none",
+  borderRadius: 10,
+  padding: "6px 10px",
+  cursor: "pointer",
 };

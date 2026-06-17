@@ -65,6 +65,7 @@ function HostCard({
   );
 
   const handleWave = useCallback(async () => {
+  console.log("WAVE CLICKED");
     if (!user?.id) return;
 
     if (!user_id) return;
@@ -80,14 +81,31 @@ function HostCard({
   }, [user?.id, user_id]);
 
   const handleCallClick = useCallback(
-    async (type) => {
-      if (!user?.id) return;
-      if (!hasProfile) return;
+  async (type) => {
+    console.log("CALL BUTTON CLICKED");
+
+    if (!user?.id) {
+      console.log("NO USER");
+      return;
+    }
+
+    if (!hasProfile) {
+      console.log("NO PROFILE");
+      return;
+    }
 
       const relation = await getRelationship(user.id, user_id);
-      if (!canCall(relation)) return;
 
-      onOpenCall?.({ host, type });
+console.log("RELATION:", relation);
+
+if (!canCall(relation)) {
+  console.log("CALL BLOCKED");
+  return;
+}
+
+console.log("OPENING CALL MODAL");
+
+onOpenCall?.({ host, type });
     },
     [user?.id, user_id, hasProfile, host, onOpenCall]
   );
@@ -123,7 +141,10 @@ function HostCard({
       <div style={actionRail}>
         <button style={railBtn} onClick={handleWave}>👋</button>
         <button style={railBtn}>❤️</button>
-        <button style={railBtn} onClick={() => onOpenSupport?.(host)}>💰</button>
+        <button style={railBtn} onClick={() => {
+  console.log("SUPPORT BUTTON CLICKED");
+  onOpenSupport?.(host);
+}}>💰</button>
       </div>
 
       {/* CONTENT */}
@@ -157,7 +178,10 @@ function HostCard({
 
           <button
             style={messageButton}
-            onClick={() => onOpenMessage?.(host)}
+            onClick={() => {
+  console.log("MESSAGE BUTTON CLICKED");
+  onOpenMessage?.(host);
+}}
           >
             <span>Message</span>
             <MessageCircle size={26} />
@@ -248,7 +272,8 @@ const content = {
   width: "100%",
   padding: 16,
   color: "#fff",
-  zIndex: 5,
+  zIndex: 50,
+  pointerEvents: "auto",
 };
 
 const avatarStyle = {

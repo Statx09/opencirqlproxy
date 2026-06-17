@@ -159,3 +159,95 @@ export default function MessagesModal({ host, user, onClose }) {
     </div>
   );
 }
+/* ================= STYLES ================= */
+
+const overlay = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.6)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 9999,
+};
+
+const modal = {
+  width: "100%",
+  maxWidth: 700,
+  height: "100vh",
+  background: "#fff",
+  display: "flex",
+  flexDirection: "column",
+  overflow: "hidden",
+};
+
+const header = {
+  padding: 16,
+  borderBottom: "1px solid #eee",
+  display: "flex",
+  justifyContent: "space-between",
+};
+
+const headerLeft = {
+  display: "flex",
+  gap: 10,
+  alignItems: "center",
+};
+
+const avatarStyle = {
+  width: 45,
+  height: 45,
+  borderRadius: "50%",
+};
+
+const statusText = {
+  margin: 0,
+  fontSize: 12,
+  color: "#666",
+};
+
+const closeBtn = {
+  border: "none",
+  background: "#111827",
+  color: "#fff",
+  width: 34,
+  height: 34,
+  borderRadius: "50%",
+  cursor: "pointer",
+};
+
+const chatArea = {
+  flex: 1,
+  padding: 12,
+  overflowY: "auto",
+  background: "#fafafa",
+};
+
+const bubble = {
+  padding: "10px 12px",
+  borderRadius: 14,
+  maxWidth: "70%",
+};
+
+const inputArea = {
+  display: "flex",
+  gap: 10,
+  padding: 16,
+  borderTop: "1px solid #eee",
+};
+
+const input = {
+  flex: 1,
+  padding: 10,
+  borderRadius: 10,
+  border: "1px solid #ddd",
+};
+
+const sendBtn = {
+  padding: "10px 16px",
+  borderRadius: 10,
+  background: "#7c3aed",
+  color: "#fff",
+  border: "none",
+  cursor: "pointer",
+};

@@ -9,6 +9,7 @@ import ProfileTab from "./components/ProfileTab";
 import NotificationsModal from "./components/NotificationsModal";
 import { useSwipe } from "./hooks/useSwipe";
 import MessagesModal from "./components/MessagesModal";
+import SayThanksModal from "./components/SayThanksModal";
 
 import { Bell, MessageCircle, Users, User } from "lucide-react";
 
@@ -35,8 +36,9 @@ const prev = () =>
   const [activeTab, setActiveTab] = useState("Discover");
 
   const [selectedHost, setSelectedHost] = useState(null);
-const [explorerOpen, setExplorerOpen] = useState(false);
-const [messagesHost, setMessagesHost] = useState(null);
+  const [explorerOpen, setExplorerOpen] = useState(false);
+  const [messagesHost, setMessagesHost] = useState(null);
+  const [sayThanksHost, setSayThanksHost] = useState(null);
 
   // ================= STATE =================
 const [suggestedMatch, setSuggestedMatch] = useState(null);
@@ -44,6 +46,26 @@ const [showNotifications, setShowNotifications] = useState(false);
 const [notifications, setNotifications] = useState([]);
 
 const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+const openLike = (host) => {
+  if (!user) {
+    setShowLoginPrompt(true);
+    return;
+  }
+
+  setMessagesHost({
+    ...host,
+    context: "like",
+  });
+};
+
+const openSupport = (host) => {
+  if (!user) {
+    setShowLoginPrompt(true);
+    return;
+  }
+
+  setSayThanksHost(host);
+};
 
 // ================= DERIVED VALUES =================
 const current = hosts[index];
@@ -158,8 +180,9 @@ useEffect(() => {
   }}
 
   onOpenSupport={(host) => {
-    console.log("SUPPORT CLICK", host);
-  }}
+  console.log("SUPPORT CLICK", host);
+  setSayThanksHost(host);
+}}
 />
 
     {/* NAV ARROWS */}
@@ -256,6 +279,12 @@ useEffect(() => {
     host={messagesHost}
     user={user}
     onClose={() => setMessagesHost(null)}
+  />
+)}
+{sayThanksHost && (
+  <SayThanksModal
+    host={sayThanksHost}
+    onClose={() => setSayThanksHost(null)}
   />
 )}
 

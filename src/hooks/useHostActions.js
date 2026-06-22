@@ -1,5 +1,3 @@
-// src/hooks/useHostActions.js
-
 import { useCallback } from "react";
 
 export default function useHostActions({
@@ -8,53 +6,64 @@ export default function useHostActions({
   openMessageModal,
   openCallModal,
   openTipModal,
-  sendHostEvent, // unified backend event sender
+  sendHostEvent,
 }) {
-  // 👋 Wave (same system as like)
+  const hostId = host?.id || host?.user_id;
+  const userId = user?.id;
+
+  /* ================= 👋 WAVE ================= */
   const wave = useCallback(() => {
-    if (!host || !user) return;
+    if (!hostId || !userId) return;
 
-    sendHostEvent({
-      type: "wave",
-      from: user.id,
-      to: host.id,
-      payload: {
-        message: `${user.name} waved at ${host.name}`,
-      },
-    });
-  }, [host, user, sendHostEvent]);
+    try {
+      sendHostEvent?.({
+        type: "wave",
+        from: userId,
+        to: hostId,
+        payload: {
+          message: "wave",
+        },
+      });
+    } catch (err) {
+      console.log("wave failed", err);
+    }
+  }, [hostId, userId, sendHostEvent]);
 
-  // ❤️ Like (same event system as wave)
+  /* ================= ❤️ LIKE ================= */
   const like = useCallback(() => {
-    if (!host || !user) return;
+    if (!hostId || !userId) return;
 
-    sendHostEvent({
-      type: "like",
-      from: user.id,
-      to: host.id,
-      payload: {
-        message: `${user.name} liked ${host.name}`,
-      },
-    });
-  }, [host, user, sendHostEvent]);
+    try {
+      sendHostEvent?.({
+        type: "like",
+        from: userId,
+        to: hostId,
+        payload: {
+          message: "like",
+        },
+      });
+    } catch (err) {
+      console.log("like failed", err);
+    }
+  }, [hostId, userId, sendHostEvent]);
 
-  // 💬 Message
+  /* ================= 💬 MESSAGE ================= */
   const message = useCallback(() => {
     if (!host) return;
     openMessageModal?.(host);
-  }, [host, openMessageModal]);
+  }, [host?.id, openMessageModal]);
 
-  // 📞 Call
+  /* ================= 📞 CALL ================= */
   const call = useCallback(() => {
     if (!host) return;
     openCallModal?.(host);
-  }, [host, openCallModal]);
+  }, [host?.id, openCallModal]);
 
-  // 💰 Support / Tip
+  /* ================= 💰 SUPPORT ================= */
   const support = useCallback(() => {
     if (!host) return;
     openTipModal?.(host);
-  }, [host, openTipModal]);
+  }, [host?.id, openTipModal]);
 
   return {
     wave,

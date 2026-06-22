@@ -507,34 +507,69 @@ if (!user) {
 
         {/* INTENTS */}
         <div style={{ marginBottom: 20 }}>
-          <h3>Intent Tags</h3>
+          {/* SIGNALS */}
+<div style={{ marginBottom: 20 }}>
+  <h3 style={{ marginBottom: 6 }}>Your Signals</h3>
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 8,
-            }}
-          >
-            {INTENTS.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => toggleIntent(tag)}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 999,
-                  border: "none",
-                  background: intentTags.includes(tag)
-                    ? "#7c3aed"
-                    : "#e5e7eb",
-                  color: intentTags.includes(tag)
-                    ? "#fff"
-                    : "#111",
-                }}
-              >
-                {tag}
-              </button>
-            ))}
+  <p
+    style={{
+      marginTop: 0,
+      marginBottom: 12,
+      fontSize: 13,
+      color: "#6b7280",
+    }}
+  >
+    Pick up to 5 identity signals that represent you
+  </p>
+
+  <div
+    style={{
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 10,
+    }}
+  >
+            {INTENTS.map((tag) => {
+  const active = intentTags.includes(tag);
+
+  return (
+    <button
+      key={tag}
+      onClick={() => toggleIntent(tag)}
+      style={{
+        padding: "10px 14px",
+        borderRadius: 999,
+
+        border: active
+          ? "1px solid rgba(124,58,237,0.6)"
+          : "1px solid rgba(255,255,255,0.15)",
+
+        background: active
+          ? "linear-gradient(135deg,#7c3aed,#4f46e5)"
+          : "rgba(255,255,255,0.08)",
+
+        color: "#fff",
+
+        fontSize: 13,
+        fontWeight: 600,
+
+        backdropFilter: "blur(10px)",
+
+        boxShadow: active
+          ? "0 0 14px rgba(124,58,237,0.35)"
+          : "none",
+
+        transform: active ? "scale(1.05)" : "scale(1)",
+
+        transition: "all 0.15s ease",
+
+        cursor: "pointer",
+      }}
+    >
+      {tag}
+    </button>
+  );
+})}
           </div>
         </div>
 

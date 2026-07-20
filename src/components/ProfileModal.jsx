@@ -5,6 +5,7 @@ import MessagesModal from "./MessagesModal";
 import CallModal from "./CallModal";
 import TipHostButton from "./TipHostButton";
 import ImageModal from "./ImageModal";
+import ExpressionBadges from "./expressions/ExpressionBadges";
 
 export default function ProfileModal({ host, onClose }) {
   const [profile, setProfile] = useState(null);
@@ -27,25 +28,42 @@ export default function ProfileModal({ host, onClose }) {
     loadUser();
   }, []);
 
-  // ---------------- PROFILE LOAD ----------------
-  useEffect(() => {
-    if (!host?.user_id) return;
+// ---------------- PROFILE LOAD ----------------
+useEffect(() => {
+  console.log("PROFILE MODAL HOST:", host);
 
-    const fetchProfile = async () => {
-      setLoading(true);
+  if (!host?.id) {
+    console.log("❌ No profile id on host");
+    setLoading(false);
+    return;
+  }
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", host.user_id)
-        .single();
+  const fetchProfile = async () => {
+    console.log("Fetching profile for:", host.user_id);
 
-      setProfile(data || null);
-      setLoading(false);
-    };
+    setLoading(true);
 
-    fetchProfile();
-  }, [host?.user_id]);
+    const { data, error } = await supabase
+  .from("profiles")
+  .select("*")
+  .eq("id", host.id)
+  .maybeSingle();
+
+console.log("PROFILE QUERY");
+console.log("host.id =", host.id);
+console.log("host.user_id =", host.user_id);
+console.log("data =", data);
+console.log("error =", error);
+
+    console.log("PROFILE DATA:", data);
+    console.log("PROFILE ERROR:", error);
+
+    setProfile(data || null);
+    setLoading(false);
+  };
+
+  fetchProfile();
+}, [host]);
 
   // ---------------- STATES ----------------
   if (loading) {
@@ -68,9 +86,9 @@ export default function ProfileModal({ host, onClose }) {
   const images = profile.gallery_urls || [];
   const topics = profile.topics || [];
   const intents = profile.intent_tags || [];
-  const badges = profile.badges_owned || []; // ✅ FIXED SOURCE
+  const expressions = profile.expression_badges || [];
 
-  // ---------------- ACTIONS ----------------
+    // ---------------- ACTIONS ----------------
   const handleMessage = () => {
     if (!sessionUser?.id) {
       alert("Please login to message.");
@@ -87,6 +105,9 @@ export default function ProfileModal({ host, onClose }) {
     setCallType(type);
     setShowCallModal(true);
   };
+
+  console.log("PROFILE OBJECT:", profile);
+  console.log("BANNER URL:", profile.banner_url);
 
   return (
     <div style={overlay} onClick={onClose}>
@@ -113,20 +134,23 @@ export default function ProfileModal({ host, onClose }) {
             <h2>{profile.alias || profile.name}</h2>
             <p style={bioText}>{profile.bio}</p>
 
-            {/* BADGES */}
-            <div style={badgeWrap}>
-              {badges.length === 0 ? (
-                <span style={{ fontSize: 12, color: "#888" }}>
-                  No badges yet
-                </span>
-              ) : (
-                badges.map((b, i) => (
-                  <span key={i} style={badgeStyle}>
-                    🏅 {b}
-                  </span>
-                ))
-              )}
-            </div>
+            {/* EXPRESSIONS */}
+
+{expressions.length > 0 && (
+  <div
+    style={{
+      marginTop: 18,
+      display: "flex",
+      justifyContent: "center",
+    }}
+  >
+    <ExpressionBadges
+      badges={expressions}
+      max={999}
+      showLabels
+    />
+  </div>
+)}
           </div>
         </div>
 

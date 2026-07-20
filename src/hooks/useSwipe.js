@@ -3,7 +3,6 @@ import { useRef, useState, useCallback } from "react";
 export function useSwipe({ onSwipeLeft, onSwipeRight }) {
   const startX = useRef(0);
   const currentX = useRef(0);
-  const startTime = useRef(0);
   const isDragging = useRef(false);
   const raf = useRef(null);
 
@@ -16,7 +15,6 @@ export function useSwipe({ onSwipeLeft, onSwipeRight }) {
     isDragging.current = true;
     startX.current = getX(e);
     currentX.current = startX.current;
-    startTime.current = performance.now();
   }, []);
 
   const handleMove = useCallback((e) => {
@@ -27,13 +25,11 @@ export function useSwipe({ onSwipeLeft, onSwipeRight }) {
 
     const diff = x - startX.current;
 
-    // 🔥 resistance curve (feels MUCH more natural)
-    const resistance = 0.35;
-    const damped = diff * resistance;
+    const resistance = 0.3;
 
     cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(() => {
-      setDragX(damped);
+      setDragX(diff * resistance);
     });
   }, []);
 
@@ -43,20 +39,16 @@ export function useSwipe({ onSwipeLeft, onSwipeRight }) {
     isDragging.current = false;
 
     const diff = currentX.current - startX.current;
-    const time = performance.now() - startTime.current;
 
-    const velocity = diff / time; // swipe speed
+    const threshold = 120;
 
-    const threshold = 100;
-
-    // reset first (feels snappier)
     setDragX(0);
 
-    const fastSwipe = Math.abs(velocity) > 0.6;
+    const isFast = Math.abs(diff) > 250;
 
-    if (diff > threshold || fastSwipe) {
+    if (diff > threshold || isFast) {
       onSwipeRight?.();
-    } else if (diff < -threshold || fastSwipe) {
+    } else if (diff < -threshold || isFast) {
       onSwipeLeft?.();
     }
   }, [onSwipeLeft, onSwipeRight]);

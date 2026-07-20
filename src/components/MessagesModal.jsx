@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-export default function MessagesModal({ host, user, onClose }) {
+export default function MessagesModal({
+  host,
+  user,
+  onClose,
+  onMessageSent, 
+}) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -49,38 +54,41 @@ export default function MessagesModal({ host, user, onClose }) {
   /* ================= SEND MESSAGE ================= */
 
   const sendMessage = async () => {
-    if (!message.trim() || !user?.id || !hostId) return;
+  if (!message.trim() || !user?.id || !hostId) return;
 
-    try {
-      const res = await fetch("/api/message", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          sender_id: user.id,
-          receiver_id: hostId,
-          text: message,
-        }),
-      });
+  try {
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
+        sender_id: user.id,
+        receiver_id: hostId,
+        text: message,
+      })
+      .select()
+      .single();
 
-      const data = await res.json();
+    if (error) throw error;
 
-      if (!res.ok) {
-        throw new Error(data?.error || "Failed to send message");
-      }
+    setMessages((prev) => [...prev, data]);
+    setMessage("");
 
-      setMessages((prev) => [...prev, data.message]);
-      setMessage("");
+    // scroll
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
 
-      requestAnimationFrame(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-      });
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
+    // 🔥 THIS IS THE INBOX SYNC TRIGGER
+    if (onMessageSent) {
+      onMessageSent();
     }
-  };
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  }
+};
+
+
 
   /* ================= EARLY SAFE GUARD (FIXED) ================= */
 

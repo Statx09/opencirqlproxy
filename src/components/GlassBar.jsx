@@ -1,48 +1,38 @@
-import React from "react";
-
-export default function GlassBar({
-  user,
-  onNotifications,
-  onMessages,
-  onConnections,
-  onProfile,
-}) {
+export default function GlassBar({ user, onAction }) {
   const isLoggedIn = !!user;
-
-  const profileStyle = {
-    ...iconBtn,
-    border: isLoggedIn
-      ? "1px solid rgba(34,197,94,0.8)"
-      : "1px solid rgba(239,68,68,0.8)",
-    boxShadow: isLoggedIn
-      ? "0 0 14px rgba(34,197,94,0.45)"
-      : "0 0 14px rgba(239,68,68,0.45)",
-  };
 
   return (
     <div style={wrap}>
       <div style={bar}>
-        <button style={iconBtn} onClick={onNotifications}>
+
+        <button style={iconBtn} onClick={() => onAction("notifications")}>
           🔔
         </button>
 
-        <button style={iconBtn} onClick={onMessages}>
+        <button style={iconBtn} onClick={() => onAction("chats")}>
           💬
         </button>
 
-        <button style={iconBtn} onClick={onConnections}>
+        <button style={iconBtn} onClick={() => onAction("connections")}>
           👥
         </button>
 
-        <button style={profileStyle} onClick={onProfile}>
+        <button
+          style={{
+            ...iconBtn,
+            border: isLoggedIn
+              ? "1px solid rgba(34,197,94,0.8)"
+              : "1px solid rgba(239,68,68,0.8)",
+          }}
+          onClick={() => onAction("userProfile")}
+        >
           👤
         </button>
+
       </div>
     </div>
   );
 }
-
-/* ================= WRAPPER ================= */
 
 const wrap = {
   position: "fixed",
@@ -55,46 +45,31 @@ const wrap = {
   pointerEvents: "none",
 };
 
-/* ================= GLASS BAR (your original style preserved) ================= */
-
 const bar = {
   pointerEvents: "auto",
-
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-
   gap: 22,
-
   padding: "14px 20px",
-
   width: "94%",
   maxWidth: 540,
-
   background: "rgba(15, 23, 42, 0.28)",
   backdropFilter: "blur(18px)",
-
   borderRadius: 26,
   border: "1px solid rgba(255,255,255,0.08)",
-
   boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
 };
-
-/* ================= ICON BUTTONS ================= */
 
 const iconBtn = {
   width: 56,
   height: 56,
   borderRadius: 18,
-
   border: "1px solid rgba(255,255,255,0.08)",
   background: "rgba(255,255,255,0.05)",
-
   color: "#fff",
   fontSize: 20,
-
   cursor: "pointer",
-
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

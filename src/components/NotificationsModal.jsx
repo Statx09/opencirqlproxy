@@ -1,82 +1,78 @@
 import React from "react";
 
-export default function NotificationsModal({ notifications = [], onClose }) {
+export default function NotificationsModal({
+  notifications = [],
+}) {
   return (
     <div
-      onClick={onClose}
       style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.65)",
+        padding: 16,
+        color: "#fff",
         display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 999999,
+        flexDirection: "column",
+        gap: 12,
       }}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          width: 420,
-          maxHeight: 520,
-          overflowY: "auto",
-          background: "#0f172a",
-          borderRadius: 16,
-          padding: 16,
-          color: "white",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
-        }}
-      >
-        {/* HEADER */}
+      {notifications.length === 0 ? (
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 12,
+            opacity: 0.6,
+            textAlign: "center",
+            padding: "40px 20px",
+            fontSize: 14,
           }}
         >
-          <h3 style={{ margin: 0 }}>Notifications</h3>
-
-          <button
-            onClick={onClose}
+          🔔 No notifications yet
+        </div>
+      ) : (
+        notifications.map((notification, index) => (
+          <div
+            key={notification.id || index}
             style={{
-              background: "transparent",
-              border: "none",
-              color: "white",
-              fontSize: 18,
-              cursor: "pointer",
+              padding: 14,
+              borderRadius: 14,
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
             }}
           >
-            ✕
-          </button>
-        </div>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: 14,
+              }}
+            >
+              {notification.title || "Notification"}
+            </div>
 
-        {/* CONTENT */}
-        {notifications.length === 0 ? (
-          <div style={{ opacity: 0.6, fontSize: 13 }}>
-            No notifications yet
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {notifications.map((n, i) => (
+            <div
+              style={{
+                fontSize: 13,
+                opacity: 0.85,
+                lineHeight: 1.45,
+              }}
+            >
+              {notification.body ||
+                notification.message ||
+                "You have a new notification."}
+            </div>
+
+            {notification.created_at && (
               <div
-                key={i}
                 style={{
-                  padding: 10,
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  fontSize: 13,
-                  lineHeight: "18px",
+                  marginTop: 6,
+                  fontSize: 11,
+                  opacity: 0.5,
                 }}
               >
-                {n.message || "Notification"}
+                {new Date(notification.created_at).toLocaleString()}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
+        ))
+      )}
     </div>
   );
 }

@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import HostCard from "./HostCard";
+import LiveStatusCard from "./live/LiveStatusCard";
 
 export default function Hero({
   suggestedMatch,
   onOpenHost,
   user,
   onOpenExplorer,
+  onOpenStatus,
+  supabase,
 }) {
+
   const [deck, setDeck] = useState([]);
   const [index, setIndex] = useState(0);
 
-  // build deck (unchanged logic)
   useEffect(() => {
     if (!suggestedMatch) return;
 
@@ -20,73 +23,37 @@ export default function Hero({
       );
       if (exists) return prev;
 
-      return [suggestedMatch, ...prev].slice(0, 12);
+      return [suggestedMatch, ...prev].slice(0, 10);
     });
   }, [suggestedMatch]);
 
-  const safeIndex = deck.length ? index % deck.length : 0;
-  const current = deck[safeIndex]?.host;
+  const current = deck.length ? deck[index % deck.length]?.host : null;
 
-  const goLeft = (e) => {
-    e.stopPropagation();
-    if (!deck.length) return;
-    setIndex((i) => (i - 1 + deck.length) % deck.length);
-  };
+  const next = () => setIndex((i) => (i + 1) % deck.length);
+  const prev = () => setIndex((i) => (i - 1 + deck.length) % deck.length);
 
-  const goRight = (e) => {
-    e.stopPropagation();
-    if (!deck.length) return;
-    setIndex((i) => (i + 1) % deck.length);
-  };
-
-  if (!current) {
-    return (
-      <div style={heroStyle}>
-        Finding live people...
-      </div>
-    );
-  }
 
   return (
-    <div style={heroStyle}>
-      {/* LEFT TEXT */}
-      <div style={{ flex: 1 }}>
-        <h1 style={{ fontSize: 32, margin: 0 }}>CirqlProxy</h1>
-        <p style={{ opacity: 0.7, marginTop: 4, fontSize: 13 }}>
-          Live people. Real connections. No feeds.
-        </p>
-      </div>
+    <div style={heroWrap}>
+      
+      {/* LIVE */}
+<LiveStatusCard
+  onOpen={onOpenStatus}
+/>
 
-      {/* RIGHT CARD AREA */}
-      <div style={rightSide}>
-        <button onClick={goLeft} style={arrowBtn}>
-          ‹
-        </button>
+      {/* RIGHT — HOST CARD */}
+      <div style={right}>
+        <button onClick={prev} style={arrow}>‹</button>
 
-        {/* CARD WRAP (IMPORTANT FIXED POSITION CONTEXT) */}
-        <div style={cardWrap}>
+        {current && (
           <HostCard
             host={current}
             user={user}
-            hasProfile={!!user}
-            onViewProfile={() => onOpenHost?.(current)}
+            onViewProfile={() => onOpenHost(current)}
           />
+        )}
 
-          {/* 🔥 DISCOVER BUTTON (FIXED + ALWAYS VISIBLE) */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenExplorer?.();
-            }}
-            style={discoverBtn}
-          >
-            🔍 Discover
-          </button>
-        </div>
-
-        <button onClick={goRight} style={arrowBtn}>
-          ›
-        </button>
+        <button onClick={next} style={arrow}>›</button>
       </div>
     </div>
   );
@@ -94,50 +61,74 @@ export default function Hero({
 
 /* ================= STYLES ================= */
 
-const heroStyle = {
-  padding: "10px 18px",
-  background: "linear-gradient(180deg, #111827, #0b1220)",
-  color: "white",
+const heroWrap = {
   display: "flex",
-  alignItems: "center",
   justifyContent: "space-between",
-  gap: 18,
+  padding: "12px 18px",
+  background: "linear-gradient(180deg,#0b1220,#0a0f1a)",
+  color: "white",
+  gap: 16,
 };
 
-const rightSide = {
+const left = { flex: 1 };
+
+const label = {
+  fontSize: 11,
+  opacity: 0.6,
+  marginBottom: 6,
+};
+
+const ticker = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 6,
+  cursor: "pointer",
+};
+
+const pill = {
+  display: "flex",
+  gap: 10,
+  alignItems: "center",
+  padding: "8px",
+  borderRadius: 12,
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.06)",
+};
+
+const avatar = {
+  width: 28,
+  height: 28,
+  borderRadius: "50%",
+  objectFit: "cover",
+};
+
+const textBlock = {
+  display: "flex",
+  flexDirection: "column",
+};
+
+const name = {
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const msg = {
+  fontSize: 11,
+  opacity: 0.7,
+};
+
+const right = {
   display: "flex",
   alignItems: "center",
   gap: 10,
 };
 
-/* 🔥 IMPORTANT: must be relative for overlay button */
-const cardWrap = {
-  position: "relative",
-};
-
-const arrowBtn = {
-  background: "rgba(255,255,255,0.08)",
+const arrow = {
+  width: 32,
+  height: 32,
+  borderRadius: 8,
   border: "none",
-  color: "#fff",
-  fontSize: 20,
-  width: 34,
-  height: 34,
-  borderRadius: 10,
+  background: "rgba(255,255,255,0.06)",
+  color: "white",
   cursor: "pointer",
-};
-
-const discoverBtn = {
-  position: "absolute",
-  top: 8,
-  left: 8,
-  padding: "5px 9px",
-  borderRadius: 10,
-  border: "none",
-  background: "rgba(124, 58, 237, 0.95)",
-  color: "#fff",
-  fontWeight: 700,
-  fontSize: 10,
-  cursor: "pointer",
-  zIndex: 50,
-  boxShadow: "0 6px 16px rgba(124,58,237,0.25)",
 };

@@ -1,209 +1,142 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
-import MessagesModal from "./MessagesModal";
 
 export default function ChatsTab({
   user,
-  hosts,
+  hosts = [],
+  onOpenChat,
 }) {
   const [conversations, setConversations] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  const [selectedHost, setSelectedHost] =
-    useState(null);
-
-  useEffect(() => {
+  const loadChats = useCallback(async () => {
     if (!user?.id) return;
 
-    loadChats();
-  }, [user, hosts]);
-
-  const loadChats = async () => {
-    setLoading(true);
-
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("messages")
       .select("*")
-      .or(
-        `sender_id.eq.${user.id},receiver_id.eq.${user.id}`
-      )
-      .order("created_at", {
-        ascending: false,
-      });
-
-    if (error) {
-      console.error(error);
-      setLoading(false);
-      return;
-    }
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order("created_at", { ascending: false });
 
     const map = new Map();
 
     for (const msg of data || []) {
-      const otherUserId =
+      const otherId =
         msg.sender_id === user.id
           ? msg.receiver_id
           : msg.sender_id;
 
-      if (!map.has(otherUserId)) {
-        const host = hosts.find(
-          (h) => h.user_id === otherUserId
-        );
+      if (map.has(otherId)) continue;
 
-        if (host) {
-          map.set(otherUserId, {
-            host,
-            lastMessage: msg,
-          });
-        }
+      const host = hosts.find((h) => h.user_id === otherId);
+
+      if (!host) continue;
+
+      const isMe = msg.sender_id === user.id;
+
+      let preview = msg.text || "";
+
+      switch (msg.event) {
+        case "wave":
+          preview = isMe
+            ? "You waved 👋"
+            : "👋 Waved at you";
+          break;
+
+        case "like":
+          preview = isMe
+            ? "You liked ❤️"
+            : "❤️ Liked you";
+          break;
+
+        case "support":
+          preview = isMe
+            ? "You sent support 💰"
+            : "💰 Sent you support";
+          break;
       }
+
+      map.set(otherId, {
+        host,
+        preview,
+      });
     }
 
-    setConversations(
-      Array.from(map.values())
-    );
+    setConversations([...map.values()]);
+  }, [user?.id, hosts]);
 
-    setLoading(false);
-  };
-
-  if (!user) {
-    return (
-      <div
-        style={{
-          padding: 40,
-          textAlign: "center",
-        }}
-      >
-        <h2>Please login first</h2>
-
-        <p>
-          Your chats and connections
-          will appear here.
-        </p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    loadChats();
+  }, [loadChats]);
 
   return (
-    <>
-      <div style={{ marginTop: 20 }}>
-        <h2
-          style={{
-            marginBottom: 20,
-          }}
-        >
-          Chats
-        </h2>
-
-        {loading && <p>Loading chats...</p>}
-
-        {!loading &&
-          conversations.length === 0 && (
-            <div
-              style={{
-                background: "#fff",
-                padding: 24,
-                borderRadius: 20,
-                boxShadow:
-                  "0 2px 12px rgba(0,0,0,0.08)",
-              }}
-            >
-              <h3>No conversations yet</h3>
-
-              <p>
-                Start messaging people from
-                the directory.
-              </p>
-            </div>
-          )}
-
+    <div
+      style={{
+        padding: 16,
+        color: "#fff",
+      }}
+    >
+      {conversations.length === 0 ? (
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
+            opacity: 0.6,
+            textAlign: "center",
+            padding: 40,
           }}
         >
-          {conversations.map(
-            ({ host, lastMessage }) => {
-              const avatar =
-                host.avatar_url ||
-                host.avatar ||
-                "https://placehold.co/100x100";
-
-              const displayName =
-                host.alias ||
-                host.name ||
-                "Unnamed";
-
-              return (
-                <div
-                  key={host.user_id}
-                  onClick={() =>
-                    setSelectedHost(host)
-                  }
-                  style={{
-                    background: "#fff",
-                    borderRadius: 18,
-                    padding: 14,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 14,
-                    cursor: "pointer",
-                    boxShadow:
-                      "0 2px 12px rgba(0,0,0,0.06)",
-                  }}
-                >
-                  <img
-                    src={avatar}
-                    alt={displayName}
-                    style={{
-                      width: 58,
-                      height: 58,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      flex: 1,
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        marginBottom: 6,
-                      }}
-                    >
-                      {displayName}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 14,
-                        color: "#6b7280",
-                      }}
-                    >
-                      {lastMessage.text}
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-          )}
+          No conversations yet.
         </div>
-      </div>
+      ) : (
+        conversations.map(({ host, preview }) => (
+          <div
+            key={host.user_id}
+            onClick={() => onOpenChat(host)}
+            style={{
+              display: "flex",
+              gap: 12,
+              alignItems: "center",
+              padding: 12,
+              cursor: "pointer",
+              borderBottom:
+                "1px solid rgba(255,255,255,.08)",
+            }}
+          >
+            <img
+              src={host.avatar_url || host.avatar}
+              alt=""
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
 
-      {selectedHost && (
-        <MessagesModal
-          host={selectedHost}
-          user={user}
-          onClose={() =>
-            setSelectedHost(null)
-          }
-        />
+            <div
+              style={{
+                flex: 1,
+              }}
+            >
+              <div
+                style={{
+                  fontWeight: 700,
+                }}
+              >
+                {host.alias || host.name}
+              </div>
+
+              <div
+                style={{
+                  opacity: 0.7,
+                  fontSize: 13,
+                  marginTop: 4,
+                }}
+              >
+                {preview}
+              </div>
+            </div>
+          </div>
+        ))
       )}
-    </>
+    </div>
   );
 }

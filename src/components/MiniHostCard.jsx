@@ -1,47 +1,396 @@
-import React from "react";
-import ExpressionBadges from "./badges/ExpressionBadges";
-import useHostActions from "../hooks/useHostActions";
+import React, { memo, useMemo } from "react";
+import { normalizeHost } from "../utils/normalizeHost";
+import ExpressionBadges from "./expressions/ExpressionBadges";
 
-export default function MiniHostCard(props) {
-  const {
-    host,
-    user,
-    sendHostEvent,
-    openMessageModal,
-    openCallModal,
-    openTipModal,
-  } = props;
+function MiniHostCard({ host, onAction }) {
 
-  const actions = useHostActions({
-    host,
-    user,
-    sendHostEvent,
-    openMessageModal,
-    openCallModal,
-    openTipModal,
-  });
+console.log(
+  "CARD RECEIVED:",
+  host.alias,
+  host.name,
+  host.id
+);
+
+  const h = useMemo(() => normalizeHost(host), [host]);
+
+console.log("NORMALIZED", h.expressions);
+console.log("BANNER:", h.banner);
+
+  console.log("MiniHostCard:", h);
+
+  if (!h) return null;
 
   return (
-    <div style={card}>
-      <div style={avatar} />
+    <div
+  style={{
+    ...card,
 
+    border:
+      h.presence === "in_studio"
+        ? "1px solid rgba(139,92,246,.65)"
+        : "1px solid rgba(255,255,255,.06)",
+
+    boxShadow:
+      h.presence === "in_studio"
+        ? "0 0 22px rgba(139,92,246,.35)"
+        : "none",
+  }}
+  onClick={() => onAction?.("profile", h)}
+>
+
+      {/* AVATAR */}
+      <div
+  style={{
+    ...avatarWrap,
+
+    border:
+      h.presence === "online"
+        ? "2px solid #22c55e"
+        : h.presence === "busy"
+        ? "2px solid #ef4444"
+        : h.presence === "in_studio"
+        ? "2px solid #8b5cf6"
+        : "2px solid transparent",
+
+    boxShadow:
+      h.presence === "online"
+        ? "0 0 12px rgba(34,197,94,.45)"
+        : h.presence === "busy"
+        ? "0 0 12px rgba(239,68,68,.45)"
+        : h.presence === "in_studio"
+        ? "0 0 14px rgba(139,92,246,.5)"
+        : "none",
+  }}
+>
+  {h.avatar ? (
+    <img
+      src={h.avatar}
+      style={avatarImg}
+    />
+  ) : (
+    <div style={avatarFallback} />
+  )}
+
+  {h.presence !== "offline" && (
+    <div
+      style={{
+        ...statusDot,
+
+        background:
+          h.presence === "online"
+            ? "#22c55e"
+            : h.presence === "busy"
+            ? "#ef4444"
+            : "#8b5cf6",
+      }}
+    />
+  )}
+
+  {h.presence === "in_studio" && (
+    <div style={studioBadge}>
+      📹
+    </div>
+  )}
+</div>
+
+      {/* CENTER INFO */}
       <div style={info}>
-        <div>{host.name}</div>
+  <div style={name}>
+  {h.name}
+</div>
 
-        {/* BADGES */}
-        <ExpressionBadges badges={host.expression_badges} />
+ {/* EXPRESSIONS */}
+<ExpressionBadges
+  badges={h.expressions || []}
+  max={3}
+  size={32}
+/>
 
-        {/* QUICK ACTIONS */}
-        <div style={actionsRow}>
-          <button onClick={actions.wave}>👋</button>
-          <button onClick={actions.like}>❤️</button>
+        {/* INTENTS */}
+        <div style={chipRow}>
+          {h.intents.slice(0, 2).map((t, i) => (
+            <span key={i} style={chip}>{t}</span>
+          ))}
         </div>
+
+        {/* MESSAGE + CALL (FIXED — HOSTCARD STYLE) */}
+        <div style={actionRow}>
+
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      onAction("messages", h);
+    }}
+    style={messageBtn}
+  >
+    Message
+  </button>
+
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      onAction("call", h);
+    }}
+    style={callBtn}
+  >
+    Call
+  </button>
+
+</div>
       </div>
+
+      {/* ACTION RAIL */}
+
+<div style={rail}>
+
+  <button
+  style={{ ...railButton, ...waveButton }}
+  onClick={(e) => {
+    e.stopPropagation();
+    onAction("wave", h);
+  }}
+>
+  👋
+</button>
+
+<button
+  style={{ ...railButton, ...likeButton }}
+  onClick={(e) => {
+    e.stopPropagation();
+    onAction("like", h);
+  }}
+>
+  ❤️
+</button>
+
+<button
+  style={{ ...railButton, ...tipButton }}
+  onClick={(e) => {
+    e.stopPropagation();
+    onAction("support", h);
+  }}
+>
+  💰
+</button>
+
+</div>
+
     </div>
   );
 }
 
-const card = {};
-const avatar = {};
-const info = {};
-const actionsRow = {};
+export default memo(MiniHostCard);
+
+/* ================= STYLES ================= */
+
+const card = {
+  display: "flex",
+  padding: 12,
+  background: "#111827",
+  borderRadius: 16,
+  color: "#fff",
+  position: "relative",
+  alignItems: "center",
+  gap: 12,
+};
+
+/* AVATAR */
+const avatarWrap = {
+  width: 75,
+  height: 75,
+  borderRadius: "50%",
+  overflow: "hidden",
+  flexShrink: 0,
+  position: "relative",
+};
+
+const avatarImg = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+};
+
+const avatarFallback = {
+  width: "100%",
+  height: "100%",
+  background: "#333",
+};
+
+const statusDot = {
+  position: "absolute",
+
+  right: 2,
+  bottom: 2,
+
+  width: 10,
+  height: 10,
+
+  borderRadius: "50%",
+
+  border: "2px solid #111827",
+
+  boxShadow: "0 0 8px currentColor",
+};
+
+const studioBadge = {
+  position: "absolute",
+
+  left: -2,
+  top: -2,
+
+  width: 18,
+  height: 18,
+
+  borderRadius: "50%",
+
+  background: "#8b5cf6",
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  fontSize: 9,
+
+  border: "2px solid #111827",
+
+  boxShadow: "0 0 12px rgba(139,92,246,.6)",
+};
+
+/* INFO */
+const info = {
+  flex: 1,
+  display: "flex",
+  flexDirection: "column",
+  gap: 6,
+};
+
+const name = {
+  fontWeight: 700,
+};
+
+/* TAGS */
+const chipRow = {
+  display: "flex",
+  gap: 6,
+  flexWrap: "wrap",
+};
+
+const chip = {
+  fontSize: 10,
+  padding: "2px 6px",
+  background: "#222",
+  borderRadius: 999,
+};
+
+/* EXPRESSIONS */
+const expressionRow = {
+  display: "flex",
+  gap: 4,
+};
+
+const exprDot = {
+  width: 6,
+  height: 6,
+  borderRadius: 999,
+  background: "#7c3aed",
+};
+
+/* ACTION BUTTONS (HOSTCARD STYLE FIX) */
+const actionRow = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 8,
+  marginTop: 8,
+};
+
+const messageBtn = {
+  background: "rgba(59,130,246,0.2)",
+  color: "#3b82f6",
+  border: "1px solid rgba(59,130,246,0.4)",
+
+  padding: "4px 0",
+
+  borderRadius: 10,
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  fontSize: 12,
+  fontWeight: 600,
+
+  cursor: "pointer",
+};
+
+const callBtn = {
+  background: "rgba(34,197,94,0.2)",
+  color: "#22c55e",
+  border: "1px solid rgba(34,197,94,0.4)",
+
+  padding: "4px 0",
+
+  borderRadius: 10,
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  fontSize: 12,
+  fontWeight: 600,
+
+  cursor: "pointer",
+};
+
+const rail = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+
+const railButton = {
+  width: 38,
+  height: 38,
+
+  borderRadius: "50%",
+
+  background: "rgba(255,255,255,0.08)",
+
+  border: "1px solid rgba(255,255,255,0.18)",
+
+  color: "#ffffff",
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  fontSize: 18,
+
+  cursor: "pointer",
+
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+
+  boxShadow:
+    "0 8px 24px rgba(0,0,0,0.35)",
+
+  transition:
+    "transform .2s ease, box-shadow .2s ease",
+};
+
+const waveButton = {
+  boxShadow:
+    "0 0 14px rgba(56,189,248,.55)",
+};
+
+const likeButton = {
+  boxShadow:
+    "0 0 14px rgba(236,72,153,.55)",
+};
+
+const tipButton = {
+  boxShadow:
+    "0 0 14px rgba(250,204,21,.55)",
+};

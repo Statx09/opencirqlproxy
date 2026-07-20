@@ -1,96 +1,51 @@
-import React, { useCallback, memo, useMemo } from "react";
+import React, { memo, useMemo, useCallback } from "react";
 import { MessageCircle, Phone } from "lucide-react";
-import useHostActions from "../hooks/useHostActions";
-import ExpressionBadges from "./badges/ExpressionBadges";
+import { normalizeArray } from "../utils/profileHelpers";
+import ExpressionBadges from "./expressions/ExpressionBadges";
 
-function HostCard({
-  host,
-  user,
-  onViewProfile,
-  onOpenMessage,
-  onOpenCall,
-  onOpenSupport,
-  variant = "swipe",
-}) {
+function HostCard({ host, onAction, variant = "swipe" }) {
   if (!host) return null;
 
   const {
-    name,
-    alias,
-    avatar,
-    avatar_url,
-    banner_url,
-    intent_tags,
-    topics,
-    user_id,
-  } = host;
+  name,
+  alias,
+  avatar_url,
+  avatar: avatarImage,
+  banner_url,
+  topics,
+} = host;
 
   const displayName = name || alias || "Unnamed";
-  const avatarSrc = avatar_url || avatar;
+  const avatarSrc = avatar_url || avatarImage || "";
 
-  /* ================= NORMALIZATION ================= */
+  const flags = normalizeArray(host?.flags);
+  const expressions = normalizeArray(
+  host?.expressions || host?.expression_badges
+);
 
   const normalizedTopics = useMemo(() => {
     if (!topics) return [];
     if (Array.isArray(topics)) return topics;
-
-    return String(topics)
-      .replace(/[{}"]/g, "")
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean)
-      .slice(0, 3);
+    return String(topics).split(",").map(t => t.trim()).filter(Boolean);
   }, [topics]);
 
-  const normalizedIntent = useMemo(() => {
-    if (!intent_tags) return [];
-    if (Array.isArray(intent_tags)) return intent_tags;
 
-    return String(intent_tags)
-      .replace(/[{}"]/g, "")
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean)
-      .slice(0, 3);
-  }, [intent_tags]);
+  const handle = useCallback(
+    (type) => {
+      onAction?.(type, host);
+    },
+    [onAction, host]
+  );
 
-  /* ================= ACTIONS ================= */
-
-const actions = useHostActions({
-  host,
-  user,
-  openMessageModal: (host) => onOpenMessage?.({ host }),
-  openCallModal: (host) => onOpenCall?.({ host }),
-  openTipModal: onOpenSupport,
-
-  sendHostEvent: async ({ type, from, to }) => {
-    if (type === "wave") {
-      fetch("/api/wave", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from_user: from,
-          to_user: to,
-        }),
-      }).catch(console.log);
-    }
-
-    if (type === "like") {
-      console.log("LIKE CLICKED");
-    }
-  },
-});
-
-const handleProfile = useCallback(() => {
-  onViewProfile?.(host);
-}, [host, onViewProfile]);
-
-  /* ================= RENDER ================= */
+console.log("HOSTCARD HOST", host);
+console.log("HOSTCARD user_id:", host.user_id);
+console.log("HOSTCARD id:", host.id);
+console.log("HOSTCARD expression_badges", host.expression_badges);
+console.log("HOSTCARD expressions", host.expressions);
+console.log("HOSTCARD normalized", expressions);
 
   return (
-    <div style={card(variant)}>
+    <div style={container}>
 
       {/* BANNER */}
       {banner_url ? (
@@ -99,60 +54,130 @@ const handleProfile = useCallback(() => {
         <div style={fallbackBanner} />
       )}
 
-      {/* VIEW PROFILE */}
+      {/* PROFILE BUTTON */}
       <button
         style={viewProfileBtn}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleProfile();
-        }}
+        onClick={() => handle("profile")}
       >
         View Profile
       </button>
 
       {/* ACTION RAIL */}
       <div style={rail}>
-        <button style={railBtn} onClick={actions.wave}>👋</button>
-<button style={railBtn} onClick={actions.like}>❤️</button>
-<button style={railBtn} onClick={actions.support}>💰</button>
+        <button style={railBtn} onClick={() => handle("wave")}>👋</button>
+        <button style={railBtn} onClick={() => handle("like")}>❤️</button>
+        <button style={railBtn} onClick={() => handle("support")}>💰</button>
       </div>
 
       {/* CONTENT */}
       <div style={content}>
-        <img src={avatarSrc} style={avatar} />
+
+        <img src={avatarSrc} style={avatarStyle} />
 
         <div style={nameStyle}>{displayName}</div>
 
-        <div style={tags}>
-          {normalizedIntent.map((t, i) => (
-            <span key={i} style={intentTag}>{t}</span>
-          ))}
-        </div>
+{host.headline && (
+  <div style={headlineStyle}>
+    {host.headline}
+  </div>
+)}
 
+{host.headline && (
+  <div
+    style={{
+      opacity: 0.85,
+      fontSize: 14,
+      marginTop: 4,
+      marginBottom: 10,
+    }}
+  >
+    {host.headline}
+  </div>
+)}
+
+        {/* IDENTITY */}
+<div style={identityRow}>
+
+  <ExpressionBadges
+    badges={expressions}
+    max={5}
+  />
+
+  {flags.map((flag) => (
+    <div
+      key={flag}
+      style={flagBubble}
+    >
+      {flag}
+    </div>
+  ))}
+
+</div>
+
+
+        {/* TOPICS */}
         <div style={tags}>
           {normalizedTopics.map((t, i) => (
             <span key={i} style={topicTag}>{t}</span>
           ))}
         </div>
 
-        {/* ACTION BUTTONS */}
+        {/* MESSAGE + CALL */}
         {variant === "swipe" && (
           <div style={buttons}>
+
             <button
               style={msgBtn}
-              onClick={actions.message}
+              onClick={(e) => {
+                e.stopPropagation();
+                handle("messages");
+              }}
             >
-              <MessageCircle size={16} /> Message
+              <MessageCircle size={16} />
+              Message
             </button>
 
             <button
               style={callBtn}
-              onClick={actions.call}
+              onClick={(e) => {
+                e.stopPropagation();
+                handle("call");
+              }}
             >
-              <Phone size={16} /> Call
+              <Phone size={16} />
+              Call
             </button>
+
           </div>
         )}
+
+        {/* ARROWS (FIXED LOGIC) */}
+        {variant === "swipe" && (
+          <div style={arrowRow}>
+
+            <button
+              style={arrowBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                handle("prev");
+              }}
+            >
+              ‹
+            </button>
+
+            <button
+              style={arrowBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                handle("next");
+              }}
+            >
+              ›
+            </button>
+
+          </div>
+        )}
+
       </div>
     </div>
   );
@@ -160,22 +185,60 @@ const handleProfile = useCallback(() => {
 
 export default memo(HostCard);
 
-/* ================= STYLES ================= */
+/* ================= ONLY ADDITIONS (NO LAYOUT CHANGE) ================= */
 
-const card = (v) => ({
-  height: v === "grid" ? 320 : "100dvh",
+const leftArrow = {
+  position: "absolute",
+  left: 10,
+  top: "50%",
+  transform: "translateY(-50%)",
+  zIndex: 50,
+  width: 50,
+  height: 50,
+  borderRadius: "50%",
+  background: "rgba(0,0,0,0.5)",
+  color: "#fff",
+  border: "1px solid rgba(255,255,255,0.2)",
+  fontSize: 24,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const rightArrow = {
+  position: "absolute",
+  right: 10,
+  top: "50%",
+  transform: "translateY(-50%)",
+  zIndex: 50,
+  width: 50,
+  height: 50,
+  borderRadius: "50%",
+  background: "rgba(0,0,0,0.5)",
+  color: "#fff",
+  border: "1px solid rgba(255,255,255,0.2)",
+  fontSize: 24,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+/* keep your existing styles BELOW unchanged */
+const container = {
+  height: "100dvh",
   width: "100vw",
   position: "relative",
-  background: "#000",
   overflow: "hidden",
-});
+  background: "#000",
+};
 
 const banner = {
+  position: "absolute",
+  inset: 0,
   width: "100%",
   height: "100%",
   objectFit: "cover",
-  position: "absolute",
-  inset: 0,
+  zIndex: 0,        
 };
 
 const fallbackBanner = {
@@ -191,9 +254,9 @@ const viewProfileBtn = {
   zIndex: 10,
   padding: "10px 14px",
   borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.2)",
   background: "rgba(0,0,0,0.5)",
   color: "#fff",
+  border: "1px solid rgba(255,255,255,0.2)",
 };
 
 const rail = {
@@ -203,27 +266,34 @@ const rail = {
   display: "flex",
   flexDirection: "column",
   gap: 10,
-  zIndex: 20,
+  zIndex: 9999,        // 🔥 ADD THIS
+  pointerEvents: "auto"
 };
 
 const railBtn = {
   width: 48,
   height: 48,
   borderRadius: "50%",
-  border: "1px solid rgba(255,255,255,0.15)",
   background: "rgba(0,0,0,0.6)",
   color: "#fff",
+  border: "1px solid rgba(255,255,255,0.15)",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  pointerEvents: "auto"
 };
 
 const content = {
   position: "absolute",
-  bottom: 160,
+  bottom: 140,
   width: "100%",
   padding: 16,
   color: "#fff",
+  zIndex: 5,        
 };
 
-const avatar = {
+const avatarStyle = {
   width: 110,
   height: 110,
   borderRadius: "50%",
@@ -240,7 +310,6 @@ const tags = {
   display: "flex",
   flexWrap: "wrap",
   gap: 6,
-  marginTop: 6,
 };
 
 const intentTag = {
@@ -270,6 +339,9 @@ const msgBtn = {
   border: "1px solid rgba(59,130,246,0.4)",
   padding: 10,
   borderRadius: 10,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 };
 
 const callBtn = {
@@ -278,4 +350,73 @@ const callBtn = {
   border: "1px solid rgba(34,197,94,0.4)",
   padding: 10,
   borderRadius: 10,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const headlineStyle = {
+  marginTop: 6,
+  marginBottom: 10,
+  fontSize: 15,
+  color: "rgba(255,255,255,0.9)",
+  fontWeight: 500,
+  lineHeight: 1.4,
+  textShadow: "0 1px 4px rgba(0,0,0,0.35)",
+};
+
+const arrowRow = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginTop: 14,
+  padding: "0 10px",
+};
+
+const arrowBtn = {
+  width: 60,
+  height: 60,
+  borderRadius: "50%",
+  background: "rgba(0,0,0,0.6)",
+  color: "#fff",
+  border: "1px solid rgba(255,255,255,0.25)",
+  fontSize: 28,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+};
+
+const expressionChip = {
+  padding: "4px 8px",
+  borderRadius: 999,
+  background: "rgba(255,255,255,0.12)",
+  color: "#fff",
+  fontSize: 12,
+  marginRight: 6,
+  display: "inline-block",
+};
+
+const identityRow = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 8,
+  marginTop: 8,
+  marginBottom: 8,
+};
+
+const flagBubble = {
+  padding: "3px 8px",
+
+  borderRadius: 999,
+
+  background: "rgba(255,255,255,.08)",
+
+  border: "1px solid rgba(255,255,255,.10)",
+
+  backdropFilter: "blur(12px)",
+
+  fontSize: 11,
+
+  color: "#fff",
 };

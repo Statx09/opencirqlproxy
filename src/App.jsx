@@ -1,6 +1,6 @@
 import React from "react";
-import LandingPage from "./LandingPage";
+import AppShell from "./AppShell";
 
 export default function App() {
-  return <LandingPage />;
+  return <AppShell />;
 }

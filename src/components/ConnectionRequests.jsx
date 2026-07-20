@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-export default function ConnectionRequests({ user, onUpdated }) {
+export default function ConnectionRequests({
+  user,
+  onUpdated,
+}) {
   const [requests, setRequests] = useState([]);
   const [profiles, setProfiles] = useState({});
 
-  const loadRequests = async () => {
+  const loadRequests = useCallback(async () => {
     if (!user?.id) return;
 
     const { data, error } = await supabase
@@ -40,7 +43,7 @@ export default function ConnectionRequests({ user, onUpdated }) {
     });
 
     setProfiles(map);
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     loadRequests();
@@ -48,52 +51,51 @@ export default function ConnectionRequests({ user, onUpdated }) {
     const interval = setInterval(loadRequests, 5000);
 
     return () => clearInterval(interval);
-  }, [user]);
+  }, [loadRequests]);
 
-  const acceptRequest = async (connectionId) => {
-    const { error } = await supabase
+  async function acceptRequest(id) {
+    await supabase
       .from("connections")
       .update({
         status: "accepted",
       })
-      .eq("id", connectionId);
+      .eq("id", id);
 
-    if (error) {
-      console.error(error);
-      return alert(error.message);
-    }
+    loadRequests();
 
-    await loadRequests();
+    onUpdated?.();
+  }
 
-    if (onUpdated) onUpdated();
-  };
-
-  const declineRequest = async (connectionId) => {
-    const { error } = await supabase
+  async function declineRequest(id) {
+    await supabase
       .from("connections")
       .delete()
-      .eq("id", connectionId);
+      .eq("id", id);
 
-    if (error) {
-      console.error(error);
-      return alert(error.message);
-    }
+    loadRequests();
 
-    await loadRequests();
-
-    if (onUpdated) onUpdated();
-  };
-
-  if (!requests.length) return null;
+    onUpdated?.();
+  }
 
   return (
-    <div style={{ marginBottom: 24 }}>
-      <h2 style={{ marginBottom: 12 }}>
-        Connection Requests
-      </h2>
-
-      <div style={{ display: "grid", gap: 12 }}>
-        {requests.map((request) => {
+    <div
+      style={{
+        padding: 16,
+        color: "#fff",
+      }}
+    >
+      {requests.length === 0 ? (
+        <div
+          style={{
+            opacity: .6,
+            textAlign: "center",
+            padding: 40,
+          }}
+        >
+          No connection requests.
+        </div>
+      ) : (
+        requests.map((request) => {
           const profile = profiles[request.user_a];
 
           return (
@@ -104,15 +106,17 @@ export default function ConnectionRequests({ user, onUpdated }) {
                 alignItems: "center",
                 gap: 12,
                 padding: 12,
-                borderRadius: 16,
-                background: "#fff",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+                marginBottom: 12,
+                borderRadius: 14,
+                background: "rgba(255,255,255,.05)",
+                border: "1px solid rgba(255,255,255,.08)",
               }}
             >
               <img
                 src={
                   profile?.avatar_url ||
-                  "https://placehold.co/100x100"
+                  profile?.avatar ||
+                  "https://placehold.co/100"
                 }
                 alt=""
                 style={{
@@ -136,8 +140,8 @@ export default function ConnectionRequests({ user, onUpdated }) {
 
                 <div
                   style={{
+                    opacity: .7,
                     fontSize: 13,
-                    color: "#666",
                   }}
                 >
                   wants to connect
@@ -149,13 +153,12 @@ export default function ConnectionRequests({ user, onUpdated }) {
                   acceptRequest(request.id)
                 }
                 style={{
-                  padding: "8px 10px",
+                  padding: "8px 12px",
                   borderRadius: 10,
                   border: "none",
+                  cursor: "pointer",
                   background: "#22c55e",
                   color: "#fff",
-                  fontWeight: 700,
-                  cursor: "pointer",
                 }}
               >
                 Accept
@@ -166,21 +169,20 @@ export default function ConnectionRequests({ user, onUpdated }) {
                   declineRequest(request.id)
                 }
                 style={{
-                  padding: "8px 10px",
+                  padding: "8px 12px",
                   borderRadius: 10,
                   border: "none",
+                  cursor: "pointer",
                   background: "#ef4444",
                   color: "#fff",
-                  fontWeight: 700,
-                  cursor: "pointer",
                 }}
               >
                 Decline
               </button>
             </div>
           );
-        })}
-      </div>
+        })
+      )}
     </div>
   );
 }

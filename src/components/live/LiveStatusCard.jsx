@@ -95,11 +95,10 @@ export default function LiveStatusCard({
 /* ====================== */
 
 const card = {
-  position: "absolute",
-  top: -60,
-  right: 100,
+  width: "100%",
+  maxWidth: 520,
 
-  width: 350,
+  margin: "0 auto",
 
   padding: 16,
 
@@ -108,7 +107,6 @@ const card = {
   background: "rgba(17,24,39,.72)",
 
   backdropFilter: "blur(20px)",
-
   WebkitBackdropFilter: "blur(20px)",
 
   border: "1px solid rgba(255,255,255,.08)",
@@ -118,8 +116,6 @@ const card = {
   cursor: "pointer",
 
   transition: "all .25s ease",
-
-  zIndex: 50,
 };
 
 const content = {

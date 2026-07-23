@@ -209,15 +209,6 @@ useEffect(() => {
   return (
     <div style={page}>
 
-      {/* MODE TOGGLE */}
-      <button
-        style={modeBtn}
-        onClick={() =>
-          setMode((m) => (m === "grid" ? "swipe" : "grid"))
-        }
-      >
-        {mode === "grid" ? "Swipe Mode" : "Grid Mode"}
-      </button>
 
       {/* GRID */}
       {mode === "grid" && (
@@ -226,6 +217,10 @@ useEffect(() => {
   user={user}
   onAction={handleAction}
   statuses={statuses}
+  mode={mode}
+  onToggleMode={() =>
+    setMode((m) => (m === "grid" ? "swipe" : "grid"))
+  }
   onOpenPulse={() => setShowStatusModal(true)}
   onOpenCallsStudio={() => setActiveModal("callsStudio")}
 />
@@ -363,22 +358,10 @@ const page = {
   overflow: "hidden",
 };
 
-const modeBtn = {
-  position: "fixed",
-  top: 16,
-  left: 16,
-  zIndex: 9999,
-  padding: 10,
-  background: "#7c3aed",
-  color: "#fff",
-  borderRadius: 12,
-};
-
 const swipeStage = {
   width: "100vw",
   height: "100vh",
 };
-
 const glassWrap = {
   position: "fixed",
   bottom: 0,

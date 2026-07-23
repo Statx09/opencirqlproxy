@@ -56,11 +56,14 @@ console.log("HOSTCARD normalized", expressions);
 
       {/* PROFILE BUTTON */}
       <button
-        style={viewProfileBtn}
-        onClick={() => handle("profile")}
-      >
-        View Profile
-      </button>
+  style={{
+    ...glassTopButton,
+    right: 16,
+  }}
+  onClick={() => handle("profile")}
+>
+  View Profile
+</button>
 
       {/* ACTION RAIL */}
       <div style={rail}>
@@ -78,19 +81,6 @@ console.log("HOSTCARD normalized", expressions);
 
 {host.headline && (
   <div style={headlineStyle}>
-    {host.headline}
-  </div>
-)}
-
-{host.headline && (
-  <div
-    style={{
-      opacity: 0.85,
-      fontSize: 14,
-      marginTop: 4,
-      marginBottom: 10,
-    }}
-  >
     {host.headline}
   </div>
 )}
@@ -247,16 +237,34 @@ const fallbackBanner = {
   background: "linear-gradient(135deg,#7c3aed,#3b82f6)",
 };
 
-const viewProfileBtn = {
+const glassTopButton = {
   position: "absolute",
-  top: 40,
-  right: 16,
-  zIndex: 10,
-  padding: "10px 14px",
-  borderRadius: 12,
-  background: "rgba(0,0,0,0.5)",
+  top: 16,
+
+  height: 48,
+  padding: "0 18px",
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  borderRadius: 16,
+
+  background: "rgba(15,18,28,.72)",
+
+  backdropFilter: "blur(22px)",
+  WebkitBackdropFilter: "blur(22px)",
+
+  border: "1px solid rgba(255,255,255,.10)",
+
+  boxShadow:
+    "0 10px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05)",
+
   color: "#fff",
-  border: "1px solid rgba(255,255,255,0.2)",
+  fontWeight: 600,
+  fontSize: 15,
+
+  cursor: "pointer",
 };
 
 const rail = {
@@ -286,18 +294,27 @@ const railBtn = {
 
 const content = {
   position: "absolute",
-  bottom: 140,
+  bottom: 95,   // was 140
+
   width: "100%",
   padding: 16,
+
   color: "#fff",
-  zIndex: 5,        
+  zIndex: 5,
 };
 
 const avatarStyle = {
-  width: 110,
-  height: 110,
+  width: 140,
+  height: 140,
   borderRadius: "50%",
-  border: "3px solid #fff",
+  border: "4px solid rgba(255,255,255,.95)",
+
+  objectFit: "cover",
+
+  boxShadow:
+    "0 12px 28px rgba(0,0,0,.45)",
+
+  marginBottom: 8,
 };
 
 const nameStyle = {
@@ -334,25 +351,45 @@ const buttons = {
 };
 
 const msgBtn = {
-  background: "rgba(59,130,246,0.2)",
-  color: "#3b82f6",
-  border: "1px solid rgba(59,130,246,0.4)",
+  background: "rgba(20,20,25,.82)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+
+  color: "#60a5fa",
+  border: "1px solid rgba(96,165,250,.35)",
+
+  boxShadow: "0 8px 20px rgba(0,0,0,.35)",
+
   padding: 10,
-  borderRadius: 10,
+  borderRadius: 12,
+
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+
+  gap: 8,
+  cursor: "pointer",
 };
 
 const callBtn = {
-  background: "rgba(34,197,94,0.2)",
-  color: "#22c55e",
-  border: "1px solid rgba(34,197,94,0.4)",
+  background: "rgba(20,20,25,.82)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+
+  color: "#4ade80",
+  border: "1px solid rgba(74,222,128,.35)",
+
+  boxShadow: "0 8px 20px rgba(0,0,0,.35)",
+
   padding: 10,
-  borderRadius: 10,
+  borderRadius: 12,
+
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+
+  gap: 8,
+  cursor: "pointer",
 };
 
 const headlineStyle = {

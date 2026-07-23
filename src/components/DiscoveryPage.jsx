@@ -140,15 +140,16 @@ const topButton = {
   justifyContent: "center",
 
   borderRadius: 14,
-  border: "1px solid rgba(255,255,255,.12)",
 
-  background:
-    "linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05))",
+  background: "rgba(20,20,25,.82)",
 
   backdropFilter: "blur(18px)",
   WebkitBackdropFilter: "blur(18px)",
 
-  boxShadow: "0 8px 24px rgba(0,0,0,.30)",
+  border: "1px solid rgba(96,165,250,.35)",
+
+  boxShadow:
+    "0 0 0 1px rgba(96,165,250,.18), 0 0 18px rgba(59,130,246,.20), 0 8px 22px rgba(0,0,0,.35)",
 
   color: "#fff",
   fontWeight: 600,
@@ -156,5 +157,4 @@ const topButton = {
 
   cursor: "pointer",
 };
-
 

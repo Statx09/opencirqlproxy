@@ -207,24 +207,32 @@ useEffect(() => {
   }
 
   return (
-    <div style={page}>
+  <div style={page}>
 
+    {mode === "swipe" && (
+  <button
+    style={modeBtn}
+    onClick={() => setMode("grid")}
+  >
+    ▦ Grid View
+  </button>
+)}
 
-      {/* GRID */}
-      {mode === "grid" && (
-        <DiscoveryPage
-  hosts={hosts}
-  user={user}
-  onAction={handleAction}
-  statuses={statuses}
-  mode={mode}
-  onToggleMode={() =>
-    setMode((m) => (m === "grid" ? "swipe" : "grid"))
-  }
-  onOpenPulse={() => setShowStatusModal(true)}
-  onOpenCallsStudio={() => setActiveModal("callsStudio")}
-/>
-      )}
+    {/* GRID */}
+    {mode === "grid" && (
+      <DiscoveryPage
+        hosts={hosts}
+        user={user}
+        onAction={handleAction}
+        statuses={statuses}
+        mode={mode}
+        onToggleMode={() =>
+          setMode((m) => (m === "grid" ? "swipe" : "grid"))
+        }
+        onOpenPulse={() => setShowStatusModal(true)}
+        onOpenCallsStudio={() => setActiveModal("callsStudio")}
+      />
+    )}
 
       {/* SWIPE */}
       {mode === "swipe" && current && (
@@ -356,6 +364,31 @@ const page = {
   height: "100vh",
   background: "#0b1220",
   overflow: "hidden",
+};
+
+const modeBtn = {
+  position: "fixed",
+  top: 16,
+  left: 16,
+  zIndex: 9999,
+
+  height: 46,
+  padding: "0 18px",
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  borderRadius: 14,
+  border: "1px solid rgba(255,255,255,.12)",
+
+  background: "rgba(20,20,25,.85)",
+
+  color: "#fff",
+  fontWeight: 600,
+  fontSize: 15,
+
+  cursor: "pointer",
 };
 
 const swipeStage = {

@@ -120,16 +120,19 @@ const card = {
 
 const content = {
   display: "flex",
-  gap: 14,
+  gap: 18,
   alignItems: "flex-start",
 };
 
 const avatarStyle = {
-  width: 48,
-  height: 48,
+  width: 64,
+  height: 64,
+
   borderRadius: "50%",
   objectFit: "cover",
   flexShrink: 0,
+
+  boxShadow: "0 6px 18px rgba(0,0,0,.35)",
 };
 
 const headerRow = {

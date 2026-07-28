@@ -6,6 +6,8 @@ import GlassBar from "./components/GlassBar";
 import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
+import { useTheme } from "./context/ThemeContext";
+import { Sun, Moon } from "lucide-react";
 
 
 import ChatsTab from "./components/ChatsTab";
@@ -30,11 +32,13 @@ export default function LandingPage({ user }) {
 
   const [activeModal, setActiveModal] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
-
   const [selectedHost, setSelectedHost] = useState(null);
 
+  // Theme
+  const { theme, isDark, toggleTheme } = useTheme();
+
   const handleOpenProfile = async (userId) => {
-  console.log("handleOpenProfile received:", userId);
+    console.log("handleOpenProfile received:", userId);
 
   if (!userId) {
     console.log("No userId passed.");
@@ -144,6 +148,10 @@ useEffect(() => {
           setActiveModal("notifications");
           break;
 
+        case "status":
+         setActiveModal("status");
+         break;
+
         case "connections":
           setActiveModal("connections");
           break;
@@ -207,7 +215,26 @@ useEffect(() => {
   }
 
   return (
-  <div style={page}>
+  <div style={page(theme)}>
+
+{mode === "grid" && (
+  <div style={header(theme)}>
+    <div style={logo}>
+      ◉ OpenCall
+    </div>
+
+<button
+  style={themeToggle(theme)}
+  onClick={toggleTheme}
+>
+  {theme.mode === "dark" ? (
+    <Sun size={18} strokeWidth={2.2} />
+  ) : (
+    <Moon size={18} strokeWidth={2.2} />
+  )}
+</button>
+  </div>
+)}
 
     {mode === "swipe" && (
   <button
@@ -324,6 +351,14 @@ useEffect(() => {
         </ModalShell>
       )}
 
+      {activeModal === "status" && (
+  <StatusFeedModal
+    statuses={statuses}
+    onClose={closeModal}
+    onOpenProfile={(host) => handleAction("profile", host)}
+  />
+)}
+
       {activeModal === "connections" && (
         <ModalShell title="Connections" onClose={closeModal}>
           <ConnectionRequests user={user} />
@@ -359,16 +394,74 @@ useEffect(() => {
 
 /* ================= STYLES ================= */
 
-const page = {
+const page = (theme) => ({
   width: "100%",
-  height: "100vh",
-  background: "#0b1220",
-  overflow: "hidden",
+  minHeight: "100vh",
+  background: theme.background,
+  color: theme.text,
+  transition: "all .25s ease",
+  paddingTop: 72,
+});
+
+const header = (theme) => ({
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+
+  height: 64,
+
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+
+  padding: "0 20px",
+
+  background: theme.glass,
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+
+  borderBottom: `1px solid ${theme.border}`,
+
+  zIndex: 9000,
+});
+
+const logo = {
+  fontSize: 22,
+  fontWeight: 700,
+  letterSpacing: ".5px",
 };
+
+const themeToggle = (theme) => ({
+  width: 42,
+  height: 42,
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  borderRadius: "50%",
+
+  background: "rgba(255,255,255,0.08)",
+
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+
+  border: "1px solid rgba(255,255,255,.15)",
+
+  color: theme.text,
+
+  boxShadow:
+    "0 4px 18px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05)",
+
+  cursor: "pointer",
+
+  transition: "all .25s ease",
+});
 
 const modeBtn = {
   position: "fixed",
-  top: 16,
+  top: 80, // moved below header
   left: 16,
   zIndex: 9999,
 
@@ -395,6 +488,7 @@ const swipeStage = {
   width: "100vw",
   height: "100vh",
 };
+
 const glassWrap = {
   position: "fixed",
   bottom: 0,

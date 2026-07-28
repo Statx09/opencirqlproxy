@@ -1,15 +1,18 @@
 import React, { memo, useMemo } from "react";
 import { normalizeHost } from "../utils/normalizeHost";
 import ExpressionBadges from "./expressions/ExpressionBadges";
+import { useTheme } from "../context/ThemeContext";
 
 function MiniHostCard({ host, onAction }) {
 
-console.log(
-  "CARD RECEIVED:",
-  host.alias,
-  host.name,
-  host.id
-);
+  const { theme } = useTheme();
+
+  console.log(
+    "CARD RECEIVED:",
+    host.alias,
+    host.name,
+    host.id
+  );
 
   const h = useMemo(() => normalizeHost(host), [host]);
 
@@ -25,10 +28,13 @@ console.log("BANNER:", h.banner);
   style={{
     ...card,
 
+    background: theme.card,
+    color: theme.text,
+
     border:
-      h.presence === "in_studio"
-        ? "1px solid rgba(139,92,246,.65)"
-        : "1px solid rgba(255,255,255,.06)",
+  h.presence === "in_studio"
+    ? "1px solid rgba(139,92,246,.65)"
+    : `1px solid ${theme.border}`,
 
     boxShadow:
       h.presence === "in_studio"
@@ -37,7 +43,6 @@ console.log("BANNER:", h.banner);
   }}
   onClick={() => onAction?.("profile", h)}
 >
-
       {/* AVATAR */}
       <div
   style={{
@@ -94,8 +99,18 @@ console.log("BANNER:", h.banner);
 </div>
 
       {/* CENTER INFO */}
-      <div style={info}>
-  <div style={name}>
+      <div
+  style={{
+    ...info,
+    color: theme.text,
+  }}
+>
+  <div
+  style={{
+    ...name,
+    color: theme.text,
+  }}
+>
   {h.name}
 </div>
 
@@ -107,12 +122,20 @@ console.log("BANNER:", h.banner);
 />
 
         {/* INTENTS */}
-        <div style={chipRow}>
-          {h.intents.slice(0, 2).map((t, i) => (
-            <span key={i} style={chip}>{t}</span>
-          ))}
-        </div>
-
+<div style={chipRow}>
+  {h.intents.slice(0, 2).map((t, i) => (
+    <span
+      key={i}
+      style={{
+        ...chip,
+        background: theme.surface,
+        color: theme.text,
+      }}
+    >
+      {t}
+    </span>
+  ))}
+</div>
         {/* MESSAGE + CALL (FIXED — HOSTCARD STYLE) */}
         <div style={actionRow}>
 

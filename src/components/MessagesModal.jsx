@@ -51,33 +51,46 @@ export default function MessagesModal({
     loadMessages();
   }, [loadMessages]);
 
-  /* ================= SEND MESSAGE ================= */
+/* ================= SEND MESSAGE ================= */
 
-  const sendMessage = async () => {
+const sendMessage = async () => {
   if (!message.trim() || !user?.id || !hostId) return;
 
   try {
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({
+    const res = await fetch("http://localhost:3000/api/message", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         sender_id: user.id,
         receiver_id: hostId,
         text: message,
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    setMessages((prev) => [...prev, data]);
-    setMessage("");
-
-    // scroll
-    requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }),
     });
 
-    // 🔥 THIS IS THE INBOX SYNC TRIGGER
+    const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json.error || "Failed to send message");
+    }
+
+    const data = json.message;
+
+    setMessages((prev) => [
+      ...prev,
+      data,
+      ...(json.ai_message ? [json.ai_message] : []),
+    ]);
+
+    setMessage("");
+
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "smooth",
+      });
+    });
+
     if (onMessageSent) {
       onMessageSent();
     }

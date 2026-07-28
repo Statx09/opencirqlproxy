@@ -13,6 +13,10 @@ export default function GlassBar({ user, onAction }) {
           💬
         </button>
 
+        <button style={iconBtn} onClick={() => onAction("status")}>
+          📡
+        </button>
+
         <button style={iconBtn} onClick={() => onAction("connections")}>
           👥
         </button>
@@ -36,37 +40,46 @@ export default function GlassBar({ user, onAction }) {
 
 const wrap = {
   position: "fixed",
-  bottom: 16,
+  bottom: 0,
   left: 0,
   right: 0,
-  display: "flex",
-  justifyContent: "center",
   zIndex: 99999,
   pointerEvents: "none",
 };
 
 const bar = {
   pointerEvents: "auto",
+
+  width: "100%",
+
   display: "flex",
-  justifyContent: "space-between",
+  justifyContent: "space-around",
   alignItems: "center",
-  gap: 22,
-  padding: "14px 20px",
-  width: "94%",
-  maxWidth: 540,
-  background: "rgba(15, 23, 42, 0.28)",
-  backdropFilter: "blur(18px)",
-  borderRadius: 26,
-  border: "1px solid rgba(255,255,255,0.08)",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+
+  padding: "12px 18px",
+
+  background:
+    "rgba(15,23,42,0.82)",
+
+  backdropFilter:
+    "blur(20px)",
+
+  WebkitBackdropFilter:
+    "blur(20px)",
+
+  borderTop:
+    "1px solid rgba(255,255,255,.12)",
+
+  boxShadow:
+    "0 -8px 30px rgba(0,0,0,.25)",
 };
 
 const iconBtn = {
-  width: 56,
-  height: 56,
-  borderRadius: 18,
+  width: 48,
+  height: 48,
+  borderRadius: 14,
   border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.05)",
+  background: "transparent",
   color: "#fff",
   fontSize: 20,
   cursor: "pointer",

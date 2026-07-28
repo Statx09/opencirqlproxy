@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from "react";
 import TopicSearchBar from "./TopicSearchBar";
 import MiniHostCard from "./MiniHostCard";
-import LiveStatusCard from "./live/LiveStatusCard";
 import HeroCallCard from "./HeroCallCard";
 import { normalizeHost } from "../utils/normalizeHost";
+import { useTheme } from "../context/ThemeContext";
 
 export default function DiscoveryPage({
   hosts = [],
@@ -14,6 +14,9 @@ export default function DiscoveryPage({
   onOpenPulse,
   onOpenCallsStudio,
 }) {
+
+  const { theme } = useTheme();
+
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -46,7 +49,7 @@ export default function DiscoveryPage({
 }, [hosts, query]);
 
   return (
-  <div style={page}>
+  <div style={page(theme)}>
 
     <div style={header}>
 
@@ -69,11 +72,6 @@ export default function DiscoveryPage({
     </button>
 
   </div>
-
-  <LiveStatusCard
-    statuses={statuses}
-    onOpen={onOpenPulse}
-  />
 
   <TopicSearchBar
     value={query}
@@ -99,11 +97,15 @@ export default function DiscoveryPage({
 
 /* ================= STYLES ================= */
 
-const page = {
+const page = (theme) => ({
   padding: "20px 18px 120px",
-  background: "#0b1220",
+  background: theme.background,
+  color: theme.text,
   minHeight: "100vh",
-};
+  overflowY: "auto",
+  WebkitOverflowScrolling: "touch",
+  transition: "all .25s ease",
+});
 
 const header = {
   display: "flex",

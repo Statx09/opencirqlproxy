@@ -218,7 +218,7 @@ useEffect(() => {
   <div style={page(theme)}>
 
 {mode === "grid" && (
-  <div style={header(theme)}>
+  <div style={{ ...header(theme), marginBottom: 24 }}>
     <div style={logo}>
       ◉ OpenCall
     </div>
@@ -234,15 +234,6 @@ useEffect(() => {
   )}
 </button>
   </div>
-)}
-
-    {mode === "swipe" && (
-  <button
-    style={modeBtn}
-    onClick={() => setMode("grid")}
-  >
-    ▦ Grid View
-  </button>
 )}
 
     {/* GRID */}
@@ -262,31 +253,40 @@ useEffect(() => {
     )}
 
       {/* SWIPE */}
-      {mode === "swipe" && current && (
-        <div style={swipeStage}>
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              transform: `translateX(${dragX}px)`,
-              transition: dragX === 0 ? "transform 0.25s ease" : "none",
-              touchAction: "none",
-            }}
-            onPointerDown={handleStart}
-            onPointerMove={handleMove}
-            onPointerUp={handleEnd}
-            onPointerCancel={handleEnd}
-          >
-            <HostCard
-              host={current}
-              user={user}
-              onAction={handleAction}
-              onNext={next}
-              onPrev={prev}
-            />
-          </div>
-        </div>
-      )}
+{mode === "swipe" && current && (
+  <div style={swipeStage}>
+
+    <button
+      style={modeBtn}
+      onClick={() => setMode("grid")}
+    >
+      ▦ Grid View
+    </button>
+
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        transform: `translateX(${dragX}px)`,
+        transition: dragX === 0 ? "transform 0.25s ease" : "none",
+        touchAction: "none",
+      }}
+      onPointerDown={handleStart}
+      onPointerMove={handleMove}
+      onPointerUp={handleEnd}
+      onPointerCancel={handleEnd}
+    >
+      <HostCard
+        host={current}
+        user={user}
+        onAction={handleAction}
+        onNext={next}
+        onPrev={prev}
+      />
+    </div>
+
+  </div>
+)}
 
       {/* GLASSBAR */}
       <div style={glassWrap}>
@@ -400,7 +400,6 @@ const page = (theme) => ({
   background: theme.background,
   color: theme.text,
   transition: "all .25s ease",
-  paddingTop: 72,
 });
 
 const header = (theme) => ({
@@ -487,6 +486,7 @@ const modeBtn = {
 const swipeStage = {
   width: "100vw",
   height: "100vh",
+  overflow: "hidden",
 };
 
 const glassWrap = {

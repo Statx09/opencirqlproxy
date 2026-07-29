@@ -1,4 +1,6 @@
 export const darkTheme = {
+  mode: "dark",
+
   background: "#0b1220",
   surface: "#111827",
   card: "#182235",
@@ -14,6 +16,8 @@ export const darkTheme = {
 };
 
 export const lightTheme = {
+  mode: "light",
+
   background: "#f8fafc",
   surface: "#ffffff",
   card: "#ffffff",
@@ -21,7 +25,7 @@ export const lightTheme = {
   text: "#111827",
   textSecondary: "#64748b",
 
-  border: "rgba(0,0,0,.14)",
+  border: "rgba(0,0,0,.08)",
 
   glass: "rgba(255,255,255,.75)",
 

@@ -1,9 +1,12 @@
+import { useTheme } from "../context/ThemeContext";
+
 export default function GlassBar({ user, onAction }) {
   const isLoggedIn = !!user;
+  const { theme } = useTheme();
 
   return (
     <div style={wrap}>
-      <div style={bar}>
+      <div style={bar(theme)}>
 
         <button style={iconBtn} onClick={() => onAction("notifications")}>
           🔔
@@ -47,32 +50,30 @@ const wrap = {
   pointerEvents: "none",
 };
 
-const bar = {
+const bar = (theme) => ({
   pointerEvents: "auto",
-
-  width: "100%",
 
   display: "flex",
   justifyContent: "space-around",
   alignItems: "center",
 
-  padding: "12px 18px",
+  width: "100%",
+  height: 72,
 
-  background:
-    "rgba(15,23,42,0.82)",
+  padding: "0 18px",
 
-  backdropFilter:
-    "blur(20px)",
+  background: theme.glass,
 
-  WebkitBackdropFilter:
-    "blur(20px)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
 
-  borderTop:
-    "1px solid rgba(255,255,255,.12)",
+  borderTop: `1px solid ${theme.border}`,
 
   boxShadow:
-    "0 -8px 30px rgba(0,0,0,.25)",
-};
+    theme.mode === "dark"
+      ? "0 -8px 24px rgba(0,0,0,.35)"
+      : "0 -6px 18px rgba(0,0,0,.08)",
+});
 
 const iconBtn = {
   width: 48,

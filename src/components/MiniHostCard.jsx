@@ -186,15 +186,6 @@ console.log("BANNER:", h.banner);
   ❤️
 </button>
 
-<button
-  style={{ ...railButton, ...tipButton }}
-  onClick={(e) => {
-    e.stopPropagation();
-    onAction("support", h);
-  }}
->
-  💰
-</button>
 
 </div>
 

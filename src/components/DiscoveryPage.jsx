@@ -56,18 +56,18 @@ export default function DiscoveryPage({
   <div style={topRow}>
 
     <button
-      style={topButton}
-      onClick={onToggleMode}
-    >
+  style={topButton(theme)}
+  onClick={onToggleMode}
+>
       {mode === "grid"
         ? "⇄ Swipe View"
         : "▦ Grid View"}
     </button>
 
     <button
-      style={topButton}
-      onClick={onOpenCallsStudio}
-    >
+  style={topButton(theme)}
+  onClick={onOpenCallsStudio}
+>
       Call Studio
     </button>
 
@@ -98,7 +98,7 @@ export default function DiscoveryPage({
 /* ================= STYLES ================= */
 
 const page = (theme) => ({
-  padding: "20px 18px 120px",
+  padding: "90px 18px 120px",
   background: theme.background,
   color: theme.text,
   minHeight: "100vh",
@@ -133,7 +133,7 @@ const topRow = {
   marginBottom: 14,
 };
 
-const topButton = {
+const topButton = (theme) => ({
   flex: 1,
   height: 46,
 
@@ -143,20 +143,19 @@ const topButton = {
 
   borderRadius: 14,
 
-  background: "rgba(20,20,25,.82)",
+  background: theme.card,
+  color: theme.text,
 
   backdropFilter: "blur(18px)",
   WebkitBackdropFilter: "blur(18px)",
 
-  border: "1px solid rgba(96,165,250,.35)",
+  border: `1px solid ${theme.border}`,
 
   boxShadow:
-    "0 0 0 1px rgba(96,165,250,.18), 0 0 18px rgba(59,130,246,.20), 0 8px 22px rgba(0,0,0,.35)",
+    "0 0 0 1px rgba(96,165,250,.18), 0 0 18px rgba(59,130,246,.20), 0 8px 22px rgba(0,0,0,.20)",
 
-  color: "#fff",
   fontWeight: 600,
   fontSize: 15,
 
   cursor: "pointer",
-};
-
+});

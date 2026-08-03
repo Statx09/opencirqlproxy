@@ -5,13 +5,11 @@ export default function MessagesModal({
   host,
   user,
   onClose,
-  onMessageSent, 
+  onMessageSent,
 }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-
-  const bottomRef = useRef(null);
 
   const hostId = host?.user_id ?? host?.id;
 
@@ -21,6 +19,16 @@ export default function MessagesModal({
     host?.avatar_url ||
     host?.avatar ||
     "https://placehold.co/100x100";
+
+const chatRef = useRef(null);
+
+const scrollToBottom = () => {
+  requestAnimationFrame(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  });
+};
 
   /* ================= LOAD MESSAGES ================= */
 
@@ -42,9 +50,8 @@ export default function MessagesModal({
     setMessages(data || []);
     setLoading(false);
 
-    requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    });
+    scrollToBottom();
+
   }, [user?.id, hostId]);
 
   useEffect(() => {
@@ -54,7 +61,16 @@ export default function MessagesModal({
 /* ================= SEND MESSAGE ================= */
 
 const sendMessage = async () => {
-  if (!message.trim() || !user?.id || !hostId) return;
+  console.log("SEND CLICKED");
+
+  if (!message.trim() || !user?.id || !hostId) {
+    console.log("FAILED CHECK", {
+      message,
+      user,
+      hostId,
+    });
+    return;
+  }
 
   try {
     const res = await fetch("http://localhost:3000/api/message", {
@@ -69,38 +85,28 @@ const sendMessage = async () => {
       }),
     });
 
+    console.log("STATUS:", res.status);
+
     const json = await res.json();
 
-    if (!res.ok) {
-      throw new Error(json.error || "Failed to send message");
-    }
+console.log("RAW RESPONSE:", json);
 
-    const data = json.message;
+// Clear the textbox
+setMessage("");
 
-    setMessages((prev) => [
-      ...prev,
-      data,
-      ...(json.ai_message ? [json.ai_message] : []),
-    ]);
+// Reload the conversation
+await loadMessages();
 
-    setMessage("");
+// Notify parent if needed
+onMessageSent?.();
 
-    requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({
-        behavior: "smooth",
-      });
-    });
-
-    if (onMessageSent) {
-      onMessageSent();
-    }
+// Scroll to bottom
+scrollToBottom();
 
   } catch (err) {
-    console.error(err);
-    alert(err.message);
+    console.error("FETCH ERROR:", err);
   }
 };
-
 
 
   /* ================= EARLY SAFE GUARD (FIXED) ================= */
@@ -130,7 +136,7 @@ const sendMessage = async () => {
         </div>
 
         {/* CHAT */}
-        <div style={chatArea}>
+        <div ref={chatRef} style={chatArea}>
           {loading && <p>Loading...</p>}
 
           {!loading &&
@@ -159,7 +165,6 @@ const sendMessage = async () => {
               );
             })}
 
-          <div ref={bottomRef} />
         </div>
 
         {/* INPUT */}

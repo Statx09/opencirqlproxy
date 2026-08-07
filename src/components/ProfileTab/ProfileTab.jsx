@@ -80,6 +80,9 @@ const uploadImage = async (file, bucket) => {
 
   /* ================= PROFILE SYNC ================= */
 useEffect(() => {
+  console.log("PROFILE TAB USER:", user);
+  console.log("PROFILE TAB DATA:", profile);
+
   if (!profile) return;
 
   setAlias(profile.alias || "");

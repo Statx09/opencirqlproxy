@@ -81,7 +81,8 @@ const uploadImage = async (file, bucket) => {
   /* ================= PROFILE SYNC ================= */
 useEffect(() => {
   console.log("PROFILE TAB USER:", user);
-  console.log("PROFILE TAB DATA:", profile);
+  console.log("PROFILE TAB USER ID:", user?.id);
+  console.log("PROFILE TAB DATA:", JSON.stringify(profile, null, 2));
 
   if (!profile) return;
 

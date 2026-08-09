@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from "react";
+﻿import React, { useEffect, useRef } from "react";
 
 export default function JitsiRoom({
   roomName,
-  displayName = "Cirql User",
+  displayName = "OpenCall User",
 }) {
   const containerRef = useRef(null);
   const apiRef = useRef(null);
@@ -12,7 +12,6 @@ export default function JitsiRoom({
 
     const loadJitsi = () =>
       new Promise((resolve, reject) => {
-        // Already loaded
         if (window.JitsiMeetExternalAPI) {
           resolve();
           return;
@@ -38,51 +37,68 @@ export default function JitsiRoom({
       });
 
     async function init() {
-      await loadJitsi();
+      try {
+        await loadJitsi();
 
-      if (cancelled || !containerRef.current) return;
-
-      const domain = "meet.jit.si";
-
-      apiRef.current = new window.JitsiMeetExternalAPI(domain, {
-        roomName,
-
-        parentNode: containerRef.current,
-
-        width: "100%",
-        height: "100%",
-
-        userInfo: {
-          displayName,
-        },
-
-        configOverwrite: {
-          prejoinPageEnabled: false,
-          startWithAudioMuted: false,
-          startWithVideoMuted: false,
-          disableDeepLinking: true,
-        },
-
-        interfaceConfigOverwrite: {
-          MOBILE_APP_PROMO: false,
-          SHOW_JITSI_WATERMARK: false,
-          SHOW_WATERMARK_FOR_GUESTS: false,
-        },
-      });
-
-      apiRef.current.addEventListener(
-        "videoConferenceJoined",
-        () => {
-          console.log("✅ Joined Jitsi room");
+        if (
+          cancelled ||
+          !containerRef.current ||
+          !window.JitsiMeetExternalAPI
+        ) {
+          return;
         }
-      );
 
-      apiRef.current.addEventListener(
-        "readyToClose",
-        () => {
-          console.log("Room closed");
-        }
-      );
+        apiRef.current = new window.JitsiMeetExternalAPI("meet.jit.si", {
+          roomName,
+          parentNode: containerRef.current,
+          width: "100%",
+          height: "100%",
+
+          userInfo: {
+            displayName,
+          },
+
+          configOverwrite: {
+  prejoinConfig: {
+    enabled: false,
+  },
+
+  startWithAudioMuted: false,
+  startWithVideoMuted: false,
+
+  disableDeepLinking: true,
+  enableWelcomePage: false,
+  enableInsecureRoomNameWarning: false,
+
+  hideConferenceSubject: true,
+},
+
+          interfaceConfigOverwrite: {
+            MOBILE_APP_PROMO: false,
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_WATERMARK_FOR_GUESTS: false,
+            SHOW_BRAND_WATERMARK: false,
+            SHOW_POWERED_BY: false,
+            SHOW_DEEP_LINKING_IMAGE: false,
+          },
+        });
+
+        apiRef.current.addEventListener(
+          "videoConferenceJoined",
+          () => {
+            console.log("✅ Joined OpenCall Studio");
+          }
+        );
+
+        apiRef.current.addEventListener(
+          "readyToClose",
+          () => {
+            console.log("Jitsi ready to close");
+          }
+        );
+      } catch (error) {
+        console.error("Jitsi initialization failed:", error);
+      }
     }
 
     init();
@@ -91,7 +107,12 @@ export default function JitsiRoom({
       cancelled = true;
 
       if (apiRef.current) {
-        apiRef.current.dispose();
+        try {
+          apiRef.current.dispose();
+        } catch (error) {
+          console.error("Jitsi dispose error:", error);
+        }
+
         apiRef.current = null;
       }
     };
@@ -101,6 +122,8 @@ export default function JitsiRoom({
     <div
       ref={containerRef}
       style={{
+        position: "absolute",
+        inset: 0,
         width: "100%",
         height: "100%",
         background: "#000",

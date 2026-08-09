@@ -84,7 +84,7 @@ const toggle = (value) => {
               opacity: 0.6,
             }}
           >
-            No expressions selected yet.
+            Select a few expressions below to build your identity. These will appear on your profile and help people discover you.
           </div>
         )}
       </div>
@@ -99,7 +99,7 @@ const toggle = (value) => {
             fontWeight: 600,
           }}
         >
-          Expression Library
+          Browse Expressions
         </div>
 
         <ExpressionGrid

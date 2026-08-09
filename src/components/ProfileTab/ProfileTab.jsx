@@ -5,7 +5,7 @@ import ExpressSection from "./ExpressSection";
 import IdentitySection from "./IdentitySection";
 
 export default function ProfileTab({ user, onLogout }) {
-  const [tab, setTab] = useState("identity");
+  const [tab, setTab] = useState("profile");
   const [loading, setLoading] = useState(false);
 
   const {

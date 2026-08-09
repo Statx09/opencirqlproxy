@@ -4,6 +4,7 @@ import MiniHostCard from "./MiniHostCard";
 import HeroCallCard from "./HeroCallCard";
 import { normalizeHost } from "../utils/normalizeHost";
 import { useTheme } from "../context/ThemeContext";
+import { ArrowLeftRight, Video } from "lucide-react";
 
 export default function DiscoveryPage({
   hosts = [],
@@ -14,85 +15,85 @@ export default function DiscoveryPage({
   onOpenPulse,
   onOpenCallsStudio,
 }) {
-
   const { theme } = useTheme();
 
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
-  const q = query.toLowerCase();
+    const q = query.toLowerCase();
 
-  const result = hosts
-    .map(normalizeHost)
-    .filter((h) => {
-      const name = h.name?.toLowerCase() || "";
-      const topics = (h.topics || []).join(" ").toLowerCase();
-      const intents = (h.intents || []).join(" ").toLowerCase();
+    const result = hosts
+      .map(normalizeHost)
+      .filter((h) => {
+        const name = h.name?.toLowerCase() || "";
+        const topics = (h.topics || []).join(" ").toLowerCase();
+        const intents = (h.intents || []).join(" ").toLowerCase();
 
-      return (
-        name.includes(q) ||
-        topics.includes(q) ||
-        intents.includes(q)
-      );
-    });
+        return (
+          name.includes(q) ||
+          topics.includes(q) ||
+          intents.includes(q)
+        );
+      });
 
-  console.log(
-    "FILTERED:",
-    result.map(h => ({
-      alias: h.alias,
-      name: h.name
-    }))
-  );
+    console.log(
+      "FILTERED:",
+      result.map((h) => ({
+        alias: h.alias,
+        name: h.name,
+      }))
+    );
 
-  return result;
-
-}, [hosts, query]);
+    return result;
+  }, [hosts, query]);
 
   return (
-  <div style={page(theme)}>
+    <div style={page(theme)}>
+      <div style={header}>
 
-    <div style={header}>
+        <div style={topRow}>
 
-  <div style={topRow}>
+          <button
+            type="button"
+            aria-label={mode === "grid" ? "Swipe View" : "Grid View"}
+            title={mode === "grid" ? "Swipe View" : "Grid View"}
+            style={topButton(theme)}
+            onClick={onToggleMode}
+          >
+            <ArrowLeftRight size={19} strokeWidth={2.2} />
+          </button>
 
-    <button
-  style={topButton(theme)}
-  onClick={onToggleMode}
->
-      {mode === "grid"
-        ? "⇄ Swipe View"
-        : "▦ Grid View"}
-    </button>
+          <button
+            type="button"
+            aria-label="Call Studio"
+            title="Call Studio"
+            style={topButton(theme)}
+            onClick={onOpenCallsStudio}
+          >
+            <Video size={19} strokeWidth={2.2} />
+          </button>
 
-    <button
-  style={topButton(theme)}
-  onClick={onOpenCallsStudio}
->
-      Call Studio
-    </button>
+        </div>
 
-  </div>
-
-  <TopicSearchBar
-    value={query}
-    onChange={setQuery}
-  />
-
-</div>
-
-    {/* GRID */}
-    <div style={grid}>
-      {filtered.map((host) => (
-        <MiniHostCard
-          key={host.id}
-          host={host}
-          onAction={onAction}
+        <TopicSearchBar
+          value={query}
+          onChange={setQuery}
         />
-      ))}
-    </div>
+
+      </div>
+
+      <div style={grid}>
+        {filtered.map((host) => (
+          <MiniHostCard
+            key={host.id}
+            host={host}
+            onAction={onAction}
+          />
+        ))}
+      </div>
 
     </div>
-);
+  );
 }
 
 /* ================= STYLES ================= */
@@ -122,11 +123,6 @@ const grid = {
   margin: "0 auto",
 };
 
-const studioRow = {
-  display: "flex",
-  justifyContent: "flex-end",
-};
-
 const topRow = {
   display: "flex",
   gap: 12,
@@ -152,10 +148,12 @@ const topButton = (theme) => ({
   border: `1px solid ${theme.border}`,
 
   boxShadow:
-    "0 0 0 1px rgba(96,165,250,.18), 0 0 18px rgba(59,130,246,.20), 0 8px 22px rgba(0,0,0,.20)",
-
-  fontWeight: 600,
-  fontSize: 15,
+    "0 0 0 1px rgba(96,165,250,.14), 0 0 16px rgba(59,130,246,.16), 0 8px 22px rgba(0,0,0,.20)",
 
   cursor: "pointer",
+
+  transition:
+    "transform .18s ease, box-shadow .18s ease, background .18s ease",
+
+  WebkitTapHighlightColor: "transparent",
 });

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import JitsiRoom from "./jitsi/JitsiRoom";
+﻿import React, { useState } from "react";
+import DailyRoom from "./daily/DailyRoom";
 import { getJitsiRoom } from "../utils/getJitsiRoom";
 import ConnectionRequests from "./ConnectionRequests";
 import SayThanksModal from "./SayThanksModal";
@@ -33,8 +33,8 @@ export default function CallsStudioModal({ user, onClose }) {
 
       {/* VIDEO */}
       <div style={videoArea}>
-        <JitsiRoom
-          roomName={room.roomName}
+        <DailyRoom
+          roomUrl="https://cirqll.daily.co/cirqll"
           displayName={user.email || "Guest"}
         />
       </div>

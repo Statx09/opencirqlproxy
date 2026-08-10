@@ -157,9 +157,9 @@ useEffect(() => {
           break;
 
         case "call":
-          setSelectedHost(host || current);
-          setActiveModal("call");
-          break;
+  setSelectedHost(host || current);
+  setActiveModal("callsStudio");
+  break;
 
         case "callsStudio":
   setActiveModal("callsStudio");
@@ -376,6 +376,7 @@ useEffect(() => {
       {activeModal === "callsStudio" && (
   <CallsStudioModal
     user={user}
+    host={selectedHost}
     onClose={closeModal}
   />
 )}

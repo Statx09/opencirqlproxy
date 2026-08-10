@@ -324,43 +324,58 @@ const activeButton = {
 
 const randomCallButton = {
   position: "absolute",
-  right: 78,
-  bottom: 125,
+  right: 16,
+  top: "calc(50% + 68px)",
 
   display: "flex",
   alignItems: "center",
-  gap: 8,
+  justifyContent: "center",
+  gap: 7,
 
-  padding: "12px 20px",
+  padding: "9px 13px",
 
   borderRadius: 999,
 
-  border:
-    "1px solid rgba(139,92,246,.55)",
+  border: "1px solid rgba(255,255,255,.14)",
 
-  background:
-    "rgba(88,28,135,.72)",
+  background: "rgba(20,20,25,.60)",
 
   backdropFilter: "blur(18px)",
-  WebkitBackdropFilter:
-    "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
 
   color: "#fff",
 
-  fontSize: 14,
-  fontWeight: 700,
+  fontSize: 12,
+  fontWeight: 600,
 
   cursor: "pointer",
 
   boxShadow:
-    "0 8px 30px rgba(88,28,135,.35)",
+    "0 4px 18px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05)",
+
+  transition: "all .2s ease",
 
   zIndex: 35,
 };
 
 const randomCallIcon = {
-  fontSize: 20,
+  width: 24,
+  height: 24,
+
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+
+  borderRadius: "50%",
+
+  background: "rgba(255,255,255,.08)",
+
+  color: "#fff",
+
+  fontSize: 17,
   lineHeight: 1,
+
+  flexShrink: 0,
 };
 
 const panel = {

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Coffee,
   Plane,
   Music,
@@ -35,8 +35,15 @@ import {
 import AIIcon from "./svg/ai";
 import CryptoIcon from "./svg/crypto";
 import RoboticsIcon from "./svg/robotics";
+import ManchesterUnitedIcon from "./svg/ManchesterUnitedIcon";
 
 export const iconMap = {
+manchester_united: {
+    type: "image",
+    src: "/expressions/manchester-united.svg",
+    color: "#DA291C",
+  },
+
   ai: {
     component: AIIcon,
     color: "#8B5CF6",
@@ -200,10 +207,17 @@ export const iconMap = {
   computer: {
     component: Monitor,
     color: "#60A5FA",
-  },
-
+  },
   startup: {
     component: Rocket,
     color: "#F97316",
   },
 };
+
+
+
+
+
+
+
+

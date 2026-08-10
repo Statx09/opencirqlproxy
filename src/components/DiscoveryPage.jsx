@@ -136,7 +136,7 @@ const header = {
   display: "flex",
   flexDirection: "column",
   gap: 6,
-  marginBottom: 4,
+  marginBottom: 10,
 };
 
 const grid = {

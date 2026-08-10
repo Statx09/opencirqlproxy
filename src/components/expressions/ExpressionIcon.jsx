@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { iconMap } from "./iconMap";
 
 export default function ExpressionIcon({
@@ -8,13 +8,44 @@ export default function ExpressionIcon({
   animated = true,
 }) {
   const config = iconMap[type];
-  console.log(type, config);
 
   if (!config) return null;
 
+  /* IMAGE EXPRESSION */
+  if (config.type === "image") {
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: size,
+          height: size,
+          flexShrink: 0,
+          animation: animated
+            ? "expressionPulse 3s ease-in-out infinite"
+            : "none",
+        }}
+      >
+        <img
+  src={config.src}
+  alt=""
+  style={{
+    width: "170%",
+    height: "170%",
+    objectFit: "contain",
+    display: "block",
+  }}
+/>
+      </span>
+    );
+  }
+
+  /* EXISTING SVG / LUCIDE EXPRESSIONS */
   const Icon = config.component;
   const iconColor = color || config.color;
-  console.log("Icon:", Icon);
+
+  if (!Icon) return null;
 
   return (
     <span

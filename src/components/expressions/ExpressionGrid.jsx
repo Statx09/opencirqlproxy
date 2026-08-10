@@ -11,13 +11,7 @@ export default function ExpressionGrid({
     const q = search.trim().toLowerCase();
 
     return expressions.filter((item) => {
-      // Hide expressions already selected
-      if (selected.includes(item.id)) return false;
-
       if (!q) return true;
-
-console.log("ExpressionGrid expressions:", expressions);
-console.log("Filtered:", filtered);
 
       return (
         item.label.toLowerCase().includes(q) ||
@@ -27,61 +21,68 @@ console.log("Filtered:", filtered);
         )
       );
     });
-  }, [search, selected]);
+  }, [search]);
 
   return (
     <div
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 8,
-      }}
-    >
-      {filtered.map((item) => (
-  <button
-    key={item.id}
-    onClick={() => onToggle(item.id)}
-    title={item.label}
-    style={{
-      width: 56,
-      height: 56,
+  onClick={() => console.log("GRID CLICKED")}
+  style={{
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+  }}
+>
+      {filtered.map((item) => {
+        const isSelected = selected.includes(item.id);
 
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => {
+              console.log("EXPRESSION CLICKED:", item.id);
+              console.log("CURRENT SELECTED:", selected);
+              onToggle(item.id);
+            }}
+            title={
+              isSelected
+                ? `Remove ${item.label}`
+                : item.label
+            }
+            style={{
+              width: 56,
+              height: 56,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "50%",
+              cursor: "pointer",
 
-      borderRadius: "50%",
+              background: isSelected
+                ? `${item.color}30`
+                : "rgba(255,255,255,.05)",
 
-      cursor: "pointer",
+              border: isSelected
+                ? `2px solid ${item.color}`
+                : "1px solid rgba(255,255,255,.08)",
 
-      background: "rgba(255,255,255,.05)",
+              boxShadow: isSelected
+                ? `0 0 18px ${item.color}55`
+                : "none",
 
-      border: "1px solid rgba(255,255,255,.08)",
-
-      transition: "all .18s ease",
-
-      backdropFilter: "blur(10px)",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = "translateY(-3px) scale(1.08)";
-      e.currentTarget.style.borderColor = item.color;
-      e.currentTarget.style.background = `${item.color}22`;
-      e.currentTarget.style.boxShadow = `0 0 18px ${item.color}55`;
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.transform = "translateY(0) scale(1)";
-      e.currentTarget.style.borderColor = "rgba(255,255,255,.08)";
-      e.currentTarget.style.background = "rgba(255,255,255,.05)";
-      e.currentTarget.style.boxShadow = "none";
-    }}
-  >
-    <ExpressionIcon
-      type={item.svg}
-      size={26}
-      color={item.color}
-    />
-  </button>
-))}
+              transition: "all .18s ease",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
+            }}
+          >
+            <ExpressionIcon
+              type={item.svg}
+              size={26}
+              color={item.color}
+            />
+          </button>
+        );
+      })}
 
       {!filtered.length && (
         <div

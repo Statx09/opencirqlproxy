@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { styles } from "./profileStyles";
 
 import ExpressionBadges from "../expressions/ExpressionBadges";
@@ -12,22 +12,33 @@ export default function ExpressSection({
 
   const MAX_EXPRESSIONS = 10;
 
+  const uniqueSelectedExpressions = [...new Set(selectedExpressions)];
 const toggle = (value) => {
-  // Remove if already selected
+  console.log("=== EXPRESSION TOGGLE ===");
+  console.log("Clicked value:", value);
+  console.log("Selected expressions:", selectedExpressions);
+  console.log(
+    "Already selected:",
+    selectedExpressions.includes(value)
+  );
+
   if (selectedExpressions.includes(value)) {
+    console.log("REMOVING:", value);
+
     setExpressions(
       selectedExpressions.filter((x) => x !== value)
     );
+
     return;
   }
 
-  // Prevent selecting more than 10
+  console.log("ADDING:", value);
+
   if (selectedExpressions.length >= MAX_EXPRESSIONS) {
     alert("You can select up to 10 identity icons.");
     return;
   }
 
-  // Add new selection
   setExpressions([...selectedExpressions, value]);
 };
 
@@ -69,15 +80,16 @@ const toggle = (value) => {
             marginBottom: 12,
           }}
         >
-          Selected ({selectedExpressions.length})
+          Selected ({uniqueSelectedExpressions.length})
         </div>
 
-        {selectedExpressions.length ? (
+        {uniqueSelectedExpressions.length ? (
           <ExpressionBadges
-            badges={selectedExpressions}
-            max={999}
-            showLabels
-          />
+          badges={uniqueSelectedExpressions}
+          max={999}
+          showLabels
+          onRemove={toggle}
+        />
         ) : (
           <div
             style={{
@@ -103,7 +115,7 @@ const toggle = (value) => {
         </div>
 
         <ExpressionGrid
-          selected={selectedExpressions}
+          selected={uniqueSelectedExpressions}
           search={search}
           onToggle={toggle}
         />
@@ -111,3 +123,5 @@ const toggle = (value) => {
     </div>
   );
 }
+
+

@@ -7,6 +7,7 @@ export default function ExpressionBadges({
   max = 4,
   showLabels = false,
   size = 48,
+  onRemove,
 }) {
   if (!badges.length) return null;
 
@@ -27,10 +28,20 @@ export default function ExpressionBadges({
 
         return (
           <ExpressionChip
-  key={id}
-  expression={expression}
-  size={size}
-/>
+            key={id}
+            expression={expression}
+            size={size}
+            selected={true}
+            onClick={() => {
+              console.log("REMOVE EXPRESSION:", id);
+
+              if (onRemove) {
+                onRemove(id);
+              } else {
+                console.log("NO onRemove FUNCTION");
+              }
+            }}
+          />
         );
       })}
     </div>

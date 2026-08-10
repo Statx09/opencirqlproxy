@@ -1,4 +1,4 @@
-export const expressions = [
+﻿export const expressions = [
 
   // ================= TECHNOLOGY =================
 
@@ -226,8 +226,24 @@ export const expressions = [
     color: "#EAB308",
   },
 
+  {
+  id: "manchester_united",
+  label: "Manchester United",
+  category: "Sports",
+  svg: "manchester_united",
+  color: "#DA291C",
+  keywords: [
+    "manchester united",
+    "man united",
+    "man utd",
+    "mufc",
+    "united",
+    "football",
+    "soccer",
+    "premier league",
+  ],
+},
 ];
-
 
 export function getExpression(id) {
   return expressions.find((e) => e.id === id);
@@ -249,3 +265,11 @@ export function searchExpressions(query) {
       )
   );
 }
+
+
+
+
+
+
+
+

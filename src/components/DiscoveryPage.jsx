@@ -18,23 +18,45 @@ export default function DiscoveryPage({
   const { theme } = useTheme();
 
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase();
+  const q = query.toLowerCase();
 
-    const result = hosts
-      .map(normalizeHost)
-      .filter((h) => {
-        const name = h.name?.toLowerCase() || "";
-        const topics = (h.topics || []).join(" ").toLowerCase();
-        const intents = (h.intents || []).join(" ").toLowerCase();
+  const result = hosts
+    .map(normalizeHost)
+    .filter((h) => {
+      const name = h.name?.toLowerCase() || "";
+      const topics = (h.topics || []).join(" ").toLowerCase();
+      const intents = (h.intents || []).join(" ").toLowerCase();
 
-        return (
-          name.includes(q) ||
-          topics.includes(q) ||
-          intents.includes(q)
-        );
-      });
+      const matchesSearch =
+        name.includes(q) ||
+        topics.includes(q) ||
+        intents.includes(q);
+
+      if (!matchesSearch) return false;
+
+      if (filter === "all") return true;
+
+      const filterMap = {
+        social: ["friendship", "social", "community"],
+        dating: ["dating", "relationship", "romance"],
+        networking: ["networking", "business", "professional"],
+        services: ["consultant", "consulting", "freelance", "services"],
+        promotion: ["promotion", "product", "marketing", "sales"],
+        collaboration: ["collaboration", "partner", "project"],
+        support: ["support", "help", "mentoring", "advice"],
+      };
+
+      const keywords = filterMap[filter] || [];
+
+      const searchableText = `${name} ${topics} ${intents}`;
+
+      return keywords.some((keyword) =>
+        searchableText.includes(keyword)
+      );
+    });
 
     console.log(
       "FILTERED:",
@@ -45,7 +67,7 @@ export default function DiscoveryPage({
     );
 
     return result;
-  }, [hosts, query]);
+    }, [hosts, query, filter]);
 
   return (
     <div style={page(theme)}>
@@ -76,9 +98,11 @@ export default function DiscoveryPage({
         </div>
 
         <TopicSearchBar
-          value={query}
-          onChange={setQuery}
-        />
+  value={query}
+  onChange={setQuery}
+  filter={filter}
+  onFilterChange={setFilter}
+/>
 
       </div>
 

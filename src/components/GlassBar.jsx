@@ -1,8 +1,10 @@
 import { useTheme } from "../context/ThemeContext";
+import { useUser } from "../hooks/useUser";
 
 export default function GlassBar({ user, onAction }) {
   const isLoggedIn = !!user;
   const { theme } = useTheme();
+  const { login } = useUser();
 
   return (
     <div style={wrap}>
@@ -25,16 +27,22 @@ export default function GlassBar({ user, onAction }) {
         </button>
 
         <button
-          style={{
-            ...iconBtn,
-            border: isLoggedIn
-              ? "1px solid rgba(34,197,94,0.8)"
-              : "1px solid rgba(239,68,68,0.8)",
-          }}
-          onClick={() => onAction("userProfile")}
-        >
-          👤
-        </button>
+  style={{
+    ...iconBtn,
+    border: isLoggedIn
+      ? "1px solid rgba(34,197,94,0.8)"
+      : "1px solid rgba(239,68,68,0.8)",
+  }}
+  onClick={() => {
+    if (isLoggedIn) {
+      onAction("userProfile");
+    } else {
+      login();
+    }
+  }}
+>
+  👤
+</button>
 
       </div>
     </div>

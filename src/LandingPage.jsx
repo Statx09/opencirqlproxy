@@ -8,6 +8,7 @@ import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
 import { Sun, Moon } from "lucide-react";
+import { useUser } from "./hooks/useUser";
 
 
 import ChatsTab from "./components/ChatsTab";
@@ -26,6 +27,9 @@ import { supabase } from "./lib/supabaseClient";
 
 
 export default function LandingPage({ user }) {
+
+  const { login, logout } = useUser();
+
   const [hosts, setHosts] = useState([]);
   const [mode, setMode] = useState("grid");
   const [index, setIndex] = useState(0);
@@ -219,23 +223,45 @@ useEffect(() => {
 
 {mode === "grid" && (
   <div style={{ ...header(theme), marginBottom: 24 }}>
-    <div style={logo}>
-      ◉ OpenCall
+
+    <div style={brandWrap}>
+      <div style={brandName}>
+        Cirql
+      </div>
+
+      <div
+        style={{
+          color: theme.text,
+          opacity: 0.35,         
+
+ fontSize: 13,
+          marginTop: 1,
+        }}
+      >
+        •
+      </div>
+
+      <div style={brandTagline}>
+        Social & Support Discovery
+      </div>
     </div>
 
-<button
-  style={themeToggle(theme)}
-  onClick={toggleTheme}
->
-  {theme.mode === "dark" ? (
-    <Sun size={18} strokeWidth={2.2} />
-  ) : (
-    <Moon size={18} strokeWidth={2.2} />
-  )}
-</button>
+    <div style={headerActions}>
+      <button
+        style={themeToggle(theme)}
+        onClick={toggleTheme}
+      >
+        {theme.mode === "dark" ? (
+          <Sun size={18} strokeWidth={2.2} />
+        ) : (
+          <Moon size={18} strokeWidth={2.2} />
+        )}
+      </button>
+    </div>
+
   </div>
 )}
-
+  
     {/* GRID */}
     {mode === "grid" && (
       <DiscoveryPage
@@ -401,6 +427,41 @@ useEffect(() => {
 
 /* ================= STYLES ================= */
 
+const brandWrap = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+};
+
+const brandLogo = {
+  width: 30,
+  height: 30,
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const brandName = {
+  fontSize: 20,
+  fontWeight: 800,
+  letterSpacing: "-0.4px",
+  color: "inherit",
+  lineHeight: 1,
+};
+
+const brandTagline = {
+  marginTop: 2,
+  fontSize: 12,
+  fontWeight: 600,
+  fontStyle: "italic",
+  fontFamily: '"Trebuchet MS", "Segoe UI", sans-serif',
+  letterSpacing: "0.1px",
+  color: "inherit",
+  opacity: 0.62,
+  lineHeight: 1,
+};
+
 const page = (theme) => ({
   width: "100%",
   minHeight: "100vh",
@@ -466,28 +527,29 @@ const themeToggle = (theme) => ({
 });
 
 const modeBtn = {
-  position: "fixed",
-  top: 80, // moved below header
-  left: 16,
-  zIndex: 9999,
-
-  height: 46,
-  padding: "0 18px",
+  width: "100%",
+  height: 40,
+  padding: "0 14px",
 
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 
-  borderRadius: 14,
+  borderRadius: 10,
   border: "1px solid rgba(255,255,255,.12)",
 
-  background: "rgba(20,20,25,.85)",
-
+  background: "rgba(20,20,25,.72)",
   color: "#fff",
+
   fontWeight: 600,
-  fontSize: 15,
+  fontSize: 13,
 
   cursor: "pointer",
+
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+
+  boxSizing: "border-box",
 };
 
 const swipeStage = {
@@ -503,3 +565,11 @@ const glassWrap = {
   right: 0,
   zIndex: 1000,
 };
+
+const headerActions = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+};
+
+

@@ -99,7 +99,7 @@ export default function DiscoveryPage({
 /* ================= STYLES ================= */
 
 const page = (theme) => ({
-  padding: "90px 18px 120px",
+  padding: "78px 18px 120px",
   background: theme.background,
   color: theme.text,
   minHeight: "100vh",
@@ -111,8 +111,8 @@ const page = (theme) => ({
 const header = {
   display: "flex",
   flexDirection: "column",
-  gap: 14,
-  marginBottom: 24,
+  gap: 6,
+  marginBottom: 10,
 };
 
 const grid = {
@@ -125,19 +125,19 @@ const grid = {
 
 const topRow = {
   display: "flex",
-  gap: 12,
-  marginBottom: 14,
+  gap: 8,
+  marginBottom: 6,
 };
 
 const topButton = (theme) => ({
   flex: 1,
-  height: 46,
+  height: 34,
 
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 
-  borderRadius: 14,
+  borderRadius: 9,
 
   background: theme.card,
   color: theme.text,
@@ -148,7 +148,7 @@ const topButton = (theme) => ({
   border: `1px solid ${theme.border}`,
 
   boxShadow:
-    "0 0 0 1px rgba(96,165,250,.14), 0 0 16px rgba(59,130,246,.16), 0 8px 22px rgba(0,0,0,.20)",
+    "0 0 0 1px rgba(96,165,250,.10), 0 0 12px rgba(59,130,246,.12), 0 5px 14px rgba(0,0,0,.16)",
 
   cursor: "pointer",
 

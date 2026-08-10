@@ -386,9 +386,8 @@ const activeButton = {
 
 const randomCallButton = {
   position: "absolute",
-  left: "50%",
-  bottom: 28,
-  transform: "translateX(-50%)",
+  right: 90,
+  bottom: 105,
 
   display: "flex",
   alignItems: "center",

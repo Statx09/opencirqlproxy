@@ -171,34 +171,47 @@ expression_badges: expressions,
     <div style={wrap}>
 
       {/* ================= HERO ================= */}
-      <div style={hero}>
+<div style={hero}>
 
-        {/* BANNER */}
-        <div style={bannerBox}>
-          <img
-            src={bannerUrl || "https://via.placeholder.com/600x200"}
-            style={banner}
-          />
+  {/* BANNER */}
+  <div style={bannerBox}>
+    <img
+      src={bannerUrl || "https://via.placeholder.com/600x200"}
+      style={banner}
+    />
 
-          <input
-            type="file"
-            accept="image/*"
-            id="bannerUpload"
-            style={{ display: "none" }}
-            onChange={async (e) => {
-              const file = e.target.files[0];
-              const url = await uploadBanner(file);
-if (url) setBannerUrl(url);
-            }}
-          />
+    <input
+      type="file"
+      accept="image/*"
+      id="bannerUpload"
+      style={{ display: "none" }}
+      onChange={async (e) => {
+        const file = e.target.files[0];
+        const url = await uploadBanner(file);
+        if (url) setBannerUrl(url);
+      }}
+    />
 
-          <label htmlFor="bannerUpload" style={uploadBtn}>
-            Upload Banner
-          </label>
-        </div>
+    <label htmlFor="bannerUpload" style={uploadBtn}>
+      Upload Banner
+    </label>
+  </div>
 
-        {/* AVATAR */}
-        <div style={avatarWrap}>
+  {/* LOGOUT — BELOW BANNER */}
+  {onLogout && (
+    <div style={logoutRow}>
+      <button
+        type="button"
+        onClick={onLogout}
+        style={logoutTopBtn}
+      >
+        Logout
+      </button>
+    </div>
+  )}
+
+  {/* AVATAR */}
+  <div style={avatarWrap}>
           <img
             src={avatarUrl || "https://via.placeholder.com/100"}
             style={avatar}
@@ -320,11 +333,6 @@ if (url) setAvatarUrl(url);
           {loading ? "Saving..." : "Save Profile"}
         </button>
 
-        {onLogout && (
-          <button onClick={onLogout} style={logoutBtn}>
-            Logout
-          </button>
-        )}
       </div>
     </div>
   );
@@ -462,4 +470,22 @@ const logoutBtn = {
   border: "none",
   borderRadius: 10,
   color: "#fff",
+};
+
+const logoutTopBtn = {
+  padding: "7px 13px",
+  borderRadius: 9,
+  border: "1px solid rgba(239,68,68,0.6)",
+  background: "rgba(239,68,68,0.12)",
+  color: "#ef4444",
+  fontSize: 12,
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const logoutRow = {
+  display: "flex",
+  justifyContent: "flex-end",
+  marginTop: 8,
+  marginBottom: 8,
 };

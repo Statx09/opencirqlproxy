@@ -1,27 +1,19 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "./lib/supabaseClient";
+import React from "react";
 import LandingPage from "./LandingPage";
+import { useUser } from "./hooks/useUser";
 
 export default function AppShell() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, login, logout } = useUser();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data?.session?.user || null);
-      setLoading(false);
-    });
+  if (user === undefined) {
+    return <div>Loading...</div>;
+  }
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setUser(session?.user || null);
-      }
-    );
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-
-  return <LandingPage user={user} />;
+  return (
+    <LandingPage
+      user={user}
+      onLogin={login}
+      onLogout={logout}
+    />
+  );
 }

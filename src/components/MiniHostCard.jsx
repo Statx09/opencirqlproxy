@@ -117,7 +117,7 @@ console.log("BANNER:", h.banner);
  {/* EXPRESSIONS */}
 <ExpressionBadges
   badges={h.expressions || []}
-  max={3}
+  max={5}
   size={32}
 />
 
@@ -136,30 +136,7 @@ console.log("BANNER:", h.banner);
     </span>
   ))}
 </div>
-        {/* MESSAGE + CALL (FIXED — HOSTCARD STYLE) */}
-        <div style={actionRow}>
-
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      onAction("messages", h);
-    }}
-    style={messageBtn}
-  >
-    Message
-  </button>
-
-  <button
-    onClick={(e) => {
-      e.stopPropagation();
-      onAction("call", h);
-    }}
-    style={callBtn}
-  >
-    Call
-  </button>
-
-</div>
+        
       </div>
 
       {/* ACTION RAIL */}
@@ -167,25 +144,24 @@ console.log("BANNER:", h.banner);
 <div style={rail}>
 
   <button
-  style={{ ...railButton, ...waveButton }}
-  onClick={(e) => {
-    e.stopPropagation();
-    onAction("wave", h);
-  }}
->
-  👋
-</button>
+    style={{ ...railButton, ...waveButton }}
+    onClick={(e) => {
+      e.stopPropagation();
+      onAction("wave", h);
+    }}
+  >
+    👋
+  </button>
 
-<button
-  style={{ ...railButton, ...likeButton }}
-  onClick={(e) => {
-    e.stopPropagation();
-    onAction("like", h);
-  }}
->
-  ❤️
-</button>
-
+  <button
+    style={{ ...railButton, ...likeButton }}
+    onClick={(e) => {
+      e.stopPropagation();
+      onAction("like", h);
+    }}
+  >
+    ❤️
+  </button>
 
 </div>
 
@@ -358,9 +334,10 @@ const callBtn = {
 const rail = {
   display: "flex",
   flexDirection: "column",
-  gap: 8,
+  gap: 5,
   justifyContent: "center",
   alignItems: "center",
+  flexShrink: 0,
 };
 
 
@@ -380,7 +357,7 @@ const railButton = {
   alignItems: "center",
   justifyContent: "center",
 
-  fontSize: 18,
+  fontSize: 15,
 
   cursor: "pointer",
 

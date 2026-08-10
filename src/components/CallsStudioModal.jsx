@@ -88,8 +88,8 @@ export default function CallsStudioModal({
       {/* TOP BAR */}
       <div style={topBar}>
         <div style={title}>
-          OpenCall Studio
-        </div>
+  Cirql Call Room
+</div>
 
         <button
           type="button"
@@ -267,10 +267,10 @@ const videoArea = {
 
 const topBar = {
   position: "absolute",
-  top: 0,
+  top: 14,
   left: 0,
   right: 0,
-  height: 64,
+  height: 52,
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -386,8 +386,8 @@ const activeButton = {
 
 const randomCallButton = {
   position: "absolute",
-  right: 90,
-  bottom: 105,
+  right: 78,
+  bottom: 125,
 
   display: "flex",
   alignItems: "center",

@@ -112,7 +112,7 @@ const header = {
   display: "flex",
   flexDirection: "column",
   gap: 6,
-  marginBottom: 10,
+  marginBottom: 4,
 };
 
 const grid = {

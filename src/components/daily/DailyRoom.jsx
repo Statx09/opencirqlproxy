@@ -26,6 +26,7 @@ export default function DailyRoom({
             },
 
             showLeaveButton: true,
+            showPrejoinUI: false,
             showFullscreenButton: true,
 
             userName: displayName,
@@ -89,3 +90,4 @@ export default function DailyRoom({
     />
   );
 }
+

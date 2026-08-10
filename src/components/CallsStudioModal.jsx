@@ -85,23 +85,6 @@ export default function CallsStudioModal({
         />
       </div>
 
-      {/* TOP BAR */}
-      <div style={topBar}>
-        <div style={title}>
-  Cirql Call Room
-</div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          style={closeBtn}
-          aria-label="Close Call Studio"
-          title="Close"
-        >
-          <X size={20} strokeWidth={2.2} />
-        </button>
-      </div>
-
       {/* HOST STATUS */}
       {host && (
         <div style={hostStatus}>
@@ -263,51 +246,6 @@ const videoArea = {
   width: "100%",
   height: "100%",
   background: "#000",
-};
-
-const topBar = {
-  position: "absolute",
-  top: 14,
-  left: 0,
-  right: 0,
-  height: 52,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  padding: "0 18px",
-  background:
-    "linear-gradient(to bottom, rgba(0,0,0,.75), rgba(0,0,0,0))",
-  zIndex: 20,
-  pointerEvents: "none",
-};
-
-const title = {
-  color: "#fff",
-  fontSize: 18,
-  fontWeight: 700,
-  textShadow:
-    "0 2px 8px rgba(0,0,0,.5)",
-};
-
-const closeBtn = {
-  width: 42,
-  height: 42,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  borderRadius: "50%",
-  border:
-    "1px solid rgba(255,255,255,.15)",
-  background:
-    "rgba(20,20,25,.55)",
-  backdropFilter: "blur(18px)",
-  WebkitBackdropFilter:
-    "blur(18px)",
-  color: "#fff",
-  cursor: "pointer",
-  pointerEvents: "auto",
-  boxShadow:
-    "0 4px 18px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05)",
 };
 
 const hostStatus = {

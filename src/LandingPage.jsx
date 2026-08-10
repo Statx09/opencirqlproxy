@@ -322,7 +322,13 @@ useEffect(() => {
 
       {activeModal === "userProfile" && (
         <ModalShell title="Identity Studio" onClose={closeModal}>
-          <ProfileTab user={user} />
+          <ProfileTab
+  user={user}
+  onLogout={async () => {
+    await supabase.auth.signOut();
+    closeModal();
+  }}
+/>
         </ModalShell>
       )}
 

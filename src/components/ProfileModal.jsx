@@ -216,12 +216,10 @@ console.log("error =", error);
             onClose={() => setShowMessageModal(false)}
           />
         )}
-
         {showCallModal && (
-          <CallModal
+          <CallsStudioModal
             host={host}
             user={sessionUser}
-            callType={callType}
             onClose={() => setShowCallModal(false)}
           />
         )}
@@ -232,7 +230,6 @@ console.log("error =", error);
             onClose={() => setShowTipModal(false)}
           />
         )}
-
         {showImageModal && (
           <ImageModal
             images={showImageModal.images}
@@ -398,4 +395,8 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
+
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 import MessagesModal from "./MessagesModal";
-import CallModal from "./CallModal";
+import CallsStudioModal from "./CallsStudioModal";
 import TipHostButton from "./TipHostButton";
 import ImageModal from "./ImageModal";
 import ExpressionBadges from "./expressions/ExpressionBadges";
@@ -398,3 +398,4 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import useProfile from "../../hooks/useProfile";
 import ExpressSection from "./ExpressSection";
@@ -190,10 +190,15 @@ expression_badges: expressions,
   updated_at: new Date().toISOString(),
 };
 
-    const { error } = await supabase
+    const { data, error } = await supabase
   .from("profiles")
-  .update(payload)
-  .eq("user_id", user.id);
+  .upsert(payload, {
+    onConflict: "user_id",
+  })
+  .select()
+  .single();
+
+console.log("PROFILE UPSERT RESULT:", { data, error });
 
     setLoading(false);
 
@@ -235,7 +240,7 @@ expression_badges: expressions,
     </label>
   </div>
 
-  {/* LOGOUT â€” BELOW BANNER */}
+  {/* LOGOUT — BELOW BANNER */}
   {onLogout && (
     <div style={logoutRow}>
       <button
@@ -1001,6 +1006,10 @@ const mediaCount = {
   marginTop: 8,
   marginBottom: 0,
 };
+
+
+
+
 
 
 

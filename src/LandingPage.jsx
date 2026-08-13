@@ -7,7 +7,7 @@ import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Settings } from "lucide-react";
 import { useUser } from "./hooks/useUser";
 
 
@@ -33,6 +33,10 @@ export default function LandingPage({ user }) {
   const [hosts, setHosts] = useState([]);
   const [mode, setMode] = useState("grid");
   const [index, setIndex] = useState(0);
+  const [showNetwork, setShowNetwork] = useState(false);
+const [showSettings, setShowSettings] = useState(false);
+const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [networkView, setNetworkView] = useState("main");
 
   const [activeModal, setActiveModal] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -222,9 +226,161 @@ useEffect(() => {
   <div style={page(theme)}>
 
 {mode === "grid" && (
-  <div style={{ ...header(theme), marginBottom: 24 }}>
+  <div style={{ ...header(theme), position: "relative" }}>
 
-    <div style={brandWrap}>
+   <div style={networkWrap}>
+  <button
+    type="button"
+    style={networkButton}
+    onClick={() => setShowNetwork((v) => !v)}
+    aria-label="Cirql Network"
+  >
+    <span style={networkSignal}>
+      <span style={networkSignalArc1}></span>
+      <span style={networkSignalArc2}></span>
+      <span style={networkSignalDot}></span>
+    </span>
+  </button>
+
+  {showNetwork && (
+  <div style={networkDropdown(theme)}>
+    {networkView === "main" ? (
+      <>
+        <div style={networkDropdownHeader}>
+          <span style={networkDot}></span>
+          <span>Cirql Network</span>
+        </div>
+
+        <div style={networkHealth}>
+          <div>
+            <div style={networkHealthLabel}>
+              Network health
+            </div>
+
+            <div style={networkBars}>
+              <span style={{ ...networkBar, height: 5 }}></span>
+              <span style={{ ...networkBar, height: 9 }}></span>
+              <span style={{ ...networkBar, height: 13 }}></span>
+              <span style={{ ...networkBar, height: 17 }}></span>
+              <span style={{ ...networkBar, height: 21 }}></span>
+            </div>
+          </div>
+
+          <div style={networkPercent}>94%</div>
+        </div>
+
+        <div style={networkStats}>
+          <div style={networkStat}>
+            <strong>1,284</strong>
+            <span>members</span>
+          </div>
+
+          <div style={networkStat}>
+            <strong>342</strong>
+            <span>hosts</span>
+          </div>
+
+          <div style={networkStat}>
+            <strong>86</strong>
+            <span>online</span>
+          </div>
+        </div>
+
+        <div style={networkDivider}></div>
+
+        <button
+          type="button"
+          style={networkTransparency}
+          onClick={() => setNetworkView("transparency")}
+        >
+          <span>Network costs</span>
+          <span>&rarr;</span>
+        </button>
+
+        <button
+          type="button"
+          style={networkFund}
+          aria-label="Contribute"
+        >
+          Contribute
+        </button>
+
+        <div style={networkDivider}></div>
+
+        <div style={networkTransparencyMessage}>
+          Cirql is built to keep the network available,
+          independent, and accessible.
+        </div>
+      </>
+    ) : (
+      <>
+        <button
+          type="button"
+          style={networkBack}
+          onClick={() => setNetworkView("main")}
+        >
+          <span>?�</span>
+          <span>Cirql Network</span>
+        </button>
+
+        <div style={networkTransparencyTitle}>
+          Network costs
+        </div>
+
+        <div style={networkTransparencySubtitle}>
+          Monthly network target
+        </div>
+
+        <div style={networkMonthlyTarget}>
+          $1,500
+          <span>/ month</span>
+        </div>
+
+        <div style={networkCosts}>
+          <div style={networkCostRow}>
+            <span>Infrastructure</span>
+            <strong>$600</strong>
+          </div>
+
+          <div style={networkCostRow}>
+            <span>Storage & data</span>
+            <strong>$200</strong>
+          </div>
+
+          <div style={networkCostRow}>
+            <span>Calls & video</span>
+            <strong>$400</strong>
+          </div>
+
+          <div style={networkCostRow}>
+            <span>Security & services</span>
+            <strong>$300</strong>
+          </div>
+        </div>
+
+        <div style={networkDivider}></div>
+
+        <button
+          type="button"
+          style={networkFund}
+          aria-label="Contribute"
+        >
+          Contribute
+        </button>
+
+        <div style={networkDivider}></div>
+
+        <div style={networkTransparencyMessage}>
+          Cirql is built to keep the network available,
+          independent, and accessible.
+        </div>
+      </>
+    )}
+  </div>
+)}
+
+</div>
+<div style={brandWrap}>
       <div style={brandName}>
         Cirql
       </div>
@@ -238,7 +394,7 @@ useEffect(() => {
           marginTop: 1,
         }}
       >
-        •
+        &bull;
       </div>
 
       <div style={brandTagline}>
@@ -246,17 +402,8 @@ useEffect(() => {
       </div>
     </div>
 
-    <div style={headerActions}>
-      <button
-        style={themeToggle(theme)}
-        onClick={toggleTheme}
-      >
-        {theme.mode === "dark" ? (
-          <Sun size={18} strokeWidth={2.2} />
-        ) : (
-          <Moon size={18} strokeWidth={2.2} />
-        )}
-      </button>
+    <div style={headerActions}><div style={settingsWrap}><button type="button" style={settingsButton(theme)} onClick={() => setShowSettings((v) => !v)} aria-label="Settings"><Settings size={17} strokeWidth={2} /></button>{showSettings && (<div style={settingsDropdown(theme)}><div style={settingsSection}><div style={settingsLabel}>Appearance</div><button type="button" style={settingsRow(theme)} onClick={toggleTheme}><span style={settingsRowLeft}>{theme.mode === "dark" ? (<Moon size={15} strokeWidth={2} />) : (<Sun size={15} strokeWidth={2} />)}<span>{theme.mode === "dark" ? "Dark mode" : "Light mode"}</span></span><span style={settingsValue}>{theme.mode === "dark" ? "Dark" : "Light"}</span></button></div><div style={settingsDivider}></div><div style={settingsSection}><div style={settingsLabel}>Notifications</div><button type="button" style={settingsRow(theme)} onClick={() => setNotificationsEnabled((v) => !v)}><span style={settingsRowLeft}><span style={{...settingsBell, background: notificationsEnabled ? "#22c55e" : "rgba(148,163,184,.35)"}}></span><span>Notifications</span></span><span style={{...settingsSwitch, background: notificationsEnabled ? "#22c55e" : "rgba(148,163,184,.22)"}}><span style={{...settingsSwitchKnob, transform: notificationsEnabled ? "translateX(14px)" : "translateX(2px)"}} /></span></button></div><div style={settingsDivider}></div><button type="button" style={settingsLogout} onClick={async () => { setShowSettings(false); await logout(); }}>Log out</button></div>)}</div>
+
     </div>
 
   </div>
@@ -286,7 +433,7 @@ useEffect(() => {
       style={modeBtn}
       onClick={() => setMode("grid")}
     >
-      ▦ Grid View
+      ? Grid View
     </button>
 
     <div
@@ -427,7 +574,385 @@ useEffect(() => {
 
 /* ================= STYLES ================= */
 
+const settingsWrap = {
+  position: "relative",
+};
+
+const settingsButton = (theme) => ({
+  width: 32,
+  height: 32,
+  borderRadius: "50%",
+  border: `1px solid ${theme.border}`,
+  background: "transparent",
+  color: theme.text,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+});
+
+const settingsDropdown = (theme) => ({
+  position: "absolute",
+  top: 40,
+  right: 0,
+  width: 210,
+  padding: 10,
+  borderRadius: 14,
+  background: theme.mode === "dark" ? "rgba(15,23,42,.96)" : "rgba(248,250,252,.96)",
+  border: "1px solid rgba(148,163,184,.18)",
+  boxShadow: "0 18px 45px rgba(0,0,0,.28)",
+  backdropFilter: "blur(24px)",
+  WebkitBackdropFilter: "blur(24px)",
+  zIndex: 100,
+  boxSizing: "border-box",
+});
+
+const settingsSection = {
+  padding: "3px 2px",
+};
+
+const settingsLabel = {
+  fontSize: 10,
+  fontWeight: 600,
+  opacity: 0.42,
+  marginBottom: 5,
+  padding: "0 7px",
+  textTransform: "uppercase",
+  letterSpacing: "0.5px",
+};
+
+const settingsRow = (theme) => ({
+  width: "100%",
+  minHeight: 32,
+  padding: "0 7px",
+  border: "none",
+  borderRadius: 7,
+  background: "transparent",
+  color: theme.text,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  cursor: "pointer",
+  fontSize: 12,
+});
+
+const settingsRowLeft = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+};
+
+const settingsValue = {
+  fontSize: 10,
+  opacity: 0.42,
+};
+
+const settingsBell = {
+  width: 7,
+  height: 7,
+  borderRadius: "50%",
+  background: "#22c55e",
+};
+
+const settingsSwitch = {
+  position: "relative",
+  width: 28,
+  height: 16,
+  borderRadius: 999,
+  transition: "background .2s ease",
+};
+
+const settingsSwitchKnob = {
+  position: "absolute",
+  top: 2,
+  left: 0,
+  width: 12,
+  height: 12,
+  borderRadius: "50%",
+  background: "#fff",
+  transition: "transform .2s ease",
+};
+
+const settingsDivider = {
+  height: 1,
+  margin: "7px 2px",
+  background: "rgba(148,163,184,.12)",
+};
+
+const settingsLogout = {
+  width: "100%",
+  height: 32,
+  border: "none",
+  borderRadius: 8,
+  background: "transparent",
+  color: "rgba(248,113,113,.82)",
+  textAlign: "left",
+  padding: "0 9px",
+  fontSize: 12,
+  fontWeight: 600,
+  cursor: "pointer",
+};
+const networkButton = {
+  position: "absolute",
+  left: 12,
+  top: "50%",
+  transform: "translateY(-50%)",
+  width: 32,
+  height: 32,
+  borderRadius: "50%",
+  border: "1px solid #4b5563",
+  background: "transparent",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+};
+
+const networkWrap = {
+  position: "absolute",
+  left: 12,
+  top: "50%",
+  transform: "translateY(-50%)",
+};
+
+const networkSignal = {
+  position: "relative",
+  width: 20,
+  height: 20,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+const networkSignalArc1 = {
+  position: "absolute",
+  width: 10,
+  height: 10,
+  border: "1.5px solid currentColor",
+  borderLeftColor: "transparent",
+  borderBottomColor: "transparent",
+  borderRadius: "50%",
+  transform: "rotate(-45deg)",
+  opacity: 0.75,
+};
+
+const networkSignalArc2 = {
+  position: "absolute",
+  width: 17,
+  height: 17,
+  border: "1.5px solid currentColor",
+  borderLeftColor: "transparent",
+  borderBottomColor: "transparent",
+  borderRadius: "50%",
+  transform: "rotate(-45deg)",
+  opacity: 0.35,
+};
+
+const networkSignalDot = {
+  width: 6,
+  height: 6,
+  borderRadius: "50%",
+  background: "#22c55e",
+  boxShadow: "0 0 0 3px rgba(34,197,94,.15)",
+  zIndex: 2,
+};
+
+const networkDot = {
+  width: 7,
+  height: 7,
+  borderRadius: "50%",
+  background: "#22c55e",
+  boxShadow: "0 0 0 3px rgba(34,197,94,.15)",
+  flexShrink: 0,
+};
+
+const networkDropdown = (theme) => ({
+  position: "absolute",
+  top: 40,
+  left: 0,
+  width: 228,
+  padding: 16,
+  borderRadius: 16,
+  background: theme.mode === "dark" ? "rgba(15,23,42,.96)" : "rgba(248,250,252,.96)",
+  border: "1px solid rgba(148,163,184,.18)",
+  boxShadow: "0 18px 45px rgba(0,0,0,.28)",
+  backdropFilter: "blur(24px)",
+  WebkitBackdropFilter: "blur(24px)",
+  zIndex: 100,
+  boxSizing: "border-box",
+});
+
+const networkDropdownHeader = {
+  display: "flex",
+  alignItems: "center",
+  gap: 9,
+  fontSize: 13,
+  fontWeight: 700,
+};
+
+const networkHealth = {
+  marginTop: 18,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
+const networkBars = {
+  display: "flex",
+  alignItems: "flex-end",
+  gap: 4,
+  height: 22,
+};
+
+const networkPercent = {
+  fontSize: 20,
+  fontWeight: 800,
+  letterSpacing: "-0.5px",
+};
+
+const networkStats = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: 8,
+  marginTop: 18,
+  textAlign: "center",
+};
+
+const networkStat = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 3,
+  fontSize: 11,
+  opacity: 0.7,
+};
+
+const networkDivider = {
+  height: 1,
+  margin: "16px 0 12px",
+  background: "rgba(148,163,184,.12)",
+};
+
+const networkFund = {
+  width: "100%",
+  height: 30,
+  padding: "0 12px",
+  borderRadius: 8,
+  border: "1px solid rgba(148,163,184,.18)",
+  background: "rgba(255,255,255,.035)",
+  color: "inherit",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 11,
+  fontWeight: 650,
+  letterSpacing: "0.1px",
+  cursor: "pointer",
+  transition: "all .2s ease",
+};
+
+const networkSupportIntro = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 4,
+  marginBottom: 12,
+  fontSize: 11,
+  lineHeight: 1.45,
+  opacity: 0.65,
+};
+
+const networkTransparency = {
+  width: "100%",
+  marginTop: 8,
+  padding: "7px 2px",
+  border: "none",
+  background: "transparent",
+  color: "inherit",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  fontSize: 11,
+  opacity: 0.58,
+  cursor: "pointer",
+};
+
+const networkBack = {
+  width: "100%",
+  border: "none",
+  background: "transparent",
+  color: "inherit",
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  padding: 0,
+  fontSize: 12,
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const networkTransparencyTitle = {
+  marginTop: 20,
+  fontSize: 17,
+  fontWeight: 800,
+  letterSpacing: "-0.3px",
+};
+
+const networkTransparencySubtitle = {
+  marginTop: 4,
+  fontSize: 11,
+  opacity: 0.5,
+};
+
+const networkMonthlyTarget = {
+  marginTop: 8,
+  fontSize: 25,
+  fontWeight: 800,
+  letterSpacing: "-0.7px",
+};
+
+const networkCosts = {
+  marginTop: 20,
+  display: "flex",
+  flexDirection: "column",
+  gap: 13,
+};
+
+const networkCostRow = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  fontSize: 12,
+  opacity: 0.75,
+};
+
+const networkTransparencyMessage = {
+  marginTop: 20,
+  paddingTop: 14,
+  borderTop: "1px solid rgba(148,163,184,.12)",
+  fontSize: 11,
+  lineHeight: 1.5,
+  opacity: 0.55,
+};
+
+const networkHealthLabel = {
+  fontSize: 10,
+  fontWeight: 600,
+  opacity: 0.55,
+  marginBottom: 7,
+  letterSpacing: "0.2px",
+};
+
+const networkBar = {
+  width: 7,
+  borderRadius: 3,
+  background: "#22c55e",
+  opacity: 0.85,
+};
+
 const brandWrap = {
+  position: "absolute",
+  left: "50%",
+  top: "50%",
+  transform: "translate(-50%, -50%)",
   display: "flex",
   alignItems: "center",
   gap: 8,
@@ -484,7 +1009,7 @@ const header = (theme) => ({
 
   padding: "0 20px",
 
-  background: theme.glass,
+  background: theme.mode === "dark" ? "rgba(15,23,42,.96)" : "rgba(248,250,252,.96)",
   backdropFilter: "blur(18px)",
   WebkitBackdropFilter: "blur(18px)",
 
@@ -567,9 +1092,52 @@ const glassWrap = {
 };
 
 const headerActions = {
+  position: "absolute",
+  right: 12,
+  top: "50%",
+  transform: "translateY(-50%)",
   display: "flex",
   alignItems: "center",
   gap: 8,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

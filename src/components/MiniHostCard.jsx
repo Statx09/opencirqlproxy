@@ -347,9 +347,9 @@ const railButton = {
 
   borderRadius: "50%",
 
-  background: "rgba(255,255,255,0.08)",
+  background: "rgba(255,255,255,0.06)",
 
-  border: "1px solid rgba(255,255,255,0.18)",
+  border: "1px solid rgba(255,255,255,0.14)",
 
   color: "#ffffff",
 
@@ -357,7 +357,7 @@ const railButton = {
   alignItems: "center",
   justifyContent: "center",
 
-  fontSize: 15,
+  fontSize: 14,
 
   cursor: "pointer",
 
@@ -373,12 +373,12 @@ const railButton = {
 
 const waveButton = {
   boxShadow:
-    "0 0 14px rgba(56,189,248,.55)",
+    "0 0 12px rgba(56,189,248,.32)",
 };
 
 const likeButton = {
   boxShadow:
-    "0 0 14px rgba(236,72,153,.55)",
+    "0 0 12px rgba(236,72,153,.32)",
 };
 
 const tipButton = {

@@ -8,3 +8,7 @@ CirqlProxy back up final template/
 server/
 node_modules
 dist
+tools/freesvg/.config/
+*.backup
+*.before-*
+src/LandingPage.jsx.backup-settings

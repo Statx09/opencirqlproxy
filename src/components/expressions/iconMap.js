@@ -1,4 +1,4 @@
-﻿import {
+import {
   Coffee,
   Plane,
   Music,
@@ -42,6 +42,54 @@ manchester_united: {
     type: "image",
     src: "/expressions/manchester-united.svg",
     color: "#DA291C",
+  },
+
+arsenal: {
+  type: "image",
+  src: "/expressions/arsenal.svg",
+  color: "#EF0107",
+},
+
+chelsea: {
+  type: "image",
+  src: "/expressions/chelsea.svg",
+  color: "#034694",
+},
+
+manchester_city: {
+  type: "image",
+  src: "/expressions/manchester-city.svg",
+  color: "#6CABDD",
+},
+
+real_madrid: {
+  type: "image",
+  src: "/expressions/real-madrid.svg",
+  color: "#FFFFFF",
+},
+
+barcelona: {
+  type: "image",
+  src: "/expressions/barcelona.svg",
+  color: "#A50044",
+},
+
+liverpool: {
+  type: "image",
+  src: "/src/components/expressions/badges/liverpool.svg",
+  color: "#C8102E",
+},
+
+  girl_dancing: {
+    type: "image",
+    src: "/expressions/girl_dancing.svg",
+    color: "#EC4899",
+  },
+
+  prismatic_monarch_butterfly_ii: {
+    type: "image",
+    src: "/expressions/prismatic_monarch_butterfly_ii.svg",
+    color: "#8B5CF6",
   },
 
   ai: {
@@ -207,17 +255,225 @@ manchester_united: {
   computer: {
     component: Monitor,
     color: "#60A5FA",
-  },
+  },
+
+night_owl: {
+  type: "image",
+  src: "/expressions/night-owl.svg",
+  color: "#6366F1",
+},
+
+gauntlet: {
+  type: "image",
+  src: "/expressions/gauntlet.svg",
+  color: "#F59E0B",
+},
+
+peace_for_palestine: {
+  type: "image",
+  src: "/expressions/peace-for-palestine-vector-decal.svg",
+  color: "#22C55E",
+},
+
   startup: {
     component: Rocket,
     color: "#F97316",
   },
+
+  american_trump: {
+    type: "image",
+    src: "/expressions/american-trump.svg",
+    color: "#3B82F6",
+  },
+
+  avatar_the_last_airbender_lunch_in_republic_city: {
+    type: "image",
+    src: "/expressions/avatar-the-last-airbender-lunch-in-republic-city.svg",
+    color: "#F59E0B",
+  },
+
+  heart_cats: {
+    type: "image",
+    src: "/expressions/heart-cats.svg",
+    color: "#EF4444",
+  },
+
+  i_will_always_be_with_you: {
+    type: "image",
+    src: "/expressions/i-will-always-be-with-you.svg",
+    color: "#EC4899",
+  },
+
+  jamaican_flag_patriotic_symbol: {
+    type: "image",
+    src: "/expressions/jamaican-flag-patriotic-symbol.svg",
+    color: "#22C55E",
+  },
+
+  peace_and_war: {
+    type: "image",
+    src: "/expressions/peace-and-war.svg",
+    color: "#64748B",
+  },
+
+  peace_for_palestine_vector_image: {
+    type: "image",
+    src: "/expressions/peace-for-palestine-vector-image.svg",
+    color: "#22C55E",
+  },
+
+  peace_sign_with_wordpeace: {
+    type: "image",
+    src: "/expressions/peace-sign-with-wordpeace.svg",
+    color: "#22C55E",
+  },
+
+  president_putin: {
+    type: "image",
+    src: "/expressions/president-putin.svg",
+    color: "#64748B",
+  },
+
+  trump_question_mark: {
+    type: "image",
+    src: "/expressions/trump-question-mark.svg",
+    color: "#F59E0B",
+  },
+
+  vector_illustration_of_red_heart4834: {
+    type: "image",
+    src: "/expressions/vector-illustration-of-red-heart4834.svg",
+    color: "#EF4444",
+  },
+
+  vintage_poster_with_rosie_the_riveter: {
+    type: "image",
+    src: "/expressions/vintage-poster-with-rosie-the-riveter.svg",
+    color: "#F97316",
+  },
+
+  war_kills_poster_vector_drawing: {
+    type: "image",
+    src: "/expressions/war-kills-poster-vector-drawing.svg",
+    color: "#EF4444",
+  },
+
+  waving_flag_of_israel: {
+    type: "image",
+    src: "/expressions/waving-flag-of-israel.svg",
+    color: "#2563EB",
+  },
+
+  working_class_kids_against_racism_vector_image: {
+    type: "image",
+    src: "/expressions/working-class-kids-against-racism-vector-image.svg",
+    color: "#8B5CF6",
+  },
+
+  laughing_buddha: {
+    type: "image",
+    src: "/expressions/laughing-buddha.svg",
+    color: "#F59E0B",
+  },
+
+  laughing_out_loud: {
+    type: "image",
+    src: "/expressions/laughing-out-loud.svg",
+    color: "#F59E0B",
+  },
+
+  laughing_leprechaun: {
+    type: "image",
+    src: "/expressions/laughing-leprechaun.svg",
+    color: "#22C55E",
+  },
+
+  rainbow_caticorn: {
+    type: "image",
+    src: "/expressions/rainbow-caticorn.svg",
+    color: "#EC4899",
+  },
+
+  rainbow_around_yinyang: {
+    type: "image",
+    src: "/expressions/rainbow-around-yinyang.svg",
+    color: "#8B5CF6",
+  },
+
+  colorful_rainbow_horse: {
+    type: "image",
+    src: "/expressions/colorful-rainbow-horse.svg",
+    color: "#EC4899",
+  },
+
+  adventure_hat_vector_image: {
+    type: "image",
+    src: "/expressions/adventure-hat-vector-image.svg",
+    color: "#F97316",
+  },
+
+  old_woodcut_sun_vector_image: {
+    type: "image",
+    src: "/expressions/old-woodcut-sun-vector-image.svg",
+    color: "#F59E0B",
+  },
+
+  bruce_lee_1973: {
+    type: "image",
+    src: "/expressions/bruce-lee-1973.svg",
+    color: "#EF4444",
+  },
+
+  vector_icon_for_coffee_shop: {
+    type: "image",
+    src: "/expressions/vector-icon-for-coffee-shop.svg",
+    color: "#B45309",
+  },
+
+  world_flags_globe: {
+    type: "image",
+    src: "/expressions/world-flags-globe.svg",
+    color: "#3B82F6",
+  },
+
+  satisfaction_guaranteed_kliponius_font_as_paths: {
+    type: "image",
+    src: "/expressions/satisfaction-guaranteed-kliponius-font-as-paths.svg",
+    color: "#22C55E",
+  },
+  whale_3: {
+    type: "image",
+    src: "/expressions/whale_3.svg",
+    color: "#22C55E",
+  },
+  chromatic_floral_pattern_dolphin_3: {
+    type: "image",
+    src: "/expressions/chromatic_floral_pattern_dolphin_3.svg",
+    color: "#22C55E",
+  },
+  bat_vector_silhouette: {
+    type: "image",
+    src: "/expressions/bat_vector_silhouette.svg",
+    color: "#22C55E",
+  },
+
+  gerald_g_ice_cream_cones_ff_menu_9: {
+    type: "image",
+    src: "/expressions/gerald_g_ice_cream_cones_ff_menu_9.svg",
+    color: "#22C55E",
+  },
+
+  no_food_or_drink_sign_vector_image: {
+    type: "image",
+    src: "/expressions/no_food_or_drink_sign_vector_image.svg",
+    color: "#22C55E",
+  },
+
+  organic_food_label: {
+    type: "image",
+    src: "/expressions/organic_food_label.svg",
+    color: "#22C55E",
+  },
 };
-
-
-
-
-
-
 
 

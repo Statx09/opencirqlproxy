@@ -1,0 +1,50 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+
+  <!-- Night sky -->
+  <circle cx="50" cy="50" r="47" fill="#111827"/>
+
+  <!-- Crescent moon -->
+  <path
+    d="M72 18
+       C58 22 51 35 55 48
+       C59 62 72 68 84 62
+       C77 76 61 84 46 78
+       C28 71 20 52 27 35
+       C34 19 53 12 72 18Z"
+    fill="#F8FAFC"
+  />
+
+  <!-- Owl ears -->
+  <path d="M25 47 L29 27 L43 40 Z" fill="#374151"/>
+  <path d="M75 47 L71 27 L57 40 Z" fill="#374151"/>
+
+  <!-- Owl head -->
+  <circle cx="50" cy="57" r="29" fill="#4B5563"/>
+
+  <!-- Face -->
+  <circle cx="39" cy="56" r="12" fill="#E5E7EB"/>
+  <circle cx="61" cy="56" r="12" fill="#E5E7EB"/>
+
+  <!-- Eyes -->
+  <circle cx="39" cy="56" r="7" fill="#111827"/>
+  <circle cx="61" cy="56" r="7" fill="#111827"/>
+
+  <circle cx="39" cy="56" r="3" fill="#FACC15"/>
+  <circle cx="61" cy="56" r="3" fill="#FACC15"/>
+
+  <!-- Beak -->
+  <path
+    d="M44 65 L50 73 L56 65 L50 62 Z"
+    fill="#F59E0B"
+  />
+
+  <!-- Chest -->
+  <path
+    d="M36 76
+       Q50 88 64 76
+       Q60 91 50 92
+       Q40 91 36 76Z"
+    fill="#374151"
+  />
+
+</svg>

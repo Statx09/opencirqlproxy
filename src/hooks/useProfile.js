@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import {
   fetchProfile,
   saveProfile,
   uploadImage,
+  uploadGalleryImage,
 } from "../services/profileService";
 
 export default function useProfile(userId) {
@@ -66,12 +67,23 @@ export default function useProfile(userId) {
     return url;
   }
 
+  async function uploadGallery(file, galleryIndex) {
+    const url = await uploadGalleryImage(
+      file,
+      userId,
+      galleryIndex
+    );
+
+    return url;
+  }
+
   return {
     profile,
     loading,
     updateProfile,
     uploadAvatar,
     uploadBanner,
+    uploadGallery,
     reload: loadProfile,
   };
 }

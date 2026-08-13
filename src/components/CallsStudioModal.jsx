@@ -79,10 +79,11 @@ export default function CallsStudioModal({
 
       {/* VIDEO */}
       <div style={videoArea}>
-        <DailyRoom
-          roomUrl="https://cirqll.daily.co/cirqll"
-          displayName={user.email || "Guest"}
-        />
+       <DailyRoom
+  roomUrl="https://cirqll.daily.co/cirqll"
+  displayName={user.email || "Guest"}
+  onLeave={onClose}
+/> 
       </div>
 
       {/* HOST STATUS */}

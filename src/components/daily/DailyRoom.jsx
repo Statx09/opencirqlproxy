@@ -4,6 +4,7 @@ import DailyIframe from "@daily-co/daily-js";
 export default function DailyRoom({
   roomUrl = "https://cirqll.daily.co/cirqll",
   displayName = "OpenCall User",
+  onLeave,
 }) {
   const containerRef = useRef(null);
   const callRef = useRef(null);
@@ -34,6 +35,14 @@ export default function DailyRoom({
         );
 
         callRef.current = call;
+
+        call.on("left-meeting", () => {
+          console.log("DAILY: User left meeting");
+
+          if (onLeave) {
+            onLeave();
+          }
+        });
 
         await call.join({
           url: roomUrl,
@@ -75,7 +84,7 @@ export default function DailyRoom({
         callRef.current = null;
       }
     };
-  }, [roomUrl, displayName]);
+  }, [roomUrl, displayName, onLeave]);
 
   return (
     <div
@@ -90,4 +99,3 @@ export default function DailyRoom({
     />
   );
 }
-

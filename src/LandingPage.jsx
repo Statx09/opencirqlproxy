@@ -74,7 +74,7 @@ const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
 const [showStatusModal, setShowStatusModal] = useState(false);
 
-const statuses = useStatusFeed();
+const { statuses, reload: reloadStatuses } = useStatusFeed();
 
 const [refreshChatsKey] = useState(0);
 
@@ -157,7 +157,7 @@ useEffect(() => {
           break;
 
         case "status":
-         setActiveModal("status");
+         setShowStatusModal(true);
          break;
 
         case "connections":
@@ -319,7 +319,7 @@ useEffect(() => {
           style={networkBack}
           onClick={() => setNetworkView("main")}
         >
-          <span>?</span>
+          <span>ğŸŒ</span>
           <span>Cirql Network</span>
         </button>
 
@@ -472,6 +472,7 @@ useEffect(() => {
   statuses={statuses}
   onClose={() => setShowStatusModal(false)}
   onOpenProfile={handleOpenProfile}
+  reloadStatuses={reloadStatuses}
 />
 )}
 
@@ -529,14 +530,6 @@ useEffect(() => {
           <NotificationsModal notifications={[]} />
         </ModalShell>
       )}
-
-      {activeModal === "status" && (
-  <StatusFeedModal
-    statuses={statuses}
-    onClose={closeModal}
-    onOpenProfile={(host) => handleAction("profile", host)}
-  />
-)}
 
       {activeModal === "connections" && (
         <ModalShell title="Connections" onClose={closeModal}>
@@ -1100,44 +1093,3 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

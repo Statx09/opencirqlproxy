@@ -5,13 +5,15 @@ import ModalShell from "./ui/ModalShell";
 import LiveComposer from "./live/LiveComposer";
 import LiveFeed from "./live/LiveFeed";
 
-
 export default function StatusFeedModal({
   statuses = [],
   onClose,
   onOpenProfile,
-}) {
+  reloadStatuses,
 
+  onAction,
+
+}) {
 
   const handlePost = async ({ content, expression }) => {
 
@@ -20,17 +22,14 @@ export default function StatusFeedModal({
       expression,
     });
 
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
 
     if (!user) {
       console.log("No user");
       return;
     }
-
 
     const { data, error } = await supabase
       .from("live_statuses")
@@ -39,37 +38,26 @@ export default function StatusFeedModal({
         content,
         expression,
         created_at: new Date().toISOString(),
-        expires_at: new Date(
-          Date.now() + 6 * 60 * 60 * 1000
-        ).toISOString(),
       })
       .select();
 
-
     console.log("INSERT DATA:", data);
     console.log("INSERT ERROR:", error);
-  };
 
+    if (!error) {
+      await reloadStatuses?.();
+    }
+  };
 
   return (
     <ModalShell
-      title="Status Feed"
+      title="Feed"
       onClose={onClose}
     >
 
       <div style={container}>
 
-
-        <div style={feedWrap}>
-
-          <LiveFeed
-            statuses={statuses}
-            onOpenProfile={onOpenProfile}
-          />
-
-        </div>
-
-
+        {/* COMPOSER */}
 
         <div style={composerWrap}>
 
@@ -80,57 +68,66 @@ export default function StatusFeedModal({
         </div>
 
 
+        {/* FEED */}
+
+        <div style={feedWrap}>
+
+          <LiveFeed
+            statuses={statuses}
+            onOpenProfile={onOpenProfile}
+            onAction={onAction}
+          />
+
+        </div>
+
       </div>
 
     </ModalShell>
   );
-
 }
-
 
 
 /* ================= STYLES ================= */
 
-
 const container = {
-
-  flex: 1,
-
   display: "flex",
 
   flexDirection: "column",
 
   height: "100%",
 
+  minHeight: 0,
+
+  background: "transparent",
 };
 
+
+const composerWrap = {
+
+  flexShrink: 0,
+
+  padding: "14px 18px",
+
+  borderBottom:
+    "1px solid rgba(255,255,255,.09)",
+
+  background:
+    "transparent",
+
+};
 
 
 const feedWrap = {
 
   flex: 1,
 
+  minHeight: 0,
+
   overflowY: "auto",
 
-  paddingBottom: 20,
-
-};
-
-
-
-const composerWrap = {
-
-  padding: 12,
-
-  borderTop:
-    "1px solid rgba(255,255,255,.08)",
+  overflowX: "hidden",
 
   background:
-    "rgba(11,18,32,.85)",
-
-  backdropFilter:
-    "blur(18px)",
-
-  zIndex: 10,
+    "transparent",
 
 };

@@ -42,7 +42,7 @@ export default function LiveComposer({ onPost }) {
         ref={textareaRef}
         value={text}
         onChange={(e)=>setText(e.target.value)}
-        placeholder="Share a status..."
+        placeholder="What's on your mind?"
         style={input}
       />
 
@@ -63,7 +63,7 @@ export default function LiveComposer({ onPost }) {
           onClick={submit}
           style={postBtn}
         >
-          Post Status
+          Post
         </button>
 
       </div>

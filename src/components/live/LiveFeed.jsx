@@ -1,302 +1,561 @@
-import React from "react";
-import ExpressionBadges from "../expressions/ExpressionBadges";
+import React, { useState } from "react";
+
+function formatTime(date) {
+  if (!date) return "";
+
+  const diff = Date.now() - new Date(date).getTime();
+  const minutes = Math.floor(diff / 60000);
+
+  if (minutes < 1) return "now";
+  if (minutes < 60) return `${minutes}m`;
+
+  const hours = Math.floor(minutes / 60);
+
+  if (hours < 24) return `${hours}h`;
+
+  const days = Math.floor(hours / 24);
+
+  return `${days}d`;
+}
 
 export default function LiveFeed({
   statuses = [],
   onOpenProfile,
+  onAction,
 }) {
-
-  console.log("LIVEFEED STATUSES:", statuses);
+  const [liked, setLiked] = useState({});
+  const [reposted, setReposted] = useState({});
 
   if (!statuses.length) {
     return (
       <div style={empty}>
-        No statuses yet. Be the first to post.
+        <div style={emptyTitle}>
+          Nothing here yet
+        </div>
+
+        <div style={emptyText}>
+          Be the first person to share something.
+        </div>
       </div>
     );
   }
 
+  const openProfile = (event, userId) => {
+    event.stopPropagation();
+
+    if (userId) {
+      onOpenProfile?.(userId);
+    }
+  };
+
+  const toggleLike = (event, status) => {
+    event.stopPropagation();
+
+    setLiked((previous) => ({
+      ...previous,
+      [status.id]: !previous[status.id],
+    }));
+
+    onAction?.("like", {
+      user_id: status.user_id,
+      id: status.user_id,
+    });
+  };
+
+  const toggleRepost = (event, status) => {
+    event.stopPropagation();
+
+    setReposted((previous) => ({
+      ...previous,
+      [status.id]: !previous[status.id],
+    }));
+
+    onAction?.("wave", {
+      user_id: status.user_id,
+      id: status.user_id,
+    });
+  };
+
+  const handleMessage = (event, userId) => {
+    event.stopPropagation();
+
+    if (userId) {
+      onAction?.("messages", {
+        user_id: userId,
+      });
+    }
+  };
+
+  const handleShare = async (event, status) => {
+    event.stopPropagation();
+
+    const shareText = status.content || "";
+    const shareUrl = window.location.href;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          text: shareText,
+          url: shareUrl,
+        });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(
+          `${shareText}\n${shareUrl}`
+        );
+
+        alert("Post link copied.");
+      }
+    } catch (error) {
+      console.log("Share cancelled:", error);
+    }
+  };
 
   return (
     <div style={feed}>
 
       {statuses.map((status) => {
 
-
-        console.log(
-          "STATUS OBJECT:",
-          status
-        );
-
-
         const profile =
           status.profile ||
           status.profiles ||
           null;
 
-
-        console.log(
-          "PROFILE OBJECT:",
-          profile
-        );
-
-
-
         const avatar =
           profile?.avatar_url ||
           "https://i.pravatar.cc/150";
 
-
-
         const name =
           profile?.name ||
+          profile?.alias ||
           "Anonymous";
 
+        const alias =
+          profile?.alias ||
+          "";
 
+        const isLiked =
+          !!liked[status.id];
 
-        const expressions =
-          profile?.expressions ||
-          [];
-
-
+        const isReposted =
+          !!reposted[status.id];
 
         return (
-
-          <div
+          <article
             key={status.id}
-            style={card}
-
-            onClick={() => {
-
-              console.log(
-                "Opening profile:",
-                status.user_id
-              );
-
-              onOpenProfile?.(
-                status.user_id
-              );
-
-            }}
-
+            style={post}
           >
-
 
             {/* AVATAR */}
 
-            <img
-              src={avatar}
-              alt={name}
-              style={avatarStyle}
-            />
+            <div style={avatarColumn}>
+
+              <button
+                type="button"
+                style={avatarButton}
+                onClick={(event) =>
+                  openProfile(
+                    event,
+                    status.user_id
+                  )
+                }
+              >
+                <img
+                  src={avatar}
+                  alt={name}
+                  style={avatarStyle}
+                />
+              </button>
+
+            </div>
 
 
-
-            {/* CONTENT */}
+            {/* POST BODY */}
 
             <div style={body}>
 
+              {/* HEADER */}
 
-              <div style={topRow}>
+              <div style={header}>
 
+                <button
+                  type="button"
+                  style={nameButton}
+                  onClick={(event) =>
+                    openProfile(
+                      event,
+                      status.user_id
+                    )
+                  }
+                >
+                  {name}
+                </button>
 
-                <div style={identity}>
+                {alias && (
+                  <span style={aliasStyle}>
+                    @{alias}
+                  </span>
+                )}
 
+                <span style={separator}>
+                  �
+                </span>
 
-                  <div style={nameStyle}>
-                    {name}
-                  </div>
-
-
-
-                  {expressions.length > 0 && (
-
-                    <ExpressionBadges
-                      badges={expressions}
-                      max={3}
-                      size={22}
-                    />
-
+                <span style={time}>
+                  {formatTime(
+                    status.created_at
                   )}
-
-
-                </div>
-
-
-
-                <div style={time}>
-                  2m
-                </div>
-
+                </span>
 
               </div>
 
 
-
-
+              {/* CONTENT */}
 
               <div style={content}>
                 {status.content}
               </div>
 
 
+              {/* ACTIONS */}
+
+              <div style={actions}>
+
+                {/* LIKE */}
+
+                <button
+                  type="button"
+                  style={{
+                    ...actionButton,
+                    color: isLiked
+                      ? "#f91880"
+                      : "#8b95a7",
+                  }}
+                  onClick={(event) =>
+                    toggleLike(
+                      event,
+                      status
+                    )
+                  }
+                  title="Like"
+                >
+                  <span style={actionIcon}>
+                    {isLiked ? "?" : "?"}
+                  </span>
+
+                  <span>
+                    {isLiked ? 1 : 0}
+                  </span>
+                </button>
+
+
+                {/* REPOST */}
+
+                <button
+                  type="button"
+                  style={{
+                    ...actionButton,
+                    color: isReposted
+                      ? "#00ba7c"
+                      : "#8b95a7",
+                  }}
+                  onClick={(event) =>
+                    toggleRepost(
+                      event,
+                      status
+                    )
+                  }
+                  title="Repost"
+                >
+                  <span style={actionIcon}>
+                    ?
+                  </span>
+
+                  <span>
+                    {isReposted ? 1 : 0}
+                  </span>
+                </button>
+
+
+                {/* MESSAGE */}
+
+                <button
+                  type="button"
+                  style={actionButton}
+                  onClick={(event) =>
+                    handleMessage(
+                      event,
+                      status.user_id
+                    )
+                  }
+                  title="Message"
+                >
+                  <span style={actionIcon}>
+                    ??
+                  </span>
+
+                  <span>
+                    Message
+                  </span>
+                </button>
+
+
+                {/* SHARE */}
+
+                <button
+                  type="button"
+                  style={actionButton}
+                  onClick={(event) =>
+                    handleShare(
+                      event,
+                      status
+                    )
+                  }
+                  title="Share"
+                >
+                  <span style={actionIcon}>
+                    ?
+                  </span>
+                </button>
+
+              </div>
 
             </div>
 
-
-          </div>
-
+          </article>
         );
-
       })}
-
 
     </div>
   );
 }
 
 
-
-/* ====================== STYLES ====================== */
-
+/* =====================================================
+   FEED
+===================================================== */
 
 const feed = {
-
+  width: "100%",
   display: "flex",
-
   flexDirection: "column",
-
-  gap: 12,
-
-  padding: 16,
-
+  background: "transparent",
 };
 
 
+/* =====================================================
+   POST
+===================================================== */
 
-const card = {
-
+const post = {
   display: "flex",
+  width: "100%",
+  boxSizing: "border-box",
 
-  gap: 14,
+  padding:
+    "16px 18px 14px 18px",
 
-  padding: 14,
+  borderBottom:
+    "1px solid rgba(255,255,255,.09)",
 
-  borderRadius: 16,
+  background:
+    "transparent",
+
+  transition:
+    "background .15s ease",
+};
+
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+const avatarColumn = {
+  width: 46,
+  marginRight: 12,
+  flexShrink: 0,
+};
+
+const avatarButton = {
+  width: 46,
+  height: 46,
+
+  padding: 0,
+  margin: 0,
+
+  border: "none",
+  borderRadius: "50%",
+
+  background:
+    "transparent",
 
   cursor: "pointer",
 
-  background:
-    "rgba(255,255,255,.06)",
-
-  border:
-    "1px solid rgba(255,255,255,.08)",
-
-  transition:
-    "0.2s ease",
-
-  backdropFilter:
-    "blur(18px)",
-
-  boxShadow:
-    "0 12px 30px rgba(0,0,0,.22)",
-
+  overflow: "hidden",
 };
 
-
-
 const avatarStyle = {
-
-  width: 52,
-
-  height: 52,
+  width: "100%",
+  height: "100%",
 
   borderRadius: "50%",
 
   objectFit: "cover",
 
-  flexShrink: 0,
-
+  display: "block",
 };
 
 
+/* =====================================================
+   BODY
+===================================================== */
 
 const body = {
-
   flex: 1,
-
+  minWidth: 0,
 };
 
 
+/* =====================================================
+   HEADER
+===================================================== */
 
-const topRow = {
-
+const header = {
   display: "flex",
-
-  justifyContent: "space-between",
-
   alignItems: "center",
 
+  minHeight: 22,
+
+  gap: 6,
+
+  flexWrap: "wrap",
 };
 
+const nameButton = {
+  padding: 0,
 
+  border: "none",
 
-const identity = {
+  background:
+    "transparent",
 
-  display: "flex",
-
-  alignItems: "center",
-
-  gap: 8,
-
-};
-
-
-
-const nameStyle = {
-
-  color: "#fff",
-
-  fontWeight: 700,
+  color: "#ffffff",
 
   fontSize: 15,
 
+  fontWeight: 700,
+
+  cursor: "pointer",
 };
 
+const aliasStyle = {
+  color: "#8b95a7",
 
+  fontSize: 14,
+
+  fontWeight: 400,
+};
+
+const separator = {
+  color: "#687385",
+
+  fontSize: 14,
+};
 
 const time = {
+  color: "#8b95a7",
 
-  color: "#9ca3af",
-
-  fontSize: 12,
-
-  fontWeight: 500,
-
+  fontSize: 14,
 };
 
 
+/* =====================================================
+   CONTENT
+===================================================== */
 
 const content = {
-
-  marginTop: 10,
+  marginTop: 4,
 
   color: "#f3f4f6",
 
   fontSize: 15,
 
-  lineHeight: 1.6,
+  lineHeight: 1.55,
 
+  whiteSpace: "pre-wrap",
+
+  overflowWrap: "anywhere",
 };
 
 
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+const actions = {
+  display: "flex",
+
+  alignItems: "center",
+
+  justifyContent: "space-between",
+
+  maxWidth: 420,
+
+  marginTop: 12,
+};
+
+const actionButton = {
+  display: "flex",
+
+  alignItems: "center",
+
+  gap: 5,
+
+  padding: "4px 8px",
+
+  border: "none",
+
+  background:
+    "transparent",
+
+  color: "#8b95a7",
+
+  fontSize: 13,
+
+  cursor: "pointer",
+
+  borderRadius: 999,
+};
+
+const actionIcon = {
+  fontSize: 17,
+
+  lineHeight: 1,
+};
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
 
 const empty = {
-
-  padding: 60,
+  padding:
+    "80px 30px",
 
   textAlign: "center",
+};
 
-  color: "#777",
+const emptyTitle = {
+  color: "#ffffff",
 
+  fontSize: 18,
+
+  fontWeight: 700,
+};
+
+const emptyText = {
+  marginTop: 7,
+
+  color: "#8b95a7",
+
+  fontSize: 14,
 };

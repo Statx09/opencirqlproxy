@@ -1,3 +1,11 @@
+import {
+  Bell,
+  MessageCircle,
+  Newspaper,
+  Users,
+  UserRound,
+} from "lucide-react";
+
 import { useTheme } from "../context/ThemeContext";
 import { useUser } from "../hooks/useUser";
 
@@ -10,39 +18,51 @@ export default function GlassBar({ user, onAction }) {
     <div style={wrap}>
       <div style={bar(theme)}>
 
-        <button style={iconBtn} onClick={() => onAction("notifications")}>
-          🔔
-        </button>
-
-        <button style={iconBtn} onClick={() => onAction("chats")}>
-          💬
-        </button>
-
-        <button style={iconBtn} onClick={() => onAction("status")}>
-          📡
-        </button>
-
-        <button style={iconBtn} onClick={() => onAction("connections")}>
-          👥
+        <button
+          style={iconBtn}
+          onClick={() => onAction("notifications")}
+        >
+          <Bell size={21} strokeWidth={2.1} />
         </button>
 
         <button
-  style={{
-    ...iconBtn,
-    border: isLoggedIn
-      ? "1px solid rgba(34,197,94,0.8)"
-      : "1px solid rgba(239,68,68,0.8)",
-  }}
-  onClick={() => {
-    if (isLoggedIn) {
-      onAction("userProfile");
-    } else {
-      login();
-    }
-  }}
->
-  👤
-</button>
+          style={iconBtn}
+          onClick={() => onAction("chats")}
+        >
+          <MessageCircle size={21} strokeWidth={2.1} />
+        </button>
+
+        <button
+          style={iconBtn}
+          onClick={() => onAction("status")}
+        >
+          <Newspaper size={21} strokeWidth={2.1} />
+        </button>
+
+        <button
+          style={iconBtn}
+          onClick={() => onAction("connections")}
+        >
+          <Users size={21} strokeWidth={2.1} />
+        </button>
+
+        <button
+          style={{
+            ...iconBtn,
+            border: isLoggedIn
+              ? "1px solid rgba(34,197,94,0.8)"
+              : "1px solid rgba(239,68,68,0.8)",
+          }}
+          onClick={() => {
+            if (isLoggedIn) {
+              onAction("userProfile");
+            } else {
+              login();
+            }
+          }}
+        >
+          <UserRound size={21} strokeWidth={2.1} />
+        </button>
 
       </div>
     </div>

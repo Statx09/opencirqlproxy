@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -36,7 +36,68 @@ export default function LandingPage({ user }) {
   const [showNetwork, setShowNetwork] = useState(false);
 const [showSettings, setShowSettings] = useState(false);
 const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [networkView, setNetworkView] = useState("main");
+const [notifications, setNotifications] = useState([]);
+const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const loadNotifications = useCallback(async () => {
+    if (!user?.id) {
+      setNotifications([]);
+      setUnreadNotificationCount(0);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("messages")
+      .select("id, sender_id, receiver_id, text, event, payload, created_at, read_at")
+      .eq("receiver_id", user.id)
+      .not("event", "is", null)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("NOTIFICATIONS LOAD ERROR:", error);
+      return;
+    }
+
+    const notificationRows = (data || []).filter(
+      (item) =>
+        item.event === "wave" ||
+        item.event === "like" ||
+        item.event === "status_like"
+    );
+
+    setNotifications(notificationRows);
+    setUnreadNotificationCount(
+      notificationRows.filter((item) => !item.read_at).length
+    );
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+  const markNotificationsRead = useCallback(async () => {
+    if (!user?.id) return;
+
+    const { error } = await supabase
+      .from("messages")
+      .update({ read_at: new Date().toISOString() })
+      .eq("receiver_id", user.id)
+      .is("read_at", null)
+      .in("event", ["wave", "like", "status_like"]);
+
+    if (error) {
+      console.error("NOTIFICATIONS READ ERROR:", error);
+      return;
+    }
+
+    setNotifications((previous) =>
+      previous.map((notification) => ({
+        ...notification,
+        read_at: notification.read_at || new Date().toISOString(),
+      }))
+    );
+
+    setUnreadNotificationCount(0);
+  }, [user?.id]);
+const [networkView, setNetworkView] = useState("main");
 
   const [activeModal, setActiveModal] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -71,6 +132,29 @@ const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   setSelectedProfile(data);
   setActiveModal("profile");
 };
+
+const handleNotificationClick = useCallback(
+  async (notification) => {
+    console.log(
+      "NOTIFICATION CLICK:",
+      notification?.event,
+      notification?.sender_id
+    );
+
+    if (!notification?.sender_id) return;
+
+    if (
+      notification.event === "wave" ||
+      notification.event === "like" ||
+      notification.event === "status_like"
+    ) {
+      await handleOpenProfile(notification.sender_id);
+    }
+  },
+  [handleOpenProfile]
+);
+
+
 
 const [showStatusModal, setShowStatusModal] = useState(false);
 
@@ -153,6 +237,7 @@ useEffect(() => {
           break;
 
         case "notifications":
+          await markNotificationsRead();
           setActiveModal("notifications");
           break;
 
@@ -181,6 +266,28 @@ useEffect(() => {
           prev();
           break;
 
+        case "statusLike": {
+          const receiverId = host?.user_id;
+
+          if (!receiverId || !user?.id) return;
+
+          const likerName =
+            user?.user_metadata?.name ||
+            user?.user_metadata?.full_name ||
+            user?.email ||
+            "Someone";
+
+          await supabase.from("messages").insert({
+            sender_id: user.id,
+            receiver_id: receiverId,
+            text: `${likerName} liked your post`,
+            event: "status_like",
+            created_at: new Date().toISOString(),
+          });
+
+          break;
+        }
+
         case "wave":
         case "like":
         case "support": {
@@ -195,8 +302,8 @@ useEffect(() => {
 
           const text =
             type === "wave"
-              ? "👋 waved at you"
-              : "❤️ liked you";
+              ? "waved at you"
+              : "liked you";
 
           await supabase.from("messages").insert({
             sender_id: user.id,
@@ -215,7 +322,7 @@ useEffect(() => {
           console.log("UNKNOWN ACTION:", type);
       }
     },
-    [user, current, next, prev]
+    [user, current, next, prev, markNotificationsRead]
   );
 
   if (!hasHosts) {
@@ -319,7 +426,7 @@ useEffect(() => {
           style={networkBack}
           onClick={() => setNetworkView("main")}
         >
-          <span>🌐</span>
+          <span>🌐</span>
           <span>Cirql Network</span>
         </button>
 
@@ -463,7 +570,7 @@ useEffect(() => {
 
       {/* GLASSBAR */}
       <div style={glassWrap}>
-        <GlassBar user={user} onAction={handleAction} />
+        <GlassBar user={user} onAction={handleAction} unreadNotificationCount={unreadNotificationCount} />
       </div>
 
       {/* STATUS MODAL */}
@@ -472,6 +579,7 @@ useEffect(() => {
   statuses={statuses}
   onClose={() => setShowStatusModal(false)}
   onOpenProfile={handleOpenProfile}
+  onAction={handleAction}
   reloadStatuses={reloadStatuses}
 />
 )}
@@ -483,14 +591,16 @@ useEffect(() => {
     {console.log("SELECTED HOST:", selectedHost)}
     {console.log("SELECTED PROFILE:", selectedProfile)}
 
-    <ProfileModal
-      host={
-        selectedHost
-          ? selectedHost
-          : { user_id: selectedProfile?.user_id }
-      }
-      onClose={closeModal}
-    />
+    <div style={{ position: "fixed", inset: 0, zIndex: 100001 }}>
+      <ProfileModal
+        host={
+          selectedHost
+            ? selectedHost
+            : selectedProfile
+        }
+        onClose={closeModal}
+      />
+    </div>
   </>
 )}
 
@@ -507,11 +617,13 @@ useEffect(() => {
       )}
 
       {activeModal === "messages" && selectedHost && (
-        <MessagesModal
-          host={selectedHost}
-          user={user}
-          onClose={closeModal}
-        />
+        <div style={{ position: "fixed", inset: 0, zIndex: 100002 }}>
+          <MessagesModal
+            host={selectedHost}
+            user={user}
+            onClose={closeModal}
+          />
+        </div>
       )}
 
       {activeModal === "chats" && (
@@ -527,7 +639,7 @@ useEffect(() => {
 
       {activeModal === "notifications" && (
         <ModalShell title="Notifications" onClose={closeModal}>
-          <NotificationsModal notifications={[]} />
+          <NotificationsModal notifications={notifications} onNotificationClick={handleNotificationClick} />
         </ModalShell>
       )}
 
@@ -1093,3 +1205,26 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

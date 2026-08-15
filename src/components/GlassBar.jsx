@@ -1,4 +1,4 @@
-import {
+﻿import {
   Bell,
   MessageCircle,
   Newspaper,
@@ -9,7 +9,7 @@ import {
 import { useTheme } from "../context/ThemeContext";
 import { useUser } from "../hooks/useUser";
 
-export default function GlassBar({ user, onAction }) {
+export default function GlassBar({ user, onAction, unreadNotificationCount = 0 }) {
   const isLoggedIn = !!user;
   const { theme } = useTheme();
   const { login } = useUser();
@@ -19,10 +19,38 @@ export default function GlassBar({ user, onAction }) {
       <div style={bar(theme)}>
 
         <button
-          style={iconBtn}
+          style={{ ...iconBtn, position: "relative" }}
           onClick={() => onAction("notifications")}
+          aria-label="Notifications"
         >
           <Bell size={21} strokeWidth={2.1} />
+
+          {unreadNotificationCount > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                minWidth: 18,
+                height: 18,
+                padding: "0 5px",
+                borderRadius: 999,
+                background: "#ef4444",
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+                border: "2px solid rgba(15,23,42,0.9)",
+              }}
+            >
+              {unreadNotificationCount > 99
+                ? "99+"
+                : unreadNotificationCount}
+            </span>
+          )}
         </button>
 
         <button
@@ -116,3 +144,5 @@ const iconBtn = {
   alignItems: "center",
   justifyContent: "center",
 };
+
+

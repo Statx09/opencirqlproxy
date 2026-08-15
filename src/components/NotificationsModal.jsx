@@ -1,8 +1,41 @@
-import React from "react";
+﻿import React from "react";
 
 export default function NotificationsModal({
   notifications = [],
+  onNotificationClick,
 }) {
+  const getNotificationText = (notification) => {
+    switch (notification.event) {
+      case "status_like":
+        return notification.text || "Someone liked your post";
+
+      case "like":
+        return "Someone liked you";
+
+      case "wave":
+        return "Someone waved at you";
+
+      default:
+        return notification.text || "You have a new notification.";
+    }
+  };
+
+  const getNotificationTitle = (notification) => {
+    switch (notification.event) {
+      case "status_like":
+        return "Post liked";
+
+      case "like":
+        return "New like";
+
+      case "wave":
+        return "New wave";
+
+      default:
+        return "Notification";
+    }
+  };
+
   return (
     <div
       style={{
@@ -22,16 +55,25 @@ export default function NotificationsModal({
             fontSize: 14,
           }}
         >
-          🔔 No notifications yet
+          No notifications yet
         </div>
       ) : (
         notifications.map((notification, index) => (
-          <div
+          <button
+            type="button"
             key={notification.id || index}
+            onClick={() => onNotificationClick?.(notification)}
             style={{
+              width: "100%",
+              textAlign: "left",
+              cursor: "pointer",
+              color: "#fff",
+              font: "inherit",
               padding: 14,
               borderRadius: 14,
-              background: "rgba(255,255,255,0.05)",
+              background: notification.read_at
+                ? "rgba(255,255,255,0.04)"
+                : "rgba(255,255,255,0.08)",
               border: "1px solid rgba(255,255,255,0.08)",
               display: "flex",
               flexDirection: "column",
@@ -44,7 +86,7 @@ export default function NotificationsModal({
                 fontSize: 14,
               }}
             >
-              {notification.title || "Notification"}
+              {getNotificationTitle(notification)}
             </div>
 
             <div
@@ -54,9 +96,7 @@ export default function NotificationsModal({
                 lineHeight: 1.45,
               }}
             >
-              {notification.body ||
-                notification.message ||
-                "You have a new notification."}
+              {getNotificationText(notification)}
             </div>
 
             {notification.created_at && (
@@ -70,9 +110,10 @@ export default function NotificationsModal({
                 {new Date(notification.created_at).toLocaleString()}
               </div>
             )}
-          </div>
+          </button>
         ))
       )}
     </div>
   );
 }
+

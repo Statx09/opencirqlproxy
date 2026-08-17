@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from "react";
+﻿import React, { memo, useMemo } from "react";
 import { normalizeHost } from "../utils/normalizeHost";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import { useTheme } from "../context/ThemeContext";
@@ -161,6 +161,18 @@ console.log("BANNER:", h.banner);
     }}
   >
     ❤️
+  </button>
+
+  <button
+    style={railButton}
+    onClick={(e) => {
+      e.stopPropagation();
+      onAction("call", h);
+    }}
+    title="Call"
+    aria-label="Call"
+  >
+    📹
   </button>
 
 </div>
@@ -385,3 +397,4 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+

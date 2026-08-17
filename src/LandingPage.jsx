@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -15,7 +15,6 @@ import ChatsTab from "./components/ChatsTab";
 import MessagesModal from "./components/MessagesModal";
 import NotificationsModal from "./components/NotificationsModal";
 import ConnectionRequests from "./components/ConnectionRequests";
-import CallModal from "./components/CallModal";
 import SayThanksModal from "./components/SayThanksModal";
 import ProfileModal from "./components/ProfileModal";
 import ProfileTab from "./components/ProfileTab/ProfileTab";
@@ -821,14 +820,6 @@ useEffect(() => {
         </ModalShell>
       )}
 
-      {activeModal === "call" && (
-        <CallModal
-          host={selectedHost}
-          user={user}
-          onClose={closeModal}
-        />
-      )}
-
       {activeModal === "callsStudio" && (
   <CallsStudioModal
     user={user}
@@ -1377,6 +1368,10 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
+
+
 
 
 

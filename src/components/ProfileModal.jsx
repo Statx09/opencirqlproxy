@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
 import MessagesModal from "./MessagesModal";
@@ -33,7 +34,7 @@ useEffect(() => {
   console.log("PROFILE MODAL HOST:", host);
 
   if (!host?.id) {
-    console.log("❌ No profile id on host");
+    console.log("âŒ No profile id on host");
     setLoading(false);
     return;
   }
@@ -369,7 +370,7 @@ const overlay = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  zIndex: 9999,
+  zIndex: 100001,
 };
 
 const modal = {
@@ -395,6 +396,11 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
+
+
 
 
 

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import MessagesModal from "./MessagesModal";
-import CallModal from "./CallModal";
+import CallsStudioModal from "./CallsStudioModal";
 
 import { getRelationship, canCall } from "../lib/interactionRules";
 
@@ -178,10 +178,9 @@ export default function ConnectionsTab({ user, onOpenProfile }) {
       )}
 
       {activeCall && (
-        <CallModal
+        <CallsStudioModal
           host={activeCall}
           user={user}
-          callType={activeCall.callType}
           onClose={() => setActiveCall(null)}
         />
       )}
@@ -252,3 +251,4 @@ const thanksBtn = {
   fontWeight: 800,
   cursor: "pointer",
 };
+

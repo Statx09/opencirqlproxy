@@ -1,12 +1,13 @@
-import React from "react";
+﻿import React from "react";
 
 export default function ModalShell({
   title,
   onClose,
   children,
+  zIndex = 99999,
 }) {
   return (
-    <div style={overlay}>
+    <div style={{ ...overlay, zIndex }}>
       <div style={modal}>
 
         <div style={header}>
@@ -79,3 +80,4 @@ const body = {
   flex: 1,
   overflow: "auto",
 };
+

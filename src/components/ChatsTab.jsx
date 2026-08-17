@@ -1,21 +1,31 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function ChatsTab({
   user,
   hosts = [],
   onOpenChat,
+  refreshKey,
 }) {
   const [conversations, setConversations] = useState([]);
 
   const loadChats = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setConversations([]);
+      return;
+    }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("messages")
       .select("*")
       .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .is("event", null)
       .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("CHATS LOAD ERROR:", error);
+      return;
+    }
 
     const map = new Map();
 
@@ -31,33 +41,9 @@ export default function ChatsTab({
 
       if (!host) continue;
 
-      const isMe = msg.sender_id === user.id;
-
-      let preview = msg.text || "";
-
-      switch (msg.event) {
-        case "wave":
-          preview = isMe
-            ? "You waved 👋"
-            : "👋 Waved at you";
-          break;
-
-        case "like":
-          preview = isMe
-            ? "You liked ❤️"
-            : "❤️ Liked you";
-          break;
-
-        case "support":
-          preview = isMe
-            ? "You sent support 💰"
-            : "💰 Sent you support";
-          break;
-      }
-
       map.set(otherId, {
         host,
-        preview,
+        preview: msg.text || "",
       });
     }
 
@@ -66,7 +52,85 @@ export default function ChatsTab({
 
   useEffect(() => {
     loadChats();
-  }, [loadChats]);
+  }, [loadChats, refreshKey]);
+
+  /* ================= CHAT REALTIME ================= */
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`chats-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          const message = payload.new;
+
+          if (message.event !== null) {
+            return;
+          }
+
+          const belongsToUser =
+            message.sender_id === user.id ||
+            message.receiver_id === user.id;
+
+          if (!belongsToUser) {
+            return;
+          }
+
+          const otherId =
+            message.sender_id === user.id
+              ? message.receiver_id
+              : message.sender_id;
+
+          const host = hosts.find((h) => h.user_id === otherId);
+
+          if (!host) {
+            return;
+          }
+
+          setConversations((previous) => {
+            const existing = previous.find(
+              (conversation) =>
+                conversation.host.user_id === otherId
+            );
+
+            if (existing) {
+              return [
+                {
+                  ...existing,
+                  preview: message.text || "",
+                },
+                ...previous.filter(
+                  (conversation) =>
+                    conversation.host.user_id !== otherId
+                ),
+              ];
+            }
+
+            return [
+              {
+                host,
+                preview: message.text || "",
+              },
+              ...previous,
+            ];
+          });
+        }
+      )
+      .subscribe((status) => {
+        console.log("CHATS REALTIME:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, loadChats]);
 
   return (
     <div
@@ -140,3 +204,5 @@ export default function ChatsTab({
     </div>
   );
 }
+
+

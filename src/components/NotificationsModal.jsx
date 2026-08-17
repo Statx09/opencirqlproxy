@@ -15,6 +15,9 @@ export default function NotificationsModal({
       case "wave":
         return "Someone waved at you";
 
+      case "message":
+        return notification.text || "Someone sent you a message";
+
       default:
         return notification.text || "You have a new notification.";
     }
@@ -30,6 +33,9 @@ export default function NotificationsModal({
 
       case "wave":
         return "New wave";
+
+      case "message":
+        return "New message";
 
       default:
         return "Notification";
@@ -116,4 +122,6 @@ export default function NotificationsModal({
     </div>
   );
 }
+
+
 

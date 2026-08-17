@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Heart,
   MessageCircle,
+  Send,
   UserRound,
 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
@@ -590,7 +591,7 @@ const isCommentsOpen =
                   }
                   title="Message"
                 >
-                  <MessageCircle
+                  <Send
                     size={17}
                     strokeWidth={2}
                   />

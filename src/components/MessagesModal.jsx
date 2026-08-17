@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+﻿import React, { useEffect, useRef, useState, useCallback } from "react";
+import { X } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
 export default function MessagesModal({
@@ -6,6 +7,7 @@ export default function MessagesModal({
   user,
   onClose,
   onMessageSent,
+  onMessagesRead,
 }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
@@ -54,16 +56,92 @@ const scrollToBottom = () => {
 
   }, [user?.id, hostId]);
 
+  /* ================= MARK MESSAGES READ ================= */
+
+  const markMessagesRead = useCallback(async () => {
+    if (!user?.id || !hostId) return;
+
+    const { error } = await supabase
+      .from("messages")
+      .update({ read_at: new Date().toISOString() })
+      .eq("receiver_id", user.id)
+      .eq("sender_id", hostId)
+      .eq("event", "message")
+      .is("read_at", null);
+
+    if (error) {
+      console.error("MARK MESSAGES READ ERROR:", error);
+      return;
+    }
+
+    console.log("MESSAGES MARKED READ");
+
+    if (onMessagesRead) {
+      onMessagesRead();
+    }
+  }, [user?.id, hostId]);
+
   useEffect(() => {
     loadMessages();
-  }, [loadMessages]);
+    markMessagesRead();
+  }, [loadMessages, markMessagesRead]);
+
+  /* ================= REALTIME MESSAGES ================= */
+
+  useEffect(() => {
+    if (!user?.id || !hostId) return;
+
+    const channel = supabase
+      .channel(`messages-${user.id}-${hostId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        (payload) => {
+          const newMessage = payload.new;
+
+          const belongsToChat =
+            (newMessage.sender_id === user.id &&
+              newMessage.receiver_id === hostId) ||
+            (newMessage.sender_id === hostId &&
+              newMessage.receiver_id === user.id);
+
+          if (!belongsToChat) return;
+
+          setMessages((current) => {
+            if (current.some((msg) => msg.id === newMessage.id)) {
+              return current;
+            }
+
+            return [...current, newMessage];
+          });
+
+          requestAnimationFrame(() => {
+            if (chatRef.current) {
+              chatRef.current.scrollTop =
+                chatRef.current.scrollHeight;
+            }
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, hostId]);
 
 /* ================= SEND MESSAGE ================= */
 
 const sendMessage = async () => {
   console.log("SEND CLICKED");
 
-  if (!message.trim() || !user?.id || !hostId) {
+  const text = message.trim();
+
+  if (!text || !user?.id || !hostId) {
     console.log("FAILED CHECK", {
       message,
       user,
@@ -73,38 +151,41 @@ const sendMessage = async () => {
   }
 
   try {
-    const res = await fetch("https://cirql-ai-chatbot.vercel.app/api/message", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
         sender_id: user.id,
         receiver_id: hostId,
-        text: message,
-      }),
+        text,
+        event: "message",
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("MESSAGE SEND ERROR:", error);
+      return;
+    }
+
+    console.log("MESSAGE SENT:", data);
+
+    setMessage("");
+
+    setMessages((current) => {
+      if (current.some((msg) => msg.id === data.id)) {
+        return current;
+      }
+
+      return [...current, data];
     });
 
-    console.log("STATUS:", res.status);
+    onMessageSent?.();
 
-    const json = await res.json();
-
-console.log("RAW RESPONSE:", json);
-
-// Clear the textbox
-setMessage("");
-
-// Reload the conversation
-await loadMessages();
-
-// Notify parent if needed
-onMessageSent?.();
-
-// Scroll to bottom
-scrollToBottom();
+    scrollToBottom();
 
   } catch (err) {
-    console.error("FETCH ERROR:", err);
+    console.error("MESSAGE SEND EXCEPTION:", err);
   }
 };
 
@@ -126,12 +207,12 @@ scrollToBottom();
 
             <div>
               <h3 style={{ margin: 0 }}>{displayName}</h3>
-              <p style={statusText}>💬 Open chat</p>
+              <p style={statusText}>?? Open chat</p>
             </div>
           </div>
 
           <button onClick={onClose} style={closeBtn}>
-            ✕
+            ?
           </button>
         </div>
 
@@ -194,7 +275,7 @@ const overlay = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  zIndex: 9999,
+  zIndex: 100002,
 };
 
 const modal = {
@@ -277,3 +358,13 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
+
+
+
+
+
+
+
+
+
+

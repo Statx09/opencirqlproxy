@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import useProfile from "../../hooks/useProfile";
 import ExpressSection from "./ExpressSection";
@@ -157,6 +157,7 @@ setExpressions(profile.expression_badges || []);
 
     const payload = {
   user_id: user.id,
+  email: user.email || null,
 
   /* Identity */
   alias,
@@ -240,7 +241,7 @@ console.log("PROFILE UPSERT RESULT:", { data, error });
     </label>
   </div>
 
-  {/* LOGOUT — BELOW BANNER */}
+  {/* LOGOUT â€” BELOW BANNER */}
   {onLogout && (
     <div style={logoutRow}>
       <button
@@ -1006,6 +1007,7 @@ const mediaCount = {
   marginTop: 8,
   marginBottom: 0,
 };
+
 
 
 

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { supabase } from "../lib/supabaseClient";
 
 import ModalShell from "./ui/ModalShell";
@@ -7,6 +7,7 @@ import LiveFeed from "./live/LiveFeed";
 
 export default function StatusFeedModal({
   statuses = [],
+  user,
   onClose,
   onOpenProfile,
   reloadStatuses,
@@ -57,6 +58,7 @@ export default function StatusFeedModal({
         <div style={feedWrap}>
           <LiveFeed
             statuses={statuses}
+            user={user}
             onOpenProfile={onOpenProfile}
             onAction={onAction}
           />

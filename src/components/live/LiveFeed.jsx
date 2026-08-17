@@ -27,10 +27,12 @@ function formatTime(date) {
 
 export default function LiveFeed({
   statuses = [],
+  user,
   onOpenProfile,
   onAction,
 }) {
   const [liked, setLiked] = useState({});
+  const [likeCounts, setLikeCounts] = useState({});
   const [comments, setComments] = useState({});
   const [commentCounts, setCommentCounts] = useState({});
   const [openComments, setOpenComments] = useState({});
@@ -73,6 +75,49 @@ export default function LiveFeed({
     loadCommentCounts();
   }, [statuses]);
 
+  /*
+   * Load persistent like state and counts whenever
+   * the status list or current user changes.
+   */
+  useEffect(() => {
+    if (!statuses.length) return;
+
+    const loadLikes = async () => {
+      const statusIds = statuses
+        .map((status) => status.id)
+        .filter(Boolean);
+
+      if (!statusIds.length) return;
+
+      const { data, error } = await supabase
+        .from("status_likes")
+        .select("status_id, user_id")
+        .in("status_id", statusIds);
+
+      if (error) {
+        console.error("LIKE LOAD ERROR:", error);
+        return;
+      }
+
+      const counts = {};
+      const userLikes = {};
+
+      (data || []).forEach((like) => {
+        counts[like.status_id] =
+          (counts[like.status_id] || 0) + 1;
+
+        if (like.user_id === user?.id) {
+          userLikes[like.status_id] = true;
+        }
+      });
+
+      setLikeCounts(counts);
+      setLiked(userLikes);
+    };
+
+    loadLikes();
+  }, [statuses, user?.id]);
+
   if (!statuses.length) {
     return (
       <div style={empty}>
@@ -103,16 +148,90 @@ export default function LiveFeed({
     }
   };
 
-  const toggleLike = (event, status) => {
-    console.log("LIVEFEED LIKE CLICK", status?.id);
+  const toggleLike = async (event, status) => {
     event.stopPropagation();
+
+    if (!user?.id || !status?.id) {
+      console.warn("LIKE: missing user or status", {
+        userId: user?.id,
+        statusId: status?.id,
+      });
+      return;
+    }
+
+    const statusId = status.id;
+    const alreadyLiked = !!liked[statusId];
+
+    console.log(
+      "LIVEFEED LIKE CLICK",
+      statusId,
+      alreadyLiked ? "UNLIKE" : "LIKE"
+    );
+
+    if (alreadyLiked) {
+      const { error } = await supabase
+        .from("status_likes")
+        .delete()
+        .eq("status_id", statusId)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("UNLIKE ERROR:", error);
+        return;
+      }
+
+      setLiked((previous) => {
+        const next = { ...previous };
+        delete next[statusId];
+        return next;
+      });
+
+      setLikeCounts((previous) => ({
+        ...previous,
+        [statusId]: Math.max(
+          0,
+          (previous[statusId] || 0) - 1
+        ),
+      }));
+
+      return;
+    }
+
+    const { error } = await supabase
+      .from("status_likes")
+      .insert({
+        status_id: statusId,
+        user_id: user.id,
+      });
+
+    if (error) {
+      console.error("LIKE INSERT ERROR:", error);
+      return;
+    }
 
     setLiked((previous) => ({
       ...previous,
-      [status.id]: !previous[status.id],
+      [statusId]: true,
     }));
 
-    onAction?.("statusLike", status);
+    setLikeCounts((previous) => ({
+      ...previous,
+      [statusId]: (previous[statusId] || 0) + 1,
+    }));
+
+    /*
+     * Notify the status owner only after
+     * the like has successfully been stored.
+     */
+    if (
+      status.user_id &&
+      status.user_id !== user.id
+    ) {
+      onAction?.("statusLike", {
+        ...status,
+        liked_by: user.id,
+      });
+    }
   };
 
   const handleMessage = (event, status) => {
@@ -425,7 +544,7 @@ const isCommentsOpen =
                   />
 
                   <span>
-                    {isLiked ? 1 : 0}
+                    {likeCounts[status.id] || 0}
                   </span>
                 </button>
 
@@ -476,9 +595,6 @@ const isCommentsOpen =
                     strokeWidth={2}
                   />
 
-                  <span>
-                    Message
-                  </span>
                 </button>
 
                 {/* SHARE */}

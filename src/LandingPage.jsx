@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -38,6 +38,7 @@ const [showSettings, setShowSettings] = useState(false);
 const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 const [notifications, setNotifications] = useState([]);
 const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const loadNotifications = useCallback(async () => {
     if (!user?.id) {
       setNotifications([]);
@@ -68,11 +69,119 @@ const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
     setUnreadNotificationCount(
       notificationRows.filter((item) => !item.read_at).length
     );
+    }, [user?.id]);
+
+  /* ================= UNREAD MESSAGES ================= */
+
+const loadUnreadMessages = useCallback(async () => {
+  if (!user?.id) {
+    setUnreadMessageCount(0);
+    return;
+  }
+
+  const { count, error } = await supabase
+    .from("messages")
+    .select("id", { count: "exact", head: true })
+    .eq("receiver_id", user.id)
+    .is("event", null)
+    .is("read_at", null);
+
+  if (error) {
+    console.error("UNREAD MESSAGES LOAD ERROR:", error);
+    return;
+  }
+
+  setUnreadMessageCount(count || 0);
+}, [user?.id]);
+
+useEffect(() => {
+  loadUnreadMessages();
+}, [loadUnreadMessages]);
+
+useEffect(() => {
+  loadNotifications();
+}, [loadNotifications]);
+
+useEffect(() => {
+  if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`notifications-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const notification = payload.new;
+
+          if (
+            notification.event !== "wave" &&
+            notification.event !== "like" &&
+            notification.event !== "status_like"
+          ) {
+            return;
+          }
+
+          setNotifications((previous) => {
+            if (previous.some((item) => item.id === notification.id)) {
+              return previous;
+            }
+
+            return [notification, ...previous];
+          });
+
+          if (!notification.read_at) {
+            setUnreadNotificationCount((count) => count + 1);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("NOTIFICATIONS REALTIME:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
+  /* ================= MESSAGE REALTIME ================= */
 
   useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`messages-unread-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `receiver_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const message = payload.new;
+
+          if (message.event !== null) {
+            return;
+          }
+
+          if (!message.read_at) {
+            loadUnreadMessages();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("MESSAGES REALTIME:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
   const markNotificationsRead = useCallback(async () => {
     if (!user?.id) return;
 
@@ -98,6 +207,29 @@ const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
     setUnreadNotificationCount(0);
   }, [user?.id]);
 const [networkView, setNetworkView] = useState("main");
+
+  const markMessagesRead = useCallback(
+    async (otherUserId) => {
+      if (!user?.id || !otherUserId) return;
+
+      const { error } = await supabase
+        .from("messages")
+        .update({ read_at: new Date().toISOString() })
+        .eq("receiver_id", user.id)
+        .eq("sender_id", otherUserId)
+        .is("event", null)
+        .is("read_at", null);
+
+      if (error) {
+        console.error("MESSAGES READ ERROR:", error);
+        return;
+      }
+
+      await loadUnreadMessages();
+    },
+    [user?.id, loadUnreadMessages]
+  );
+
 
   const [activeModal, setActiveModal] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -143,15 +275,39 @@ const handleNotificationClick = useCallback(
 
     if (!notification?.sender_id) return;
 
+    const { data: senderProfile, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", notification.sender_id)
+      .maybeSingle();
+
+    console.log("NOTIFICATION SENDER PROFILE:", senderProfile);
+    console.log("NOTIFICATION SENDER ERROR:", error);
+
+    if (error || !senderProfile) {
+      console.log("Notification sender profile not found.");
+      return;
+    }
+
     if (
       notification.event === "wave" ||
       notification.event === "like" ||
       notification.event === "status_like"
     ) {
-      await handleOpenProfile(notification.sender_id);
+      setSelectedHost(null);
+      setSelectedProfile(senderProfile);
+      setActiveModal("profile");
+      return;
+    }
+
+    if (notification.event === "message") {
+      setSelectedProfile(null);
+      setSelectedHost(senderProfile);
+      setActiveModal("messages");
+      return;
     }
   },
-  [handleOpenProfile]
+  []
 );
 
 
@@ -228,16 +384,16 @@ useEffect(() => {
   break;
 
         case "messages":
-          setSelectedHost(host);
-          setActiveModal("messages");
-          break;
+  setSelectedHost(host);
+  await markMessagesRead(host?.user_id ?? host?.id);
+  setActiveModal("messages");
+  break;
 
         case "chats":
           setActiveModal("chats");
           break;
 
         case "notifications":
-          await markNotificationsRead();
           setActiveModal("notifications");
           break;
 
@@ -271,6 +427,11 @@ useEffect(() => {
 
           if (!receiverId || !user?.id) return;
 
+          if (receiverId === user.id) {
+            console.log("IGNORING SELF STATUS LIKE");
+            return;
+          }
+
           const likerName =
             user?.user_metadata?.name ||
             user?.user_metadata?.full_name ||
@@ -291,8 +452,13 @@ useEffect(() => {
         case "wave":
         case "like":
         case "support": {
-          const receiverId = host?.user_id || host?.id;
+          const receiverId = host?.user_id;
           if (!receiverId || !user?.id) return;
+
+          if (receiverId === user.id) {
+            console.log("IGNORING SELF ACTION:", type);
+            return;
+          }
 
           if (type === "support") {
             setSelectedHost(host);
@@ -313,8 +479,7 @@ useEffect(() => {
             created_at: new Date().toISOString(),
           });
 
-          setActiveModal("chats");
-          setSelectedHost(null);
+
           break;
         }
 
@@ -322,7 +487,7 @@ useEffect(() => {
           console.log("UNKNOWN ACTION:", type);
       }
     },
-    [user, current, next, prev, markNotificationsRead]
+    [user, current, next, prev, markNotificationsRead, markMessagesRead]
   );
 
   if (!hasHosts) {
@@ -426,7 +591,7 @@ useEffect(() => {
           style={networkBack}
           onClick={() => setNetworkView("main")}
         >
-          <span>🌐</span>
+          <span>??</span>
           <span>Cirql Network</span>
         </button>
 
@@ -570,13 +735,19 @@ useEffect(() => {
 
       {/* GLASSBAR */}
       <div style={glassWrap}>
-        <GlassBar user={user} onAction={handleAction} unreadNotificationCount={unreadNotificationCount} />
+        <GlassBar
+  user={user}
+  onAction={handleAction}
+  unreadNotificationCount={unreadNotificationCount}
+  unreadMessageCount={unreadMessageCount}
+/>
       </div>
 
       {/* STATUS MODAL */}
 {showStatusModal && (
   <StatusFeedModal
   statuses={statuses}
+  user={user}
   onClose={() => setShowStatusModal(false)}
   onOpenProfile={handleOpenProfile}
   onAction={handleAction}
@@ -622,6 +793,7 @@ useEffect(() => {
             host={selectedHost}
             user={user}
             onClose={closeModal}
+            onMessagesRead={loadUnreadMessages}
           />
         </div>
       )}
@@ -1205,6 +1377,25 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

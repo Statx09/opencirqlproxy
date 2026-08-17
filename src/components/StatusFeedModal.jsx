@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { supabase } from "../lib/supabaseClient";
 
 import ModalShell from "./ui/ModalShell";
@@ -10,13 +10,9 @@ export default function StatusFeedModal({
   onClose,
   onOpenProfile,
   reloadStatuses,
-
   onAction,
-
 }) {
-
   const handlePost = async ({ content, expression }) => {
-
     console.log("Posting...", {
       content,
       expression,
@@ -53,81 +49,54 @@ export default function StatusFeedModal({
     <ModalShell
       title="Feed"
       onClose={onClose}
+      zIndex={90000}
     >
-
       <div style={container}>
 
-        {/* COMPOSER */}
-
-        <div style={composerWrap}>
-
-          <LiveComposer
-            onPost={handlePost}
-          />
-
-        </div>
-
-
-        {/* FEED */}
-
+        {/* SCROLLABLE FEED */}
         <div style={feedWrap}>
-
           <LiveFeed
             statuses={statuses}
             onOpenProfile={onOpenProfile}
             onAction={onAction}
           />
+        </div>
 
+        {/* BOTTOM COMPOSER */}
+        <div style={composerWrap}>
+          <LiveComposer
+            onPost={handlePost}
+          />
         </div>
 
       </div>
-
     </ModalShell>
   );
 }
-
 
 /* ================= STYLES ================= */
 
 const container = {
   display: "flex",
-
   flexDirection: "column",
-
   height: "100%",
-
   minHeight: 0,
-
   background: "transparent",
 };
 
-
-const composerWrap = {
-
-  flexShrink: 0,
-
-  padding: "14px 18px",
-
-  borderBottom:
-    "1px solid rgba(255,255,255,.09)",
-
-  background:
-    "transparent",
-
+const feedWrap = {
+  flex: 1,
+  minHeight: 0,
+  overflowY: "auto",
+  overflowX: "hidden",
+  background: "transparent",
 };
 
-
-const feedWrap = {
-
-  flex: 1,
-
-  minHeight: 0,
-
-  overflowY: "auto",
-
-  overflowX: "hidden",
-
-  background:
-    "transparent",
-
+const composerWrap = {
+  flexShrink: 0,
+  padding: "12px 18px 14px",
+  borderTop: "1px solid rgba(255,255,255,.09)",
+  background: "rgba(0,0,0,.18)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
 };

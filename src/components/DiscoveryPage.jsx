@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+﻿import React, { useMemo, useState } from "react";
 import TopicSearchBar from "./TopicSearchBar";
 import MiniHostCard from "./MiniHostCard";
 import HeroCallCard from "./HeroCallCard";
@@ -7,6 +7,7 @@ import { useTheme } from "../context/ThemeContext";
 import { ArrowLeftRight, Video } from "lucide-react";
 
 export default function DiscoveryPage({
+  user,
   hosts = [],
   onAction,
   statuses = [],
@@ -191,6 +192,7 @@ export default function DiscoveryPage({
           >
             <MiniHostCard
               host={host}
+              user={user}
               onAction={onAction}
             />
           </div>
@@ -260,6 +262,11 @@ const topButton = (theme) => ({
     "transform .18s ease, box-shadow .18s ease, background .18s ease",
   WebkitTapHighlightColor: "transparent",
 });
+
+
+
+
+
 
 
 

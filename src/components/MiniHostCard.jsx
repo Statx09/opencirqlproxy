@@ -1,9 +1,11 @@
 ﻿import React, { memo, useMemo } from "react";
 import { normalizeHost } from "../utils/normalizeHost";
+import { supabase } from "../lib/supabaseClient";
+import { Hand, UserRoundPlus } from "lucide-react";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import { useTheme } from "../context/ThemeContext";
 
-function MiniHostCard({ host, onAction }) {
+function MiniHostCard({ host, user, onAction }) {
 
   const { theme } = useTheme();
 
@@ -144,35 +146,96 @@ console.log("BANNER:", h.banner);
 <div style={rail}>
 
   <button
+    type="button"
     style={{ ...railButton, ...waveButton }}
     onClick={(e) => {
       e.stopPropagation();
-      onAction("wave", h);
+      onAction?.("wave", h);
     }}
+    title="Wave"
+    aria-label="Wave"
   >
-    👋
+    <Hand size={18} strokeWidth={2} />
   </button>
 
   <button
-    style={{ ...railButton, ...likeButton }}
-    onClick={(e) => {
+    style={{ ...railButton, ...connectButton }}
+    onClick={async (e) => {
       e.stopPropagation();
-      onAction("like", h);
-    }}
-  >
-    ❤️
-  </button>
 
-  <button
-    style={railButton}
-    onClick={(e) => {
-      e.stopPropagation();
-      onAction("call", h);
+      const currentUserId = user?.id;
+      const targetUserId = h?.user_id;
+
+      if (!currentUserId || !targetUserId) {
+        console.error("CONNECT: missing user IDs", {
+          currentUserId,
+          targetUserId,
+          host: h,
+        });
+        return;
+      }
+
+      if (currentUserId === targetUserId) {
+        return;
+      }
+
+      try {
+        const { data: existing, error: checkError } =
+          await supabase
+            .from("connections")
+            .select("id,status")
+            .or(
+              `and(user_a.eq.${currentUserId},user_b.eq.${targetUserId}),and(user_a.eq.${targetUserId},user_b.eq.${currentUserId})`
+            )
+            .limit(1);
+
+        if (checkError) {
+          console.error("CONNECT CHECK FAILED:", checkError);
+          alert("Unable to check connection.");
+          return;
+        }
+
+        if (existing?.length) {
+          const status = existing[0].status;
+
+          if (status === "accepted") {
+            alert("You are already connected.");
+          } else if (status === "pending") {
+            alert("Connection request already sent.");
+          }
+
+          return;
+        }
+
+        const { error: insertError } = await supabase
+          .from("connections")
+          .insert({
+            user_a: currentUserId,
+            user_b: targetUserId,
+            status: "pending",
+          });
+
+        if (insertError) {
+          console.error(
+            "CONNECT REQUEST FAILED:",
+            insertError
+          );
+          alert("Failed to send connection request.");
+          return;
+        }
+
+        alert("Connection request sent.");
+      } catch (error) {
+        console.error(
+          "CONNECT REQUEST ERROR:",
+          error
+        );
+      }
     }}
-    title="Call"
-    aria-label="Call"
+    title="Connect"
+    aria-label="Connect"
   >
-    📹
+    <UserRoundPlus size={18} strokeWidth={2} />
   </button>
 
 </div>
@@ -305,6 +368,15 @@ const actionRow = {
   marginTop: 8,
 };
 
+const connectButton = {
+  color: "#fff",
+  background: "rgba(255,255,255,.08)",
+  border: "1px solid rgba(255,255,255,.12)",
+  boxShadow:
+    "0 8px 20px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.28)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+};
 const messageBtn = {
   background: "rgba(59,130,246,0.2)",
   color: "#3b82f6",
@@ -385,16 +457,15 @@ const railButton = {
 
 const waveButton = {
   boxShadow:
-    "0 0 12px rgba(56,189,248,.32)",
+    "0 0 14px rgba(255,255,255,.18), 0 10px 24px rgba(0,0,0,.32)",
 };
 
-const likeButton = {
-  boxShadow:
-    "0 0 12px rgba(236,72,153,.32)",
-};
 
 const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
+
+
 

@@ -1,10 +1,9 @@
 ﻿import React, { memo, useMemo } from "react";
 import { normalizeHost } from "../utils/normalizeHost";
-import { Hand, UserRoundPlus } from "lucide-react";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import { useTheme } from "../context/ThemeContext";
 
-function MiniHostCard({ host, user, onAction }) {
+function MiniHostCard({ host, onAction }) {
 
   const { theme } = useTheme();
 
@@ -94,7 +93,7 @@ console.log("BANNER:", h.banner);
 
   {h.presence === "in_studio" && (
     <div style={studioBadge}>
-      📹
+      ðŸ“¹
     </div>
   )}
 </div>
@@ -145,27 +144,23 @@ console.log("BANNER:", h.banner);
 <div style={rail}>
 
   <button
-    type="button"
     style={{ ...railButton, ...waveButton }}
     onClick={(e) => {
       e.stopPropagation();
-      onAction?.("wave", h);
+      onAction("wave", h);
     }}
-    title="Wave"
-    aria-label="Wave"
   >
-    <Hand size={18} strokeWidth={2} />
-  </button>  <button
-    type="button"
-    style={{ ...railButton, ...connectButton }}
+    ðŸ‘‹
+  </button>
+
+  <button
+    style={{ ...railButton, ...likeButton }}
     onClick={(e) => {
       e.stopPropagation();
-      onAction?.("connect", h);
+      onAction("like", h);
     }}
-    title="Connect"
-    aria-label="Connect"
   >
-    <UserRoundPlus size={18} strokeWidth={2} />
+    â¤ï¸
   </button>
 
 </div>
@@ -298,15 +293,6 @@ const actionRow = {
   marginTop: 8,
 };
 
-const connectButton = {
-  color: "#fff",
-  background: "rgba(255,255,255,.08)",
-  border: "1px solid rgba(255,255,255,.12)",
-  boxShadow:
-    "0 8px 20px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.28)",
-  backdropFilter: "blur(14px)",
-  WebkitBackdropFilter: "blur(14px)",
-};
 const messageBtn = {
   background: "rgba(59,130,246,0.2)",
   color: "#3b82f6",
@@ -387,17 +373,15 @@ const railButton = {
 
 const waveButton = {
   boxShadow:
-    "0 0 14px rgba(255,255,255,.18), 0 10px 24px rgba(0,0,0,.32)",
+    "0 0 12px rgba(56,189,248,.32)",
 };
 
+const likeButton = {
+  boxShadow:
+    "0 0 12px rgba(236,72,153,.32)",
+};
 
 const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
-
-
-
-
-
-

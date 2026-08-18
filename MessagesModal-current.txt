@@ -151,48 +151,34 @@ const sendMessage = async () => {
   }
 
   try {
-    const response = await fetch("http://localhost:3000/api/message", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
         sender_id: user.id,
         receiver_id: hostId,
         text,
-      }),
-    });
+        event: "message",
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("MESSAGE API ERROR:", data);
+    if (error) {
+      console.error("MESSAGE SEND ERROR:", error);
       return;
     }
 
-    console.log("MESSAGE API SUCCESS:", data);
+    console.log("MESSAGE SENT:", data);
 
     setMessage("");
 
-    if (data.message) {
-      setMessages((current) => {
-        if (current.some((msg) => msg.id === data.message.id)) {
-          return current;
-        }
+    setMessages((current) => {
+      if (current.some((msg) => msg.id === data.id)) {
+        return current;
+      }
 
-        return [...current, data.message];
-      });
-    }
-
-    if (data.ai_message) {
-      setMessages((current) => {
-        if (current.some((msg) => msg.id === data.ai_message.id)) {
-          return current;
-        }
-
-        return [...current, data.ai_message];
-      });
-    }
+      return [...current, data];
+    });
 
     onMessageSent?.();
 
@@ -372,7 +358,6 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
-
 
 
 

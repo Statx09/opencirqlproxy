@@ -15,6 +15,7 @@ import ChatsTab from "./components/ChatsTab";
 import MessagesModal from "./components/MessagesModal";
 import NotificationsModal from "./components/NotificationsModal";
 import ConnectionRequests from "./components/ConnectionRequests";
+import CallModal from "./components/CallModal";
 import SayThanksModal from "./components/SayThanksModal";
 import ProfileModal from "./components/ProfileModal";
 import ProfileTab from "./components/ProfileTab/ProfileTab";
@@ -82,7 +83,7 @@ const loadUnreadMessages = useCallback(async () => {
     .from("messages")
     .select("id", { count: "exact", head: true })
     .eq("receiver_id", user.id)
-    .is("event", null)
+    .eq("event", "message")
     .is("read_at", null);
 
   if (error) {
@@ -164,12 +165,12 @@ useEffect(() => {
         (payload) => {
           const message = payload.new;
 
-          if (message.event !== null) {
+          if (message.event !== "message") {
             return;
           }
 
           if (!message.read_at) {
-            loadUnreadMessages();
+            setUnreadMessageCount((count) => count + 1);
           }
         }
       )
@@ -216,7 +217,7 @@ const [networkView, setNetworkView] = useState("main");
         .update({ read_at: new Date().toISOString() })
         .eq("receiver_id", user.id)
         .eq("sender_id", otherUserId)
-        .is("event", null)
+        .eq("event", "message")
         .is("read_at", null);
 
       if (error) {
@@ -393,6 +394,7 @@ useEffect(() => {
           break;
 
         case "notifications":
+          await markNotificationsRead();
           setActiveModal("notifications");
           break;
 
@@ -448,97 +450,11 @@ useEffect(() => {
           break;
         }
 
-        case "connect": {
-          const receiverId = host?.user_id;
-
-          if (!receiverId || !user?.id) {
-            console.error("CONNECT: missing user or receiver", {
-              userId: user?.id,
-              receiverId,
-              host,
-            });
-            return;
-          }
-
-          if (receiverId === user.id) {
-            console.log("CONNECT: ignoring self");
-            return;
-          }
-
-          const { data: existing, error: checkError } = await supabase
-            .from("connections")
-            .select("id, user_a, user_b, status")
-            .or(
-              `and(user_a.eq.${user.id},user_b.eq.${receiverId}),and(user_a.eq.${receiverId},user_b.eq.${user.id})`
-            )
-            .limit(1);
-
-          if (checkError) {
-            console.error("CONNECT CHECK ERROR:", checkError);
-            alert("Unable to check connection.");
-            return;
-          }
-
-          if (existing?.length) {
-            const connection = existing[0];
-
-            if (connection.status === "accepted") {
-              alert("You are already connected.");
-            } else if (connection.status === "pending") {
-              if (connection.user_a === user.id && connection.user_b === receiverId) {
-                alert("Connection request already sent.");
-              } else {
-                alert("This person has already sent you a connection request.");
-              }
-            }
-
-            return;
-          }
-
-          const { error: insertError } = await supabase
-            .from("connections")
-            .insert({
-              user_a: user.id,
-              user_b: receiverId,
-              status: "pending",
-            });
-
-          if (insertError) {
-            console.error("CONNECT INSERT ERROR:", insertError);
-            alert("Failed to send connection request.");
-            return;
-          }
-
-          console.log("CONNECT REQUEST SENT:", {
-            from: user.id,
-            to: receiverId,
-          });
-
-          alert("Connection request sent.");
-          break;
-        }
-
         case "wave":
         case "like":
         case "support": {
           const receiverId = host?.user_id;
-
-          console.log("ACTION RECEIVED:", {
-            type,
-            senderId: user?.id,
-            receiverId,
-            host,
-          });
-
-          if (!receiverId || !user?.id) {
-            console.error("ACTION FAILED: missing user or receiver", {
-              type,
-              senderId: user?.id,
-              receiverId,
-              host,
-            });
-            return;
-          }
+          if (!receiverId || !user?.id) return;
 
           if (receiverId === user.id) {
             console.log("IGNORING SELF ACTION:", type);
@@ -556,40 +472,18 @@ useEffect(() => {
               ? "waved at you"
               : "liked you";
 
-          const { error: actionError } = await supabase
-            .from("messages")
-            .insert({
-              sender_id: user.id,
-              receiver_id: receiverId,
-              text,
-              event: type,
-              created_at: new Date().toISOString(),
-            });
+          await supabase.from("messages").insert({
+            sender_id: user.id,
+            receiver_id: receiverId,
+            text,
+            event: type,
+            created_at: new Date().toISOString(),
+          });
 
-          if (actionError) {
-            console.error(
-              `${type.toUpperCase()} SUPABASE ERROR:`,
-              actionError
-            );
-
-            alert(
-              `${type === "wave" ? "Wave" : "Like"} failed: ` +
-              actionError.message
-            );
-
-            return;
-          }
-
-          console.log(
-            `${type.toUpperCase()} SENT SUCCESSFULLY`,
-            {
-              senderId: user.id,
-              receiverId,
-            }
-          );
 
           break;
         }
+
         default:
           console.log("UNKNOWN ACTION:", type);
       }
@@ -854,7 +748,6 @@ useEffect(() => {
 {showStatusModal && (
   <StatusFeedModal
   statuses={statuses}
-  user={user}
   onClose={() => setShowStatusModal(false)}
   onOpenProfile={handleOpenProfile}
   onAction={handleAction}
@@ -926,6 +819,14 @@ useEffect(() => {
         <ModalShell title="Connections" onClose={closeModal}>
           <ConnectionRequests user={user} />
         </ModalShell>
+      )}
+
+      {activeModal === "call" && (
+        <CallModal
+          host={selectedHost}
+          user={user}
+          onClose={closeModal}
+        />
       )}
 
       {activeModal === "callsStudio" && (
@@ -1476,26 +1377,6 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

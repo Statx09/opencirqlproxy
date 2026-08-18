@@ -1,0 +1,188 @@
+﻿import React, { useEffect, useState, useCallback } from "react";
+import { supabase } from "../lib/supabaseClient";
+
+export default function ConnectionRequests({
+  user,
+  onUpdated,
+}) {
+  const [requests, setRequests] = useState([]);
+  const [profiles, setProfiles] = useState({});
+
+  const loadRequests = useCallback(async () => {
+    if (!user?.id) return;
+
+    const { data, error } = await supabase
+      .from("connections")
+      .select("*")
+      .eq("user_b", user.id)
+      .eq("status", "pending");
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setRequests(data || []);
+
+    const senderIds = (data || []).map((r) => r.user_a);
+
+    if (!senderIds.length) {
+      setProfiles({});
+      return;
+    }
+
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("*")
+      .in("user_id", senderIds);
+
+    const map = {};
+
+    (profileData || []).forEach((p) => {
+      map[p.user_id] = p;
+    });
+
+    setProfiles(map);
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadRequests();
+
+    const interval = setInterval(loadRequests, 5000);
+
+    return () => clearInterval(interval);
+  }, [loadRequests]);
+
+  async function acceptRequest(id) {
+    await supabase
+      .from("connections")
+      .update({
+        status: "accepted",
+      })
+      .eq("id", id);
+
+    loadRequests();
+
+    onUpdated?.();
+  }
+
+  async function declineRequest(id) {
+    await supabase
+      .from("connections")
+      .delete()
+      .eq("id", id);
+
+    loadRequests();
+
+    onUpdated?.();
+  }
+
+  return (
+    <div
+      style={{
+        padding: 16,
+        color: "#fff",
+      }}
+    >
+      {requests.length === 0 ? (
+        <div
+          style={{
+            opacity: .6,
+            textAlign: "center",
+            padding: 40,
+          }}
+        >
+          No connection requests.
+        </div>
+      ) : (
+        requests.map((request) => {
+          const profile = profiles[request.user_a];
+
+          return (
+            <div
+              key={request.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: 12,
+                marginBottom: 12,
+                borderRadius: 14,
+                background: "rgba(255,255,255,.05)",
+                border: "1px solid rgba(255,255,255,.08)",
+              }}
+            >
+              <img
+                src={
+                  profile?.avatar_url ||
+                  profile?.avatar ||
+                  "https://placehold.co/100"
+                }
+                alt=""
+                style={{
+                  width: 52,
+                  height: 52,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    fontWeight: 700,
+                  }}
+                >
+                  {profile?.alias ||
+                    profile?.name ||
+                    "Unknown User"}
+                </div>
+
+                <div
+                  style={{
+                    opacity: .7,
+                    fontSize: 13,
+                  }}
+                >
+                  wants to connect
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  acceptRequest(request.id)
+                }
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: "pointer",
+                  background: "#22c55e",
+                  color: "#fff",
+                }}
+              >
+                Accept
+              </button>
+
+              <button
+                onClick={() =>
+                  declineRequest(request.id)
+                }
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  border: "none",
+                  cursor: "pointer",
+                  background: "#ef4444",
+                  color: "#fff",
+                }}
+              >
+                Decline
+              </button>
+            </div>
+          );
+        })
+      )}
+    </div>
+  );
+}

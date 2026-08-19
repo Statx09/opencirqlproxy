@@ -1,15 +1,17 @@
-import React, { useState, useRef } from "react";
+﻿import React, { useState, useRef } from "react";
 import EmojiPicker from "emoji-picker-react";
+import { useTheme } from "../../context/ThemeContext";
 
 console.log("NEW LIVE COMPOSER LOADED");
 
 export default function LiveComposer({ onPost }) {
 
+  const { theme } = useTheme();
+
   const [text, setText] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
 
   const textareaRef = useRef(null);
-
 
   const submit = () => {
 
@@ -24,7 +26,6 @@ export default function LiveComposer({ onPost }) {
     setShowEmoji(false);
   };
 
-
   const addEmoji = (emojiData) => {
 
     setText((prev) =>
@@ -34,46 +35,67 @@ export default function LiveComposer({ onPost }) {
     textareaRef.current?.focus();
   };
 
-
   return (
     <div style={wrap}>
 
-      <textarea
-        ref={textareaRef}
-        value={text}
-        onChange={(e)=>setText(e.target.value)}
-        placeholder="What's on your mind?"
-        style={input}
-      />
+      <div
+        style={{
+          ...composerBox,
+          background: theme.surface,
+          border: `1px solid ${theme.border}`,
+        }}
+      >
 
+        <textarea
+          ref={textareaRef}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="What's on your mind?"
+          style={{
+            ...input,
+            color: theme.text,
+          }}
+        />
 
-      <div style={toolbar}>
-
-        <button
-          style={emojiButton}
-          onClick={() => 
-            setShowEmoji((v)=>!v)
-          }
+        <div
+          style={{
+            ...toolbar,
+            borderTop: `1px solid ${theme.border}`,
+          }}
         >
-          😊
-        </button>
 
+          <button
+            type="button"
+            aria-label="Add emoji"
+            onClick={() =>
+              setShowEmoji((v) => !v)
+            }
+            style={{
+              ...emojiButton,
+              background: theme.background,
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            😊
+          </button>
 
-        <button
-          onClick={submit}
-          style={postBtn}
-        >
-          Post
-        </button>
+          <button
+            type="button"
+            onClick={submit}
+            style={postBtn}
+          >
+            Post
+          </button>
+
+        </div>
 
       </div>
-
 
       {showEmoji && (
         <div style={emojiBox}>
           <EmojiPicker
             onEmojiClick={addEmoji}
-            theme="dark"
+            theme={theme.mode === "dark" ? "dark" : "light"}
             width={320}
             height={350}
           />
@@ -87,101 +109,63 @@ export default function LiveComposer({ onPost }) {
 
 /* ================= STYLES ================= */
 
-
 const wrap = {
-  display:"flex",
-  flexDirection:"column",
-  gap:12,
+  display: "flex",
+  flexDirection: "column",
+  gap: 10,
 };
 
+const composerBox = {
+  width: "100%",
+  borderRadius: 10,
+  overflow: "hidden",
+  boxSizing: "border-box",
+};
 
 const input = {
-
-  width:"100%",
-
-  minHeight:80,
-
-  resize:"none",
-
-  padding:14,
-
-  borderRadius:18,
-
-  border:
-    "1px solid rgba(255,255,255,.1)",
-
-  background:
-    "rgba(255,255,255,.06)",
-
-  color:"#fff",
-
-  outline:"none",
-
-  fontSize:15,
-
-  backdropFilter:
-    "blur(18px)",
+  width: "100%",
+  minHeight: 80,
+  resize: "none",
+  padding: 12,
+  boxSizing: "border-box",
+  border: "none",
+  background: "transparent",
+  outline: "none",
+  fontSize: 15,
+  fontFamily: "inherit",
 };
-
 
 const toolbar = {
-
-  display:"flex",
-
-  justifyContent:"space-between",
-
-  alignItems:"center",
-
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 10,
+  padding: 10,
 };
-
 
 const emojiButton = {
-
-  width:46,
-
-  height:46,
-
-  borderRadius:"50%",
-
-  border:
-    "1px solid rgba(255,255,255,.12)",
-
-  background:
-    "rgba(255,255,255,.08)",
-
-  fontSize:22,
-
-  cursor:"pointer",
-
-  color:"#fff",
-
+  width: 40,
+  height: 40,
+  borderRadius: 10,
+  fontSize: 20,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 };
-
 
 const postBtn = {
-
-  padding:
-    "10px 24px",
-
-  borderRadius:999,
-
-  border:
-    "1px solid rgba(255,255,255,.12)",
-
-  background:
-    "rgba(255,255,255,.08)",
-
-  color:"#fff",
-
-  fontWeight:700,
-
-  cursor:"pointer",
-
+  padding: "10px 18px",
+  borderRadius: 10,
+  border: "none",
+  background: "#7c3aed",
+  color: "#fff",
+  fontWeight: 700,
+  cursor: "pointer",
 };
 
-
 const emojiBox = {
-
-  marginTop:10,
-
+  marginTop: 0,
+  display: "flex",
+  justifyContent: "flex-start",
 };

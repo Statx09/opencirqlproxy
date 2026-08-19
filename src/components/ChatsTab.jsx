@@ -19,7 +19,7 @@ export default function ChatsTab({
       .from("messages")
       .select("*")
       .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-      .is("event", null)
+      .eq("event", "message")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -71,7 +71,7 @@ export default function ChatsTab({
         (payload) => {
           const message = payload.new;
 
-          if (message.event !== null) {
+          if (message.event !== "message") {
             return;
           }
 
@@ -204,5 +204,7 @@ export default function ChatsTab({
     </div>
   );
 }
+
+
 
 

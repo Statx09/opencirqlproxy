@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useRef, useState, useCallback } from "react";
 import { X } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabaseClient";
 
 export default function MessagesModal({
@@ -12,6 +13,8 @@ export default function MessagesModal({
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const { theme } = useTheme();
 
   const hostId = host?.user_id ?? host?.id;
 
@@ -137,21 +140,28 @@ const scrollToBottom = () => {
 /* ================= SEND MESSAGE ================= */
 
 const sendMessage = async () => {
-  console.log("SEND CLICKED");
+    console.log("SEND CLICKED");
 
-  const text = message.trim();
+    if (sending) {
+      console.log("SEND ALREADY IN PROGRESS");
+      return;
+    }
 
-  if (!text || !user?.id || !hostId) {
+    const text = message.trim();
+
+    if (!text || !user?.id || !hostId) {
     console.log("FAILED CHECK", {
       message,
       user,
       hostId,
     });
     return;
-  }
+    }
 
-  try {
-    const response = await fetch("http://localhost:3000/api/message", {
+  setSending(true);
+
+    try {
+      const response = await fetch("https://cirql-ai-chatbot.vercel.app/api/message", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -198,8 +208,9 @@ const sendMessage = async () => {
 
     scrollToBottom();
 
-  } catch (err) {
-    console.error("MESSAGE SEND EXCEPTION:", err);
+  } catch (err) {    console.error("MESSAGE SEND EXCEPTION:", err);
+  } finally {
+    setSending(false);
   }
 };
 
@@ -212,26 +223,22 @@ const sendMessage = async () => {
 
   return (
     <div style={overlay} onClick={onClose}>
-      <div style={modal} onClick={(e) => e.stopPropagation()}>
-
-        {/* HEADER */}
-        <div style={header}>
+      <div className="messages-modal" style={{ ...modal, background: theme.background, color: theme.text }} onClick={(e) => e.stopPropagation()}>{/* HEADER */}
+        <div className="messages-modal-header" style={{ ...header, borderBottomColor: theme.border }}>
           <div style={headerLeft}>
             <img src={avatar} alt={displayName} style={avatarStyle} />
 
             <div>
               <h3 style={{ margin: 0 }}>{displayName}</h3>
-              <p style={statusText}>?? Open chat</p>
+              <p style={{ ...statusText, color: theme.text }}>@{host?.alias || displayName}</p>
             </div>
           </div>
 
-          <button onClick={onClose} style={closeBtn}>
-            ?
-          </button>
+          <button onClick={onClose} style={{ ...closeBtn, background: theme.surface, color: theme.text, border: `1px solid ${theme.border}` }} aria-label="Close messages"><X size={20} /></button>
         </div>
 
         {/* CHAT */}
-        <div ref={chatRef} style={chatArea}>
+        <div className="messages-modal-chat" ref={chatRef} style={{ ...chatArea, background: theme.background }}>
           {loading && <p>Loading...</p>}
 
           {!loading &&
@@ -248,11 +255,7 @@ const sendMessage = async () => {
                   }}
                 >
                   <div
-                    style={{
-                      ...bubble,
-                      background: mine ? "#7c3aed" : "#f3f4f6",
-                      color: mine ? "#fff" : "#111",
-                    }}
+                    className={mine ? "" : "messages-modal-incoming"} style={{ ...bubble, background: mine ? "#7c3aed" : theme.surface, color: mine ? "#fff" : theme.text }}
                   >
                     {msg.text}
                   </div>
@@ -263,16 +266,29 @@ const sendMessage = async () => {
         </div>
 
         {/* INPUT */}
-        <div style={inputArea}>
-          <input
-            value={message}
+        <div className="messages-modal-input-area" style={{ ...inputArea, background: theme.surface, borderTopColor: theme.border }}>
+          <input className="messages-modal-input" value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Send a message..."
-            style={input}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+            style={{ ...input, background: theme.surface, color: theme.text, borderColor: theme.border }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
           />
 
-          <button onClick={sendMessage} style={sendBtn}>
+          <button
+            type="button"
+            onClick={(e) => {
+              console.log("BUTTON TOUCH/CLICK");
+              e.preventDefault();
+              sendMessage();
+            }}
+            disabled={sending}
+            style={{ ...sendBtn, opacity: sending ? 0.6 : 1 }}
+          >
             Send
           </button>
         </div>
@@ -295,7 +311,8 @@ const overlay = {
 const modal = {
   width: "100%",
   maxWidth: 700,
-  height: "100vh",
+  height: "100dvh",
+  maxHeight: "100dvh",
   background: "#fff",
   display: "flex",
   flexDirection: "column",
@@ -338,9 +355,11 @@ const closeBtn = {
 };
 
 const chatArea = {
-  flex: 1,
+  flex: "1 1 auto",
+  minHeight: 0,
   padding: 12,
   overflowY: "auto",
+  WebkitOverflowScrolling: "touch",
   background: "#fafafa",
 };
 
@@ -352,9 +371,12 @@ const bubble = {
 
 const inputArea = {
   display: "flex",
+  flexShrink: 0,
   gap: 10,
   padding: 16,
+  paddingBottom: "calc(16px + env(safe-area-inset-bottom))",
   borderTop: "1px solid #eee",
+  background: "#fff",
 };
 
 const input = {
@@ -372,6 +394,21 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

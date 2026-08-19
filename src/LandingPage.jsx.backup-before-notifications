@@ -51,9 +51,7 @@ const [incomingCall, setIncomingCall] = useState(null);
 
     const { data, error } = await supabase
       .from("messages")
-      .select(
-        "id, sender_id, receiver_id, text, event, payload, created_at, read_at"
-      )
+      .select("id, sender_id, receiver_id, text, event, payload, created_at, read_at")
       .eq("receiver_id", user.id)
       .not("event", "is", null)
       .order("created_at", { ascending: false });
@@ -70,67 +68,12 @@ const [incomingCall, setIncomingCall] = useState(null);
         item.event === "status_like"
     );
 
-    const senderIds = [
-      ...new Set(
-        notificationRows
-          .map((item) => item.sender_id)
-          .filter(Boolean)
-      ),
-    ];
-
-    console.log("NOTIFICATION DEBUG - rows:", notificationRows);
-    console.log("NOTIFICATION DEBUG - senderIds:", senderIds);
-
-    let profilesByUserId = {};
-
-    if (senderIds.length > 0) {
-      const {
-        data: profiles,
-        error: profilesError,
-      } = await supabase
-        .from("profiles")
-        .select(
-          "user_id, name, alias, avatar, avatar_url"
-        )
-        .in("user_id", senderIds);
-
-      if (profilesError) {
-        console.error(
-          "NOTIFICATION PROFILES LOAD ERROR:",
-          profilesError
-        );
-      } else {
-        console.log("NOTIFICATION DEBUG - profiles returned:", profiles);
-        console.log(
-          "NOTIFICATION DEBUG - profile user_ids:",
-          (profiles || []).map((profile) => profile.user_id)
-        );
-
-        profilesByUserId = (profiles || []).reduce(
-          (map, profile) => {
-            map[profile.user_id] = profile;
-            return map;
-          },
-          {}
-        );
-      }
-    }
-
-    const enrichedNotifications =
-      notificationRows.map((notification) => ({
-        ...notification,
-        sender_profile:
-          profilesByUserId[notification.sender_id] || null,
-      }));
-
-    setNotifications(enrichedNotifications);
-
+    setNotifications(notificationRows);
     setUnreadNotificationCount(
-      enrichedNotifications.filter(
-        (item) => !item.read_at
-      ).length
+      notificationRows.filter((item) => !item.read_at).length
     );
-  }, [user?.id]);
+    }, [user?.id]);
+
   /* ================= UNREAD MESSAGES ================= */
 
 const loadUnreadMessages = useCallback(async () => {
@@ -175,7 +118,7 @@ useEffect(() => {
           table: "messages",
           filter: `receiver_id=eq.${user.id}`,
         },
-        async (payload) => {
+        (payload) => {
           const notification = payload.new;
 
           if (
@@ -186,46 +129,16 @@ useEffect(() => {
             return;
           }
 
-          let senderProfile = null;
-
-          if (notification.sender_id) {
-            const { data, error } = await supabase
-              .from("profiles")
-              .select(
-                "user_id, name, alias, avatar, avatar_url"
-              )
-              .eq("user_id", notification.sender_id)
-              .maybeSingle();
-
-            if (error) {
-              console.error(
-                "REALTIME NOTIFICATION PROFILE ERROR:",
-                error
-              );
-            } else {
-              senderProfile = data || null;
-            }
-          }
-
-          const enrichedNotification = {
-            ...notification,
-            sender_profile: senderProfile,
-          };
-
           setNotifications((previous) => {
-            if (
-              previous.some(
-                (item) => item.id === enrichedNotification.id
-              )
-            ) {
+            if (previous.some((item) => item.id === notification.id)) {
               return previous;
             }
 
-            return [enrichedNotification, ...previous];
+            return [notification, ...previous];
           });
 
           if (!notification.read_at) {
-            loadNotifications();
+            setUnreadNotificationCount((count) => count + 1);
           }
         }
       )
@@ -437,65 +350,19 @@ const handleNotificationClick = useCallback(
 
     if (!notification?.sender_id) return;
 
-    /* ================= MARK THIS NOTIFICATION READ ================= */
-
-    if (!notification.read_at) {
-      const { error: readError } = await supabase
-        .from("messages")
-        .update({
-          read_at: new Date().toISOString(),
-        })
-        .eq("id", notification.id)
-        .eq("receiver_id", user.id)
-        .is("read_at", null);
-
-      if (readError) {
-        console.error(
-          "NOTIFICATION READ ERROR:",
-          readError
-        );
-      } else {
-        setNotifications((previous) =>
-          previous.map((item) =>
-            item.id === notification.id
-              ? {
-                  ...item,
-                  read_at: new Date().toISOString(),
-                }
-              : item
-          )
-        );
-
-        await loadNotifications();
-      }
-    }
-
-    /* ================= LOAD SENDER PROFILE ================= */
-
     const { data: senderProfile, error } = await supabase
       .from("profiles")
       .select("*")
       .eq("user_id", notification.sender_id)
       .maybeSingle();
 
-    console.log(
-      "NOTIFICATION SENDER PROFILE:",
-      senderProfile
-    );
-
-    console.log(
-      "NOTIFICATION SENDER ERROR:",
-      error
-    );
+    console.log("NOTIFICATION SENDER PROFILE:", senderProfile);
+    console.log("NOTIFICATION SENDER ERROR:", error);
 
     if (error || !senderProfile) {
-      console.log(
-        "Notification sender profile not found."
-      );
+      console.log("Notification sender profile not found.");
       return;
     }
-
-    /* ================= OPEN SENDER PROFILE ================= */
 
     if (
       notification.event === "wave" ||
@@ -508,8 +375,6 @@ const handleNotificationClick = useCallback(
       return;
     }
 
-    /* ================= MESSAGE ================= */
-
     if (notification.event === "message") {
       setSelectedProfile(null);
       setSelectedHost(senderProfile);
@@ -517,8 +382,11 @@ const handleNotificationClick = useCallback(
       return;
     }
   },
-  [user?.id, loadNotifications]
+  []
 );
+
+
+
 const [showStatusModal, setShowStatusModal] = useState(false);
 
 const { statuses, reload: reloadStatuses } = useStatusFeed();
@@ -1916,18 +1784,6 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

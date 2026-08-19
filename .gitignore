@@ -12,3 +12,5 @@ tools/freesvg/.config/
 *.backup
 *.before-*
 src/LandingPage.jsx.backup-settings
+.vercel
+.env*

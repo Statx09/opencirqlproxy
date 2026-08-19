@@ -11,6 +11,7 @@ export default function DailyRoom({
 
   useEffect(() => {
     let cancelled = false;
+    let cleaningUp = false;
 
     async function initDaily() {
       try {
@@ -38,6 +39,11 @@ export default function DailyRoom({
 
         call.on("left-meeting", () => {
           console.log("DAILY: User left meeting");
+
+          if (cleaningUp) {
+            console.log("DAILY: ignoring cleanup-triggered leave");
+            return;
+          }
 
           if (onLeave) {
             onLeave();
@@ -69,6 +75,7 @@ export default function DailyRoom({
 
     return () => {
       cancelled = true;
+      cleaningUp = true;
 
       const call = callRef.current;
 
@@ -99,3 +106,4 @@ export default function DailyRoom({
     />
   );
 }
+

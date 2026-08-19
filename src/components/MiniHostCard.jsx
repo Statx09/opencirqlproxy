@@ -161,7 +161,7 @@ console.log("BANNER:", h.banner);
 
         {/* INTENTS */}
 <div style={chipRow}>
-  {h.intents.slice(0, 5).map((t, i) => (
+  {h.intents.slice(0, 3).map((t, i) => (
     <span
       key={i}
       style={{
@@ -266,6 +266,9 @@ const feedbackActive = {
 
 const card = {
   display: "flex",
+  width: "100%",
+  maxWidth: "100%",
+  boxSizing: "border-box",
   padding: 12,
   background: "#111827",
   borderRadius: 16,
@@ -273,6 +276,7 @@ const card = {
   position: "relative",
   alignItems: "center",
   gap: 12,
+  overflow: "hidden",
 };
 
 /* AVATAR */
@@ -339,10 +343,13 @@ const studioBadge = {
 
 /* INFO */
 const info = {
-  flex: 1,
+  flex: "1 1 0",
+  minWidth: 0,
+  maxWidth: "100%",
   display: "flex",
   flexDirection: "column",
   gap: 6,
+  overflow: "hidden",
 };
 
 const identityStack = {
@@ -381,15 +388,25 @@ const headline = {
 /* TAGS */
 const chipRow = {
   display: "flex",
+  alignItems: "center",
   gap: 6,
-  flexWrap: "wrap",
+  flexWrap: "nowrap",
+  minWidth: 0,
+  width: "100%",
+  overflow: "hidden",
 };
 
 const chip = {
   fontSize: 10,
-  padding: "2px 6px",
+  padding: "3px 7px",
   background: "#222",
   borderRadius: 999,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: 78,
+  minWidth: 0,
+  flex: "0 1 auto",
 };
 
 /* EXPRESSIONS */
@@ -466,7 +483,9 @@ const rail = {
   gap: 5,
   justifyContent: "center",
   alignItems: "center",
-  flexShrink: 0,
+  flex: "0 0 38px",
+  width: 38,
+  minWidth: 38,
 };
 
 
@@ -516,6 +535,10 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
+
+
+
 
 
 

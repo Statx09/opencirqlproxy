@@ -1,5 +1,5 @@
-import React, { memo, useMemo, useCallback } from "react";
-import { MessageCircle, Phone } from "lucide-react";
+﻿import React, { memo, useMemo, useCallback } from "react";
+import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign } from "lucide-react";
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 
@@ -23,6 +23,9 @@ function HostCard({ host, onAction, variant = "swipe" }) {
   host?.expressions || host?.expression_badges
 );
 
+  const intents = normalizeArray(
+    host?.intents || host?.intent_tags
+  ).slice(0, 5);
   const normalizedTopics = useMemo(() => {
     if (!topics) return [];
     if (Array.isArray(topics)) return topics;
@@ -60,16 +63,16 @@ console.log("HOSTCARD normalized", expressions);
     ...glassTopButton,
     right: 16,
   }}
-  onClick={() => handle("profile")}
+  onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); handle("profile"); }}
 >
-  View Profile
+  <UserRound size={19} strokeWidth={1.8} />
 </button>
 
       {/* ACTION RAIL */}
       <div style={rail}>
-        <button style={railBtn} onClick={() => handle("wave")}>👋</button>
-        <button style={railBtn} onClick={() => handle("like")}>❤️</button>
-        <button style={railBtn} onClick={() => handle("support")}>💰</button>
+        <button style={railBtn} onClick={() => handle("wave")} title="Wave" aria-label="Wave"><Hand size={19} strokeWidth={1.8} /></button>
+        <button style={railBtn} onClick={() => handle("like")} title="Like" aria-label="Like"><Heart size={19} strokeWidth={1.8} /></button>
+        <button style={railBtn} onClick={() => handle("support")} title="Support" aria-label="Support"><CircleDollarSign size={19} strokeWidth={1.8} /></button>
       </div>
 
       {/* CONTENT */}
@@ -104,6 +107,18 @@ console.log("HOSTCARD normalized", expressions);
 
 </div>
 
+
+
+        {/* INTENTS */}
+        {intents.length > 0 && (
+          <div style={intentTags}>
+            {intents.map((intent, i) => (
+              <span key={`${intent}-${i}`} style={intentTag}>
+                {intent}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* TOPICS */}
         <div style={tags}>
@@ -240,36 +255,36 @@ const fallbackBanner = {
 const glassTopButton = {
   position: "absolute",
   top: 16,
+  right: 16,
 
-  height: 48,
-  padding: "0 18px",
+  width: 44,
+  height: 44,
+  padding: 0,
 
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 
-  borderRadius: 16,
+  borderRadius: "50%",
 
-  background: "rgba(15,18,28,.72)",
+  background: "rgba(20,20,25,.72)",
 
-  backdropFilter: "blur(22px)",
-  WebkitBackdropFilter: "blur(22px)",
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
 
-  border: "1px solid rgba(255,255,255,.10)",
+  border: "1px solid rgba(255,255,255,0.14)",
 
   boxShadow:
-    "0 10px 28px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05)",
+    "0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
 
   color: "#fff",
-  fontWeight: 600,
-  fontSize: 15,
 
   cursor: "pointer",
 };
 
 const rail = {
   position: "absolute",
-  top: 100,
+  top: 125,
   right: 14,
   display: "flex",
   flexDirection: "column",
@@ -279,22 +294,36 @@ const rail = {
 };
 
 const railBtn = {
-  width: 48,
-  height: 48,
+  width: 46,
+  height: 46,
+
   borderRadius: "50%",
-  background: "rgba(0,0,0,0.6)",
-  color: "#fff",
-  border: "1px solid rgba(255,255,255,0.15)",
-  cursor: "pointer",
+
+  background: "rgba(20,20,25,.72)",
+
+  border: "1px solid rgba(255,255,255,0.14)",
+
+  color: "#ffffff",
+
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  pointerEvents: "auto"
+
+  cursor: "pointer",
+
+  backdropFilter: "blur(16px)",
+  WebkitBackdropFilter: "blur(16px)",
+
+  boxShadow:
+    "0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
+
+  transition:
+    "transform .18s ease, box-shadow .18s ease",
 };
 
 const content = {
   position: "absolute",
-  bottom: 95,   // was 140
+  bottom: 80,   // lower card content
 
   width: "100%",
   padding: 16,
@@ -329,13 +358,23 @@ const tags = {
   gap: 6,
 };
 
-const intentTag = {
-  background: "#d1fae5",
-  color: "#065f46",
-  padding: "4px 8px",
-  borderRadius: 8,
+const intentTags = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 6,
+  marginTop: 8,
+  marginBottom: 4,
 };
 
+const intentTag = {
+  background: "rgba(124,58,237,.22)",
+  border: "1px solid rgba(124,58,237,.45)",
+  color: "#c4b5fd",
+  padding: "4px 8px",
+  borderRadius: 999,
+  fontSize: 10,
+  fontWeight: 700,
+};
 const topicTag = {
   background: "#ede9fe",
   color: "#5b21b6",
@@ -457,3 +496,20 @@ const flagBubble = {
 
   color: "#fff",
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

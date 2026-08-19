@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+﻿import { useRef, useState, useCallback } from "react";
 
 export function useSwipe({ onSwipeLeft, onSwipeRight }) {
   const startX = useRef(0);
@@ -8,13 +8,27 @@ export function useSwipe({ onSwipeLeft, onSwipeRight }) {
 
   const [dragX, setDragX] = useState(0);
 
-  const getX = (e) =>
-    e.touches ? e.touches[0].clientX : e.clientX;
+  const getX = (e) => {
+    if (e.touches && e.touches.length) {
+      return e.touches[0].clientX;
+    }
+
+    return e.clientX;
+  };
 
   const handleStart = useCallback((e) => {
     isDragging.current = true;
-    startX.current = getX(e);
-    currentX.current = startX.current;
+
+    const x = getX(e);
+
+    startX.current = x;
+    currentX.current = x;
+
+    if (e.currentTarget?.setPointerCapture && e.pointerId != null) {
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {}
+    }
   }, []);
 
   const handleMove = useCallback((e) => {
@@ -25,33 +39,58 @@ export function useSwipe({ onSwipeLeft, onSwipeRight }) {
 
     const diff = x - startX.current;
 
-    const resistance = 0.3;
-
     cancelAnimationFrame(raf.current);
+
     raf.current = requestAnimationFrame(() => {
-      setDragX(diff * resistance);
+      setDragX(diff);
     });
   }, []);
 
-  const handleEnd = useCallback(() => {
-    if (!isDragging.current) return;
+  const handleEnd = useCallback(
+    (e) => {
+      if (!isDragging.current) return;
 
-    isDragging.current = false;
+      isDragging.current = false;
 
-    const diff = currentX.current - startX.current;
+      const diff = currentX.current - startX.current;
+      const distance = Math.abs(diff);
 
-    const threshold = 120;
+      cancelAnimationFrame(raf.current);
 
-    setDragX(0);
+      /*
+       * Keep the release decision simple:
+       * - 80px is enough for a deliberate swipe
+       * - direction always comes from the sign of diff
+       */
+      const threshold = 80;
 
-    const isFast = Math.abs(diff) > 250;
+      if (distance >= threshold) {
+        if (diff < 0) {
+          onSwipeLeft?.();
+        } else {
+          onSwipeRight?.();
+        }
+      }
 
-    if (diff > threshold || isFast) {
-      onSwipeRight?.();
-    } else if (diff < -threshold || isFast) {
-      onSwipeLeft?.();
-    }
-  }, [onSwipeLeft, onSwipeRight]);
+      /*
+       * Snap the card back immediately after the swipe decision.
+       * LandingPage controls the short transition.
+       */
+      setDragX(0);
+
+      if (
+        e?.currentTarget?.releasePointerCapture &&
+        e.pointerId != null
+      ) {
+        try {
+          if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          }
+        } catch {}
+      }
+    },
+    [onSwipeLeft, onSwipeRight]
+  );
 
   return {
     handleStart,

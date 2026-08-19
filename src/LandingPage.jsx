@@ -7,7 +7,7 @@ import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
-import { Sun, Moon, Settings } from "lucide-react";
+import { Grid3X3,  Sun, Moon, Settings } from "lucide-react";
 import { useUser } from "./hooks/useUser";
 
 
@@ -1097,7 +1097,7 @@ useEffect(() => {
       style={modeBtn}
       onClick={() => setMode("grid")}
     >
-      ? Grid View
+      <Grid3X3 size={19} strokeWidth={1.8} />
     </button>
 
     <div
@@ -1326,10 +1326,7 @@ useEffect(() => {
         <ModalShell title="Identity Studio" onClose={closeModal}>
           <ProfileTab
   user={user}
-  onLogout={async () => {
-    await supabase.auth.signOut();
-    closeModal();
-  }}
+  onViewCard={() => handleOpenProfile(user?.id)}
 />
         </ModalShell>
       )}
@@ -1850,7 +1847,7 @@ const themeToggle = (theme) => ({
 
   borderRadius: "50%",
 
-  background: "rgba(255,255,255,0.08)",
+  background: "rgba(20,20,25,.72)",
 
   backdropFilter: "blur(20px)",
   WebkitBackdropFilter: "blur(20px)",
@@ -1868,30 +1865,39 @@ const themeToggle = (theme) => ({
 });
 
 const modeBtn = {
-  width: "100%",
-  height: 40,
-  padding: "0 14px",
+  position: "absolute",
+  top: 16,
+  left: 16,
+
+  width: 44,
+  height: 44,
+  padding: 0,
 
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
 
-  borderRadius: 10,
-  border: "1px solid rgba(255,255,255,.12)",
+  borderRadius: "50%",
 
   background: "rgba(20,20,25,.72)",
-  color: "#fff",
 
-  fontWeight: 600,
-  fontSize: 13,
+  border: "1px solid rgba(255,255,255,0.12)",
+
+  color: "#fff",
 
   cursor: "pointer",
 
-  backdropFilter: "blur(16px)",
-  WebkitBackdropFilter: "blur(16px)",
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+
+  boxShadow:
+    "0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
 
   boxSizing: "border-box",
+
+  zIndex: 100,
 };
+
 
 const swipeStage = {
   width: "100vw",
@@ -1916,6 +1922,14 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
+
+
+
+
+
+
 
 
 

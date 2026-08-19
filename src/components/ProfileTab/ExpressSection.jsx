@@ -44,11 +44,7 @@ const toggle = (value) => {
 
   return (
     <div style={styles.glass}>
-      <div style={styles.sectionTitle}>
-    Identity
-</div>
-
-      {/* Search */}
+{/* Search */}
 
       <input
         value={search}
@@ -96,7 +92,7 @@ const toggle = (value) => {
               opacity: 0.6,
             }}
           >
-            Select a few expressions below to build your identity. These will appear on your profile and help people discover you.
+            Select a few expressions below. These will appear on your profile and help people discover you.
           </div>
         )}
       </div>
@@ -123,5 +119,6 @@ const toggle = (value) => {
     </div>
   );
 }
+
 
 

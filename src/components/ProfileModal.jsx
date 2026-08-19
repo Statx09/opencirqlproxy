@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, MessageCircle, Handshake, Phone, Video } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
 import MessagesModal from "./MessagesModal";
@@ -8,7 +8,7 @@ import TipHostButton from "./TipHostButton";
 import ImageModal from "./ImageModal";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 
-export default function ProfileModal({ host, onClose }) {
+export default function ProfileModal({ host, onClose, onAction }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -178,24 +178,6 @@ console.log("error =", error);
           </div>
         </div>
 
-        {/* ACTIONS */}
-        <div style={actionRow}>
-          <button style={primaryBtn} onClick={handleMessage}>
-            Message
-          </button>
-
-          <button style={secondaryBtn} onClick={() => handleCall("voice")}>
-            Voice
-          </button>
-
-          <button style={secondaryBtn} onClick={() => handleCall("video")}>
-            Video
-          </button>
-
-          <button style={tipBtn} onClick={() => setShowTipModal(true)}>
-            Say Thanks 💛
-          </button>
-        </div>
 
         {/* INTENTS */}
         <div style={tagWrap}>
@@ -232,6 +214,136 @@ console.log("error =", error);
           )}
         </div>
 
+        {/* SOCIAL / LINKS */}
+        {profile.social_links?.[0] &&
+          Object.values(profile.social_links[0]).some(Boolean) && (
+            <div style={linksSection}>
+              <div style={linksTitle}>Links</div>
+
+              <div style={linksRow}>
+                {profile.social_links[0].website && (
+                  <button
+                    type="button"
+                    style={glassLinkButton}
+                    onClick={() =>
+                      window.open(
+                        profile.social_links[0].website,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                  >
+                    Website
+                  </button>
+                )}
+
+                {profile.social_links[0].twitter && (
+                  <button
+                    type="button"
+                    style={glassLinkButton}
+                    onClick={() =>
+                      window.open(
+                        profile.social_links[0].twitter,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                  >
+                    Twitter
+                  </button>
+                )}
+
+                {profile.social_links[0].instagram && (
+                  <button
+                    type="button"
+                    style={glassLinkButton}
+                    onClick={() =>
+                      window.open(
+                        profile.social_links[0].instagram,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                  >
+                    Instagram
+                  </button>
+                )}
+
+                {profile.social_links[0].tiktok && (
+                  <button
+                    type="button"
+                    style={glassLinkButton}
+                    onClick={() =>
+                      window.open(
+                        profile.social_links[0].tiktok,
+                        "_blank",
+                        "noopener,noreferrer"
+                      )
+                    }
+                  >
+                    TikTok
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+        {/* BOTTOM PROFILE ACTIONS */}
+        <div style={bottomActionRow}>
+
+          <button
+            type="button"
+            style={glassActionButton}
+            onClick={handleMessage}
+            title="Message"
+            aria-label="Message"
+          >
+            <MessageCircle size={19} strokeWidth={1.8} />
+          </button>
+
+          <button
+            type="button"
+            style={glassActionButton}
+            onClick={() => {
+              if (!sessionUser?.id) {
+                alert("Please login to connect.");
+                return;
+              }
+
+              if (!onAction) {
+                alert("Connection action unavailable.");
+                return;
+              }
+
+              onAction("connect", host);
+            }}
+            title="Request Connection"
+            aria-label="Request Connection"
+          >
+            <Handshake size={21} strokeWidth={1.8} />
+          </button>
+
+          <button
+            type="button"
+            style={glassActionButton}
+            onClick={() => handleCall("voice")}
+            title="Voice Call"
+            aria-label="Voice Call"
+          >
+            <Phone size={19} strokeWidth={1.8} />
+          </button>
+
+          <button
+            type="button"
+            style={glassActionButton}
+            onClick={() => handleCall("video")}
+            title="Video Call"
+            aria-label="Video Call"
+          >
+            <Video size={19} strokeWidth={1.8} />
+          </button>
+
+        </div>
         {/* MODALS */}
         {showMessageModal && (
           <MessagesModal
@@ -403,6 +515,69 @@ const imageThumb = {
   cursor: "pointer",
   flexShrink: 0,
 };
+const linksSection = {
+  width: "100%",
+  padding: "10px 16px 4px",
+  boxSizing: "border-box",
+};
+
+const linksTitle = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: "rgba(255,255,255,0.55)",
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+  marginBottom: 8,
+};
+
+const linksRow = {
+  display: "flex",
+  gap: 8,
+  flexWrap: "wrap",
+};
+
+const glassLinkButton = {
+  background: "rgba(255,255,255,0.05)",
+  color: "rgba(255,255,255,0.82)",
+  border: "1px solid rgba(255,255,255,0.10)",
+  padding: "7px 11px",
+  borderRadius: 9,
+  cursor: "pointer",
+  fontSize: 12,
+  fontWeight: 600,
+  backdropFilter: "blur(10px)",
+};
+
+const bottomActionRow = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 14,
+  width: "100%",
+  padding: "16px 16px 10px",
+  boxSizing: "border-box",
+  overflowX: "auto",
+};
+
+const glassActionButton = {
+  flex: "0 0 50px",
+  width: 50,
+  height: 50,
+  minWidth: 50,
+  padding: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  background: "rgba(255,255,255,0.045)",
+  color: "rgba(255,255,255,0.9)",
+  border: "1px solid rgba(255,255,255,0.11)",
+  borderRadius: 13,
+  cursor: "pointer",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
+  transition: "background 0.15s ease, border-color 0.15s ease, transform 0.15s ease",
+};
 const overlay = {
   position: "fixed",
   inset: 0,
@@ -436,6 +611,9 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
 
 
 

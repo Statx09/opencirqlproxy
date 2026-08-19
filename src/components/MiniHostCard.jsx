@@ -1,6 +1,6 @@
 ﻿import React, { memo, useMemo } from "react";
 import { normalizeHost } from "../utils/normalizeHost";
-import { Hand, UserRoundPlus } from "lucide-react";
+import { Hand, Handshake } from "lucide-react";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import { useTheme } from "../context/ThemeContext";
 
@@ -106,13 +106,27 @@ console.log("BANNER:", h.banner);
     color: theme.text,
   }}
 >
+  <div style={identityRow}>
   <div
-  style={{
-    ...name,
-    color: theme.text,
-  }}
->
-  {h.name}
+    style={{
+      ...name,
+      color: theme.text,
+    }}
+  >
+    {h.alias || h.name}
+  </div>
+
+  {h.headline && (
+    <div
+      style={{
+        ...headline,
+        color: theme.text,
+      }}
+      title={h.headline}
+    >
+      {h.headline}
+    </div>
+  )}
 </div>
 
  {/* EXPRESSIONS */}
@@ -124,7 +138,7 @@ console.log("BANNER:", h.banner);
 
         {/* INTENTS */}
 <div style={chipRow}>
-  {h.intents.slice(0, 2).map((t, i) => (
+  {h.intents.slice(0, 5).map((t, i) => (
     <span
       key={i}
       style={{
@@ -165,7 +179,7 @@ console.log("BANNER:", h.banner);
     title="Connect"
     aria-label="Connect"
   >
-    <UserRoundPlus size={18} strokeWidth={2} />
+    <Handshake size={18} strokeWidth={2} />
   </button>
 
 </div>
@@ -259,8 +273,30 @@ const info = {
   gap: 6,
 };
 
+const identityRow = {
+  display: "flex",
+  alignItems: "baseline",
+  gap: 14,
+  minWidth: 0,
+  flexWrap: "wrap",
+};
+
 const name = {
   fontWeight: 700,
+  fontSize: 14,
+  whiteSpace: "nowrap",
+};
+
+const headline = {
+  fontSize: 13,
+  fontWeight: 500,
+  fontFamily: "cursive",
+  fontStyle: "italic",
+  opacity: 0.72,
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: 190,
 };
 
 /* TAGS */
@@ -385,6 +421,12 @@ const railButton = {
     "transform .2s ease, box-shadow .2s ease",
 };
 
+const waveIcon = {
+  fontSize: 18,
+  lineHeight: 1,
+  display: "inline-block",
+  transform: "rotate(-8deg)",
+};
 const waveButton = {
   boxShadow:
     "0 0 14px rgba(255,255,255,.18), 0 10px 24px rgba(0,0,0,.32)",
@@ -395,6 +437,15 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
+
+
+
+
+
+
+
+
 
 
 

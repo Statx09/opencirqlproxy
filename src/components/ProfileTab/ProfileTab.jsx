@@ -2,9 +2,10 @@
 import { supabase } from "../../lib/supabaseClient";
 import useProfile from "../../hooks/useProfile";
 import ExpressSection from "./ExpressSection";
+import IntentSection from "./IntentSection";
 import IdentitySection from "./IdentitySection";
 
-export default function ProfileTab({ user, onLogout }) {
+export default function ProfileTab({ user, onViewCard }) {
   const [tab, setTab] = useState("profile");
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +38,7 @@ const [aiPersonality, setAiPersonality] = useState("");
   /* ================= EXPRESSIONS ================= */
  
 const [expressions, setExpressions] = useState([]);
+const [intents, setIntents] = useState([]);
 
   /* ================= MONETIZATION ================= */
   const [paypal, setPaypal] = useState("");
@@ -45,6 +47,9 @@ const [expressions, setExpressions] = useState([]);
   /* ================= PAYMENT SETTINGS ================= */
   const [paymentSettings, setPaymentSettings] = useState({
     currency: "USD",
+    free: false,
+    acceptTips: true,
+    requestPayment: false,
     voice: {
       enabled: true,
       duration: 30,
@@ -121,12 +126,27 @@ setAiPersonality(profile.ai_personality || "");
   setGalleryUrls(profile.gallery_urls || []);
 
 setExpressions(profile.expression_badges || []);
+  setIntents(
+    Array.isArray(profile.intent_tags)
+      ? profile.intent_tags
+      : String(profile.intent_tags || "")
+          .replace(/[{}"]/g, "")
+          .split(",")
+          .map((v) => v.trim())
+          .filter(Boolean)
+  );
 
   setPaypal(profile.paypal_link || "");
   setCrypto(profile.usdtwallet || "");
 
   setPaymentSettings({
     currency: profile.payment_methods?.currency || "USD",
+    free:
+      profile.payment_methods?.free ?? false,
+    acceptTips:
+      profile.payment_methods?.acceptTips ?? true,
+    requestPayment:
+      profile.payment_methods?.requestPayment ?? false,
     voice: {
       enabled: profile.payment_methods?.voice?.enabled ?? true,
       duration: profile.payment_methods?.voice?.duration || 30,
@@ -177,6 +197,7 @@ setExpressions(profile.expression_badges || []);
 
   /* Expressions */
 expression_badges: expressions,
+  intent_tags: intents,
 
   /* Monetization */
   paypal_link: paypal,
@@ -240,19 +261,23 @@ console.log("PROFILE UPSERT RESULT:", { data, error });
       Upload Banner
     </label>
   </div>
-
-  {/* LOGOUT â€” BELOW BANNER */}
-  {onLogout && (
-    <div style={logoutRow}>
-      <button
-        type="button"
-        onClick={onLogout}
-        style={logoutTopBtn}
-      >
-        Logout
-      </button>
-    </div>
-  )}
+      {/* VIEW MY CARD */}
+      {onViewCard && (
+        <div style={logoutRow}>
+          <button
+            type="button"
+            onClick={onViewCard}
+            style={{
+              ...logoutTopBtn,
+              border: "1px solid rgba(124,58,237,0.6)",
+              background: "rgba(124,58,237,0.14)",
+              color: "#c4b5fd",
+            }}
+          >
+            View My Card
+          </button>
+        </div>
+      )}
 
   {/* AVATAR */}
   <div style={avatarWrap}>
@@ -324,10 +349,19 @@ if (url) setAvatarUrl(url);
       {/* ================= EXPRESSIONS ================= */}
 
 {tab === "identity" && (
-  <ExpressSection
-    expressions={expressions}
-    setExpressions={setExpressions}
-  />
+  <>
+    <IntentSection
+      intents={intents}
+      setIntents={setIntents}
+    />
+
+    <div style={{ marginTop: 16 }}>
+      <ExpressSection
+        expressions={expressions}
+        setExpressions={setExpressions}
+      />
+    </div>
+  </>
 )}
 
 {/* ================= MEDIA ================= */}
@@ -403,165 +437,98 @@ if (url) setAvatarUrl(url);
       {tab === "payments" && (
         <div style={section}>
 
+          {/* PAYMENT OPTIONS */}
           <div style={paymentCard}>
-            <h3 style={paymentTitle}>Your Rates</h3>
+            <h3 style={paymentTitle}>Payment Options</h3>
             <p style={paymentHelp}>
-              Set what you charge for your time. Prices are shown in USD.
+              Choose how you want people to pay or support you.
             </p>
 
-            <div style={rateCard}>
-              <div style={rateHeader}>
-                <div>
-                  <strong>Voice Call</strong>
-                  <div style={mutedText}>One-to-one voice session</div>
+            {/* FREE */}
+            <div style={paymentMethodRow}>
+              <div>
+                <strong>Free</strong>
+                <div style={mutedText}>
+                  Offer calls without requiring payment.
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPaymentSettings(prev => ({
-                      ...prev,
-                      voice: {
-                        ...prev.voice,
-                        enabled: !prev.voice.enabled
-                      }
-                    }))
-                  }
-                  style={toggleBtn(paymentSettings.voice.enabled)}
-                >
-                  {paymentSettings.voice.enabled ? "ON" : "OFF"}
-                </button>
               </div>
 
-              {paymentSettings.voice.enabled && (
-                <div style={rateControls}>
-                  <div style={fieldGroup}>
-                    <label style={fieldLabel}>Duration</label>
-                    <select
-                      value={paymentSettings.voice.duration}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          voice: {
-                            ...prev.voice,
-                            duration: Number(e.target.value)
-                          }
-                        }))
-                      }
-                      style={selectInput}
-                    >
-                      <option value={15}>15 min</option>
-                      <option value={30}>30 min</option>
-                      <option value={45}>45 min</option>
-                      <option value={60}>60 min</option>
-                    </select>
-                  </div>
-
-                  <div style={fieldGroup}>
-                    <label style={fieldLabel}>Price (USD)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={paymentSettings.voice.price}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          voice: {
-                            ...prev.voice,
-                            price: e.target.value
-                          }
-                        }))
-                      }
-                      style={paymentInput}
-                    />
-                  </div>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={() =>
+                  setPaymentSettings(prev => ({
+                    ...prev,
+                    free: !prev.free
+                  }))
+                }
+                style={toggleBtn(!!paymentSettings.free)}
+              >
+                {paymentSettings.free ? "ON" : "OFF"}
+              </button>
             </div>
 
-            <div style={rateCard}>
-              <div style={rateHeader}>
-                <div>
-                  <strong>Video Call</strong>
-                  <div style={mutedText}>One-to-one video session</div>
+            {/* TIPS */}
+            <div style={paymentMethodRow}>
+              <div>
+                <strong>Accept Tips</strong>
+                <div style={mutedText}>
+                  Let people support you with optional tips.
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setPaymentSettings(prev => ({
-                      ...prev,
-                      video: {
-                        ...prev.video,
-                        enabled: !prev.video.enabled
-                      }
-                    }))
-                  }
-                  style={toggleBtn(paymentSettings.video.enabled)}
-                >
-                  {paymentSettings.video.enabled ? "ON" : "OFF"}
-                </button>
               </div>
 
-              {paymentSettings.video.enabled && (
-                <div style={rateControls}>
-                  <div style={fieldGroup}>
-                    <label style={fieldLabel}>Duration</label>
-                    <select
-                      value={paymentSettings.video.duration}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          video: {
-                            ...prev.video,
-                            duration: Number(e.target.value)
-                          }
-                        }))
-                      }
-                      style={selectInput}
-                    >
-                      <option value={15}>15 min</option>
-                      <option value={30}>30 min</option>
-                      <option value={45}>45 min</option>
-                      <option value={60}>60 min</option>
-                    </select>
-                  </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setPaymentSettings(prev => ({
+                    ...prev,
+                    acceptTips: !prev.acceptTips
+                  }))
+                }
+                style={toggleBtn(!!paymentSettings.acceptTips)}
+              >
+                {paymentSettings.acceptTips ? "ON" : "OFF"}
+              </button>
+            </div>
 
-                  <div style={fieldGroup}>
-                    <label style={fieldLabel}>Price (USD)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={paymentSettings.video.price}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          video: {
-                            ...prev.video,
-                            price: e.target.value
-                          }
-                        }))
-                      }
-                      style={paymentInput}
-                    />
-                  </div>
+            {/* PAYMENT REQUESTS */}
+            <div style={paymentMethodRow}>
+              <div>
+                <strong>Request Payment</strong>
+                <div style={mutedText}>
+                  Allow payment requests for custom services.
                 </div>
-              )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPaymentSettings(prev => ({
+                    ...prev,
+                    requestPayment: !prev.requestPayment
+                  }))
+                }
+                style={toggleBtn(!!paymentSettings.requestPayment)}
+              >
+                {paymentSettings.requestPayment ? "ON" : "OFF"}
+              </button>
             </div>
           </div>
 
+
+          {/* RECEIVE PAYMENTS */}
           <div style={paymentCard}>
-            <h3 style={paymentTitle}>Payment Methods</h3>
+            <h3 style={paymentTitle}>Receive Payments</h3>
             <p style={paymentHelp}>
-              Choose how you want to receive payments.
+              Select the payment methods you want to accept.
             </p>
 
+            {/* PAYPAL */}
             <div style={paymentMethodRow}>
               <div>
                 <strong>PayPal</strong>
-                <div style={mutedText}>Receive payments through PayPal</div>
+                <div style={mutedText}>
+                  Receive payments through PayPal.
+                </div>
               </div>
 
               <button
@@ -585,14 +552,18 @@ if (url) setAvatarUrl(url);
                 value={paypal}
                 onChange={e => setPaypal(e.target.value)}
                 style={input}
-                placeholder="Your PayPal payment link"
+                placeholder="PayPal payment link"
               />
             )}
 
+
+            {/* KO-FI */}
             <div style={paymentMethodRow}>
               <div>
                 <strong>Ko-fi</strong>
-                <div style={mutedText}>Accept payments through Ko-fi</div>
+                <div style={mutedText}>
+                  Accept tips and payments through Ko-fi.
+                </div>
               </div>
 
               <button
@@ -611,10 +582,14 @@ if (url) setAvatarUrl(url);
               </button>
             </div>
 
+
+            {/* STRIPE */}
             <div style={paymentMethodRow}>
               <div>
                 <strong>Card / Stripe</strong>
-                <div style={mutedText}>Accept card payments through Stripe</div>
+                <div style={mutedText}>
+                  Accept card payments through Stripe.
+                </div>
               </div>
 
               <button
@@ -633,10 +608,14 @@ if (url) setAvatarUrl(url);
               </button>
             </div>
 
+
+            {/* USDT */}
             <div style={paymentMethodRow}>
               <div>
                 <strong>USDT</strong>
-                <div style={mutedText}>Receive USDT directly to your wallet</div>
+                <div style={mutedText}>
+                  Receive USDT directly to your wallet.
+                </div>
               </div>
 
               <button
@@ -660,9 +639,154 @@ if (url) setAvatarUrl(url);
                 value={crypto}
                 onChange={e => setCrypto(e.target.value)}
                 style={input}
-                placeholder="Your USDT wallet address"
+                placeholder="USDT wallet address"
               />
             )}
+          </div>
+
+
+          {/* CALL RATES */}
+          <div style={paymentCard}>
+            <h3 style={paymentTitle}>Call Rates</h3>
+            <p style={paymentHelp}>
+              Set your availability, session length and rate.
+            </p>
+
+            {/* VOICE */}
+            <div style={compactRateRow}>
+              <div style={compactRateName}>
+                <span style={compactRateIcon}>🎙</span>
+                <strong>Voice</strong>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPaymentSettings(prev => ({
+                    ...prev,
+                    voice: {
+                      ...prev.voice,
+                      enabled: !prev.voice.enabled
+                    }
+                  }))
+                }
+                style={toggleBtn(paymentSettings.voice.enabled)}
+              >
+                {paymentSettings.voice.enabled ? "ON" : "OFF"}
+              </button>
+
+              {paymentSettings.voice.enabled && (
+                <>
+                  <select
+                    value={paymentSettings.voice.duration}
+                    onChange={e =>
+                      setPaymentSettings(prev => ({
+                        ...prev,
+                        voice: {
+                          ...prev.voice,
+                          duration: Number(e.target.value)
+                        }
+                      }))
+                    }
+                    style={compactRateSelect}
+                  >
+                    <option value={15}>15 min</option>
+                    <option value={30}>30 min</option>
+                    <option value={45}>45 min</option>
+                    <option value={60}>60 min</option>
+                  </select>
+
+                  <div style={compactPriceWrap}>
+                    <span>$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={paymentSettings.voice.price}
+                      onChange={e =>
+                        setPaymentSettings(prev => ({
+                          ...prev,
+                          voice: {
+                            ...prev.voice,
+                            price: e.target.value
+                          }
+                        }))
+                      }
+                      style={compactPriceInput}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
+
+            {/* VIDEO */}
+            <div style={compactRateRow}>
+              <div style={compactRateName}>
+                <span style={compactRateIcon}>🎥</span>
+                <strong>Video</strong>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPaymentSettings(prev => ({
+                    ...prev,
+                    video: {
+                      ...prev.video,
+                      enabled: !prev.video.enabled
+                    }
+                  }))
+                }
+                style={toggleBtn(paymentSettings.video.enabled)}
+              >
+                {paymentSettings.video.enabled ? "ON" : "OFF"}
+              </button>
+
+              {paymentSettings.video.enabled && (
+                <>
+                  <select
+                    value={paymentSettings.video.duration}
+                    onChange={e =>
+                      setPaymentSettings(prev => ({
+                        ...prev,
+                        video: {
+                          ...prev.video,
+                          duration: Number(e.target.value)
+                        }
+                      }))
+                    }
+                    style={compactRateSelect}
+                  >
+                    <option value={15}>15 min</option>
+                    <option value={30}>30 min</option>
+                    <option value={45}>45 min</option>
+                    <option value={60}>60 min</option>
+                  </select>
+
+                  <div style={compactPriceWrap}>
+                    <span>$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={paymentSettings.video.price}
+                      onChange={e =>
+                        setPaymentSettings(prev => ({
+                          ...prev,
+                          video: {
+                            ...prev.video,
+                            price: e.target.value
+                          }
+                        }))
+                      }
+                      style={compactPriceInput}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+
           </div>
 
         </div>
@@ -722,18 +846,18 @@ const banner = {
 
 const avatarWrap = {
   position: "absolute",
-  bottom: -30,
-  left: "50%",
-  transform: "translateX(-50%)",
+  bottom: 5,
+  left: 24,
+
   zIndex: 10,
-  textAlign: "center",
+  textAlign: "left",
 };
 
 const avatar = {
-  width: 95,
-  height: 95,
+  width: 120,
+  height: 120,
   borderRadius: "50%",
-  border: "3px solid #fff",
+  border: "4px solid #fff",
   objectFit: "cover",
   background: "#111",
 };
@@ -918,6 +1042,61 @@ const saveBtn = {
   fontWeight: 700,
 };
 
+const compactRateRow = {
+  display: "grid",
+  gridTemplateColumns: "1fr auto 110px 90px",
+  alignItems: "center",
+  gap: 10,
+  padding: "12px 0",
+  borderBottom: "1px solid rgba(255,255,255,.07)",
+};
+
+const compactRateName = {
+  display: "flex",
+  alignItems: "center",
+  gap: 9,
+  minWidth: 0,
+};
+
+const compactRateIcon = {
+  fontSize: 18,
+  width: 24,
+  textAlign: "left",
+};
+
+const compactRateSelect = {
+  width: "100%",
+  padding: "8px 9px",
+  borderRadius: 8,
+  border: "1px solid rgba(255,255,255,.12)",
+  background: "rgba(255,255,255,.06)",
+  color: "#fff",
+  fontSize: 12,
+};
+
+const compactPriceWrap = {
+  display: "flex",
+  alignItems: "center",
+  gap: 4,
+  padding: "0 9px",
+  height: 34,
+  borderRadius: 8,
+  border: "1px solid rgba(255,255,255,.12)",
+  background: "rgba(255,255,255,.06)",
+  color: "#aaa",
+  fontSize: 12,
+};
+
+const compactPriceInput = {
+  width: "100%",
+  minWidth: 0,
+  border: "none",
+  outline: "none",
+  background: "transparent",
+  color: "#fff",
+  fontSize: 13,
+  fontWeight: 600,
+};
 const logoutBtn = {
   flex: 1,
   padding: 12,
@@ -1003,10 +1182,24 @@ const mediaAddText = {
 const mediaCount = {
   color: "#888",
   fontSize: 12,
-  textAlign: "center",
+  textAlign: "left",
   marginTop: 8,
   marginBottom: 0,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

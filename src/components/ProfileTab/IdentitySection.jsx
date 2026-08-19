@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import CountrySelect from "./CountrySelect";
 import LanguageSelect from "./LanguageSelect";
 
@@ -59,6 +59,44 @@ const card = {
   border: "1px solid rgba(255,255,255,.08)",
   borderRadius: 16,
   padding: 16,
+};
+
+const intentSection = {
+  marginTop: 18,
+};
+
+const intentTitle = {
+  fontSize: 14,
+  fontWeight: 700,
+  color: "#fff",
+};
+
+const intentHelp = {
+  marginTop: 5,
+  marginBottom: 10,
+  fontSize: 12,
+  color: "#9ca3af",
+};
+
+const intentGrid = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 8,
+};
+
+const intentButton = {
+  padding: "8px 12px",
+  borderRadius: 999,
+  border: "1px solid rgba(255,255,255,.1)",
+  background: "rgba(255,255,255,.05)",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: 12,
+};
+
+const intentButtonActive = {
+  background: "rgba(124,58,237,.35)",
+  border: "1px solid #7c3aed",
 };
 
 const input = {

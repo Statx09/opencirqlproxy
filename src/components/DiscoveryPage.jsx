@@ -225,15 +225,23 @@ const header = {
 
 const swipeItem = {
   width: "100%",
+  minWidth: 0,
+  maxWidth: "100%",
+  boxSizing: "border-box",
+  overflow: "hidden",
   touchAction: "pan-y",
   userSelect: "none",
   WebkitUserSelect: "none",
 };
+
 const grid = {
   display: "grid",
-  gridTemplateColumns: "1fr",
+  gridTemplateColumns: "minmax(0, 1fr)",
   gap: 12,
+  width: "100%",
   maxWidth: 520,
+  minWidth: 0,
+  boxSizing: "border-box",
   margin: "0 auto",
 };
 

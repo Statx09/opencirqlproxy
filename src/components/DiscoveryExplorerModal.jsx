@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback } from "react";
+﻿import React, { useMemo, useState, useCallback } from "react";
 import TopicSearchBar from "./TopicSearchBar";
 
 /* ================= MAIN MODAL ================= */
@@ -91,7 +91,7 @@ const MiniHostCard = React.memo(function MiniHostCard({
       ? raw
       : String(raw).replace(/[{}"]/g, "").split(",");
 
-    return arr.map((v) => v.trim()).filter(Boolean).slice(0, 2);
+    return arr.map((v) => v.trim()).filter(Boolean).slice(0, 5);
   }, [host.intent_tags]);
 
   // OPTIMISTIC WAVE (no blocking alert)
@@ -303,3 +303,4 @@ const topicTag = {
   borderRadius: 6,
   fontSize: 10,
 };
+

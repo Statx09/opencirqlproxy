@@ -1,4 +1,4 @@
-﻿import React, { memo, useMemo, useCallback } from "react";
+﻿import React, { memo, useMemo, useCallback, useState } from "react";
 import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign } from "lucide-react";
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
@@ -33,6 +33,17 @@ function HostCard({ host, onAction, variant = "swipe" }) {
   }, [topics]);
 
 
+  const [actionFeedback, setActionFeedback] = useState(null);
+
+  const showActionFeedback = useCallback((type) => {
+    setActionFeedback(type);
+
+    window.clearTimeout(window.__hostCardFeedbackTimer);
+
+    window.__hostCardFeedbackTimer = window.setTimeout(() => {
+      setActionFeedback(null);
+    }, 1400);
+  }, []);
   const handle = useCallback(
     (type) => {
       onAction?.(type, host);
@@ -68,11 +79,30 @@ console.log("HOSTCARD normalized", expressions);
   <UserRound size={19} strokeWidth={1.8} />
 </button>
 
+      {actionFeedback && (
+        <div style={actionFeedbackStyle}>
+          <span style={actionFeedbackIcon}>
+            {actionFeedback === "wave"
+              ? "👋"
+              : actionFeedback === "like"
+              ? "❤️"
+              : "💰"}
+          </span>
+
+          <span>
+            {actionFeedback === "wave"
+              ? "Wave sent"
+              : actionFeedback === "like"
+              ? "Like sent"
+              : "Support opened"}
+          </span>
+        </div>
+      )}
       {/* ACTION RAIL */}
       <div style={rail}>
-        <button style={railBtn} onClick={() => handle("wave")} title="Wave" aria-label="Wave"><Hand size={19} strokeWidth={1.8} /></button>
-        <button style={railBtn} onClick={() => handle("like")} title="Like" aria-label="Like"><Heart size={19} strokeWidth={1.8} /></button>
-        <button style={railBtn} onClick={() => handle("support")} title="Support" aria-label="Support"><CircleDollarSign size={19} strokeWidth={1.8} /></button>
+        <button style={railBtn} onClick={() => { showActionFeedback("wave"); handle("wave"); }} title="Wave" aria-label="Wave"><Hand size={19} strokeWidth={1.8} /></button>
+        <button style={railBtn} onClick={() => { showActionFeedback("like"); handle("like"); }} title="Like" aria-label="Like"><Heart size={19} strokeWidth={1.8} /></button>
+        <button style={railBtn} onClick={() => { showActionFeedback("support"); handle("support"); }} title="Support" aria-label="Support"><CircleDollarSign size={19} strokeWidth={1.8} /></button>
       </div>
 
       {/* CONTENT */}
@@ -282,6 +312,45 @@ const glassTopButton = {
   cursor: "pointer",
 };
 
+const actionFeedbackStyle = {
+  position: "absolute",
+  right: 18,
+  bottom: 170,
+
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+
+  padding: "9px 13px",
+
+  borderRadius: 999,
+
+  background: "rgba(10,10,14,0.82)",
+  border: "1px solid rgba(255,255,255,0.12)",
+
+  color: "#fff",
+  fontSize: 12,
+  fontWeight: 650,
+
+  backdropFilter: "blur(18px)",
+  WebkitBackdropFilter: "blur(18px)",
+
+  boxShadow:
+    "0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
+
+  zIndex: 10001,
+
+  transform: "translateY(0) scale(1)",
+  opacity: 1,
+  transition: "transform .25s ease, opacity .25s ease",
+
+  pointerEvents: "none",
+};
+
+const actionFeedbackIcon = {
+  fontSize: 16,
+  lineHeight: 1,
+};
 const rail = {
   position: "absolute",
   top: 125,
@@ -496,6 +565,10 @@ const flagBubble = {
 
   color: "#fff",
 };
+
+
+
+
 
 
 

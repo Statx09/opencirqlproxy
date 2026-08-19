@@ -6,6 +6,16 @@ import { useTheme } from "../context/ThemeContext";
 
 function MiniHostCard({ host, user, onAction }) {
 
+  const [actionFeedback, setActionFeedback] = React.useState(null);
+
+  const showActionFeedback = (type) => {
+    setActionFeedback(type);
+    window.clearTimeout(showActionFeedback.timer);
+    showActionFeedback.timer = window.setTimeout(() => {
+      setActionFeedback(null);
+    }, 1200);
+  };
+
   const { theme } = useTheme();
 
   console.log(
@@ -23,6 +33,20 @@ console.log("BANNER:", h.banner);
   console.log("MiniHostCard:", h);
 
   if (!h) return null;
+
+  const actionAnimationStyle = `
+    @keyframes miniHostActionPop {
+      from {
+        opacity: 0;
+        transform: translateY(5px) scale(0.94);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  `;
+
 
   return (
     <div
@@ -106,28 +130,27 @@ console.log("BANNER:", h.banner);
     color: theme.text,
   }}
 >
-  <div style={identityRow}>
-  <div
-    style={{
-      ...name,
-      color: theme.text,
-    }}
-  >
-    {h.alias || h.name}
-  </div>
+  <div style={identityStack}>
+    <div
+      style={{
+        ...name,
+        color: theme.text,
+      }}
+      title={h.alias || h.name}
+    >
+      {h.alias || h.name}
+    </div>
 
-  {h.headline && (
     <div
       style={{
         ...headline,
         color: theme.text,
       }}
-      title={h.headline}
+      title={h.headline || ""}
     >
-      {h.headline}
+      {h.headline || "\u00A0"}
     </div>
-  )}
-</div>
+  </div>
 
  {/* EXPRESSIONS */}
 <ExpressionBadges
@@ -154,13 +177,46 @@ console.log("BANNER:", h.banner);
         
       </div>
 
+      {actionFeedback && (
+        <div
+          style={{
+            position: "absolute",
+            right: 12,
+            bottom: 58,
+            zIndex: 20,
+            padding: "7px 11px",
+            borderRadius: 999,
+            background: "rgba(15,23,42,0.82)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            backdropFilter: "blur(14px)",
+            WebkitBackdropFilter: "blur(14px)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.28)",
+            color: "#fff",
+            fontSize: 11,
+            fontWeight: 700,
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          {actionFeedback === "wave" ? "👋 Waved" : "🤝 Connection sent"}
+        </div>
+      )}
+
       {/* ACTION RAIL */}
 
 <div style={rail}>
 
   <button
     type="button"
-    style={{ ...railButton, ...waveButton }}
+    style={{
+      ...railButton,
+      ...waveButton,
+      ...(actionFeedback === "wave" ? feedbackActive : {}),
+    }}
+    onPointerDown={(e) => {
+      e.stopPropagation();
+      showActionFeedback("wave");
+    }}
     onClick={(e) => {
       e.stopPropagation();
       onAction?.("wave", h);
@@ -171,7 +227,15 @@ console.log("BANNER:", h.banner);
     <Hand size={18} strokeWidth={2} />
   </button>  <button
     type="button"
-    style={{ ...railButton, ...connectButton }}
+    style={{
+      ...railButton,
+      ...connectButton,
+      ...(actionFeedback === "connect" ? feedbackActive : {}),
+    }}
+    onPointerDown={(e) => {
+      e.stopPropagation();
+      showActionFeedback("connect");
+    }}
     onClick={(e) => {
       e.stopPropagation();
       onAction?.("connect", h);
@@ -191,6 +255,14 @@ console.log("BANNER:", h.banner);
 export default memo(MiniHostCard);
 
 /* ================= STYLES ================= */
+
+const feedbackActive = {
+  background: "rgba(139,92,246,0.28)",
+  border: "1px solid rgba(167,139,250,0.75)",
+  boxShadow:
+    "0 0 0 3px rgba(139,92,246,0.12), 0 0 18px rgba(139,92,246,0.35)",
+  transform: "scale(1.08)",
+};
 
 const card = {
   display: "flex",
@@ -273,18 +345,23 @@ const info = {
   gap: 6,
 };
 
-const identityRow = {
+const identityStack = {
   display: "flex",
-  alignItems: "baseline",
-  gap: 14,
+  flexDirection: "column",
+  justifyContent: "center",
   minWidth: 0,
-  flexWrap: "wrap",
+  width: "100%",
+  gap: 2,
 };
 
 const name = {
   fontWeight: 700,
   fontSize: 14,
   whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  width: "100%",
+  lineHeight: "18px",
 };
 
 const headline = {
@@ -296,7 +373,9 @@ const headline = {
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
-  maxWidth: 190,
+  width: "100%",
+  lineHeight: "16px",
+  minHeight: 16,
 };
 
 /* TAGS */
@@ -437,6 +516,14 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
+
+
+
+
+
+
+
 
 
 

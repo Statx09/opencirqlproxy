@@ -88,16 +88,6 @@ console.log("error =", error);
   const topics = profile.topics || [];
   const intents = profile.intent_tags || [];
   const expressions = profile.expression_badges || [];
-  const location = profile.country || profile.location || "";
-  const languages = Array.isArray(profile.languages)
-    ? profile.languages
-    : profile.languages
-      ? String(profile.languages)
-          .replace(/[{}"]/g, "")
-          .split(",")
-          .map((v) => v.trim())
-          .filter(Boolean)
-      : [];
 
     // ---------------- ACTIONS ----------------
   const handleMessage = () => {
@@ -143,21 +133,8 @@ console.log("error =", error);
 
           <div style={{ textAlign: "center" }}>
             <h2>{profile.alias || profile.name}</h2>
-            {profile.headline && (
-              <p style={headlineText}>{profile.headline}</p>
-            )}
-
             <p style={bioText}>{profile.bio}</p>
 
-            {(location || languages.length > 0) && (
-              <div style={metaText}>
-                {location && <span>{location}</span>}
-                {location && languages.length > 0 && <span> | </span>}
-                {languages.length > 0 && (
-                  <span>{languages.join(", ")}</span>
-                )}
-              </div>
-            )}
             {/* EXPRESSIONS */}
 
 {expressions.length > 0 && (
@@ -284,23 +261,6 @@ const avatarStyle = {
   borderRadius: "50%",
   border: "4px solid #111827",
   objectFit: "cover",
-};
-
-const headlineText = {
-  fontSize: 14,
-  color: "#fff",
-  fontWeight: 600,
-  marginTop: 6,
-  marginBottom: 0,
-  maxWidth: 420,
-  textAlign: "center",
-};
-
-const metaText = {
-  fontSize: 12,
-  color: "#888",
-  marginTop: 6,
-  textAlign: "center",
 };
 
 const bioText = {

@@ -367,7 +367,7 @@ const name = {
 const headline = {
   fontSize: 13,
   fontWeight: 500,
-  fontFamily: "cursive",
+  fontFamily: "Georgia, 'Times New Roman', serif",
   fontStyle: "italic",
   opacity: 0.72,
   whiteSpace: "nowrap",
@@ -516,6 +516,7 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
 
 
 

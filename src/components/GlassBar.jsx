@@ -14,6 +14,7 @@ export default function GlassBar({
   onAction,
   unreadNotificationCount = 0,
   unreadMessageCount = 0,
+  unreadConnectionRequestCount = 0,
 }) {
   const isLoggedIn = !!user;
   const { theme } = useTheme();
@@ -99,10 +100,38 @@ export default function GlassBar({
         </button>
 
         <button
-          style={iconBtn}
+          style={{ ...iconBtn, position: "relative" }}
           onClick={() => onAction("connections")}
+          aria-label="Connections"
         >
           <Users size={21} strokeWidth={2.1} />
+
+          {unreadConnectionRequestCount > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                minWidth: 18,
+                height: 18,
+                padding: "0 5px",
+                borderRadius: 999,
+                background: "#ef4444",
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+                border: "2px solid rgba(15,23,42,0.9)",
+              }}
+            >
+              {unreadConnectionRequestCount > 99
+                ? "99+"
+                : unreadConnectionRequestCount}
+            </span>
+          )}
         </button>
 
         <button
@@ -175,6 +204,9 @@ const iconBtn = {
   alignItems: "center",
   justifyContent: "center",
 };
+
+
+
 
 
 

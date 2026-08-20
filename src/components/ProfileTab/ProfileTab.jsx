@@ -40,38 +40,20 @@ const [aiPersonality, setAiPersonality] = useState("");
 const [expressions, setExpressions] = useState([]);
 const [intents, setIntents] = useState([]);
 
-  /* ================= MONETIZATION ================= */
+    /* ================= MONETIZATION ================= */
   const [paypal, setPaypal] = useState("");
+  const [kofi, setKofi] = useState("");
+  const [stripe, setStripe] = useState("");
   const [crypto, setCrypto] = useState("");
+  const [cryptoNetwork, setCryptoNetwork] = useState("Solana");
 
   /* ================= PAYMENT SETTINGS ================= */
   const [paymentSettings, setPaymentSettings] = useState({
     currency: "USD",
-    free: false,
-    acceptTips: true,
-    requestPayment: false,
-    voice: {
-      enabled: true,
-      duration: 30,
-      price: 10,
-    },
-    video: {
-      enabled: true,
-      duration: 30,
-      price: 15,
-    },
     enabled: [],
   });
 
-  /* ================= LINKS ================= */
-  const [links, setLinks] = useState({
-    twitter: "",
-    instagram: "",
-    tiktok: "",
-    website: "",
-  });
-
-  /* ================= UPLOAD ================= */
+/* ================= UPLOAD ================= */
     
 const uploadImage = async (file, bucket) => {
   if (!file || !user?.id) return null;
@@ -136,38 +118,41 @@ setExpressions(profile.expression_badges || []);
           .filter(Boolean)
   );
 
-  setPaypal(profile.paypal_link || "");
-  setCrypto(profile.usdtwallet || "");
+  const savedPayments = profile.payment_methods || {};
+
+  setPaypal(
+    savedPayments.paypal ||
+    profile.paypal_link ||
+    ""
+  );
+
+  setKofi(
+    savedPayments.kofi ||
+    ""
+  );
+
+  setStripe(
+    savedPayments.stripe ||
+    ""
+  );
+
+  setCrypto(
+    savedPayments.usdt ||
+    profile.usdtwallet ||
+    ""
+  );
+
+  setCryptoNetwork(
+    savedPayments.usdtNetwork ||
+    "Solana"
+  );
 
   setPaymentSettings({
-    currency: profile.payment_methods?.currency || "USD",
-    free:
-      profile.payment_methods?.free ?? false,
-    acceptTips:
-      profile.payment_methods?.acceptTips ?? true,
-    requestPayment:
-      profile.payment_methods?.requestPayment ?? false,
-    voice: {
-      enabled: profile.payment_methods?.voice?.enabled ?? true,
-      duration: profile.payment_methods?.voice?.duration || 30,
-      price: profile.payment_methods?.voice?.price || 10,
-    },
-    video: {
-      enabled: profile.payment_methods?.video?.enabled ?? true,
-      duration: profile.payment_methods?.video?.duration || 30,
-      price: profile.payment_methods?.video?.price || 15,
-    },
-    enabled: profile.payment_methods?.enabled || [],
+    currency: savedPayments.currency || "USD",
+    enabled: Array.isArray(savedPayments.enabled)
+      ? savedPayments.enabled
+      : [],
   });
-
-  setLinks(
-    profile.social_links?.[0] || {
-      twitter: "",
-      instagram: "",
-      tiktok: "",
-      website: "",
-    }
-  );
 }, [profile]);
 
   /* ================= SAVE ================= */
@@ -204,12 +189,24 @@ expression_badges: expressions,
   usdtwallet: crypto,
 
   /* Payment Settings */
-  payment_methods: paymentSettings,
+  payment_methods: {
+    currency: paymentSettings.currency,
 
-  /* Links */
-  social_links: [links],
+    paypal: paypal.trim(),
+    kofi: kofi.trim(),
+    stripe: stripe.trim(),
 
-  updated_at: new Date().toISOString(),
+    usdt: crypto.trim(),
+    usdtNetwork: cryptoNetwork,
+
+    enabled: [
+      ...(paypal.trim() ? ["paypal"] : []),
+      ...(kofi.trim() ? ["kofi"] : []),
+      ...(stripe.trim() ? ["stripe"] : []),
+      ...(crypto.trim() ? ["usdt"] : []),
+    ],
+  },
+updated_at: new Date().toISOString(),
 };
 
     const { data, error } = await supabase
@@ -306,7 +303,7 @@ if (url) setAvatarUrl(url);
 
       {/* ================= TABS ================= */}
       <div style={tabs}>
-        {["profile", "identity", "media", "payments", "links"].map((t) => (
+        {["profile", "identity", "media", "payments"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -436,372 +433,104 @@ if (url) setAvatarUrl(url);
       {/* ================= MONETIZATION ================= */}
       {tab === "payments" && (
         <div style={section}>
-
-          {/* PAYMENT OPTIONS */}
           <div style={paymentCard}>
-            <h3 style={paymentTitle}>Payment Options</h3>
-            <p style={paymentHelp}>
-              Choose how you want people to pay or support you.
-            </p>
 
-            {/* FREE */}
-            <div style={paymentMethodRow}>
-              <div>
-                <strong>Free</strong>
-                <div style={mutedText}>
-                  Offer calls without requiring payment.
-                </div>
-              </div>
+            <div style={paymentHeader}>
+              <h3 style={paymentTitle}>Payments</h3>
 
-              <button
-                type="button"
-                onClick={() =>
+              <select
+                value={paymentSettings.currency}
+                onChange={e =>
                   setPaymentSettings(prev => ({
                     ...prev,
-                    free: !prev.free
+                    currency: e.target.value,
                   }))
                 }
-                style={toggleBtn(!!paymentSettings.free)}
+                style={paymentCurrency}
               >
-                {paymentSettings.free ? "ON" : "OFF"}
-              </button>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="ZAR">ZAR</option>
+                <option value="AUD">AUD</option>
+                <option value="CAD">CAD</option>
+                <option value="NZD">NZD</option>
+              </select>
             </div>
 
-            {/* TIPS */}
-            <div style={paymentMethodRow}>
-              <div>
-                <strong>Accept Tips</strong>
-                <div style={mutedText}>
-                  Let people support you with optional tips.
-                </div>
+            <div style={paymentMethods}>
+
+              {/* PAYPAL */}
+              <div style={paymentRow}>
+                <div style={paymentName}>PayPal</div>
+
+                <input
+                  type="url"
+                  value={paypal}
+                  onChange={e => setPaypal(e.target.value)}
+                  style={paymentInput}
+                  placeholder="paypal.me/username"
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    acceptTips: !prev.acceptTips
-                  }))
-                }
-                style={toggleBtn(!!paymentSettings.acceptTips)}
-              >
-                {paymentSettings.acceptTips ? "ON" : "OFF"}
-              </button>
-            </div>
+              {/* KO-FI */}
+              <div style={paymentRow}>
+                <div style={paymentName}>Ko-fi</div>
 
-            {/* PAYMENT REQUESTS */}
-            <div style={paymentMethodRow}>
-              <div>
-                <strong>Request Payment</strong>
-                <div style={mutedText}>
-                  Allow payment requests for custom services.
-                </div>
+                <input
+                  type="url"
+                  value={kofi}
+                  onChange={e => setKofi(e.target.value)}
+                  style={paymentInput}
+                  placeholder="ko-fi.com/username"
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    requestPayment: !prev.requestPayment
-                  }))
-                }
-                style={toggleBtn(!!paymentSettings.requestPayment)}
-              >
-                {paymentSettings.requestPayment ? "ON" : "OFF"}
-              </button>
-            </div>
-          </div>
+              {/* STRIPE */}
+              <div style={paymentRow}>
+                <div style={paymentName}>Card / Stripe</div>
 
-
-          {/* RECEIVE PAYMENTS */}
-          <div style={paymentCard}>
-            <h3 style={paymentTitle}>Receive Payments</h3>
-            <p style={paymentHelp}>
-              Select the payment methods you want to accept.
-            </p>
-
-            {/* PAYPAL */}
-            <div style={paymentMethodRow}>
-              <div>
-                <strong>PayPal</strong>
-                <div style={mutedText}>
-                  Receive payments through PayPal.
-                </div>
+                <input
+                  type="url"
+                  value={stripe}
+                  onChange={e => setStripe(e.target.value)}
+                  style={paymentInput}
+                  placeholder="Stripe Payment Link"
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    enabled: prev.enabled.includes("paypal")
-                      ? prev.enabled.filter(m => m !== "paypal")
-                      : [...prev.enabled, "paypal"]
-                  }))
-                }
-                style={toggleBtn(paymentSettings.enabled.includes("paypal"))}
-              >
-                {paymentSettings.enabled.includes("paypal") ? "ON" : "OFF"}
-              </button>
-            </div>
+              {/* USDT */}
+              <div style={{
+                ...paymentRow,
+                borderBottom: "none",
+                paddingBottom: 2,
+              }}>
+                <div style={paymentName}>USDT</div>
 
-            {paymentSettings.enabled.includes("paypal") && (
-              <input
-                value={paypal}
-                onChange={e => setPaypal(e.target.value)}
-                style={input}
-                placeholder="PayPal payment link"
-              />
-            )}
+                <div style={paymentUsdt}>
+                  <input
+                    value={crypto}
+                    onChange={e => setCrypto(e.target.value)}
+                    style={paymentInput}
+                    placeholder="Wallet address"
+                  />
 
-
-            {/* KO-FI */}
-            <div style={paymentMethodRow}>
-              <div>
-                <strong>Ko-fi</strong>
-                <div style={mutedText}>
-                  Accept tips and payments through Ko-fi.
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    enabled: prev.enabled.includes("kofi")
-                      ? prev.enabled.filter(m => m !== "kofi")
-                      : [...prev.enabled, "kofi"]
-                  }))
-                }
-                style={toggleBtn(paymentSettings.enabled.includes("kofi"))}
-              >
-                {paymentSettings.enabled.includes("kofi") ? "ON" : "OFF"}
-              </button>
-            </div>
-
-
-            {/* STRIPE */}
-            <div style={paymentMethodRow}>
-              <div>
-                <strong>Card / Stripe</strong>
-                <div style={mutedText}>
-                  Accept card payments through Stripe.
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    enabled: prev.enabled.includes("stripe")
-                      ? prev.enabled.filter(m => m !== "stripe")
-                      : [...prev.enabled, "stripe"]
-                  }))
-                }
-                style={toggleBtn(paymentSettings.enabled.includes("stripe"))}
-              >
-                {paymentSettings.enabled.includes("stripe") ? "ON" : "OFF"}
-              </button>
-            </div>
-
-
-            {/* USDT */}
-            <div style={paymentMethodRow}>
-              <div>
-                <strong>USDT</strong>
-                <div style={mutedText}>
-                  Receive USDT directly to your wallet.
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    enabled: prev.enabled.includes("usdt")
-                      ? prev.enabled.filter(m => m !== "usdt")
-                      : [...prev.enabled, "usdt"]
-                  }))
-                }
-                style={toggleBtn(paymentSettings.enabled.includes("usdt"))}
-              >
-                {paymentSettings.enabled.includes("usdt") ? "ON" : "OFF"}
-              </button>
-            </div>
-
-            {paymentSettings.enabled.includes("usdt") && (
-              <input
-                value={crypto}
-                onChange={e => setCrypto(e.target.value)}
-                style={input}
-                placeholder="USDT wallet address"
-              />
-            )}
-          </div>
-
-
-          {/* CALL RATES */}
-          <div style={paymentCard}>
-            <h3 style={paymentTitle}>Call Rates</h3>
-            <p style={paymentHelp}>
-              Set your availability, session length and rate.
-            </p>
-
-            {/* VOICE */}
-            <div style={compactRateRow}>
-              <div style={compactRateName}>
-                <span style={compactRateIcon}>🎙</span>
-                <strong>Voice</strong>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    voice: {
-                      ...prev.voice,
-                      enabled: !prev.voice.enabled
-                    }
-                  }))
-                }
-                style={toggleBtn(paymentSettings.voice.enabled)}
-              >
-                {paymentSettings.voice.enabled ? "ON" : "OFF"}
-              </button>
-
-              {paymentSettings.voice.enabled && (
-                <>
                   <select
-                    value={paymentSettings.voice.duration}
-                    onChange={e =>
-                      setPaymentSettings(prev => ({
-                        ...prev,
-                        voice: {
-                          ...prev.voice,
-                          duration: Number(e.target.value)
-                        }
-                      }))
-                    }
-                    style={compactRateSelect}
+                    value={cryptoNetwork}
+                    onChange={e => setCryptoNetwork(e.target.value)}
+                    style={paymentNetwork}
                   >
-                    <option value={15}>15 min</option>
-                    <option value={30}>30 min</option>
-                    <option value={45}>45 min</option>
-                    <option value={60}>60 min</option>
+                    <option value="Solana">Solana</option>
+                    <option value="TRC20">TRC20</option>
+                    <option value="ERC20">ERC20</option>
+                    <option value="BEP20">BEP20</option>
+                    <option value="Polygon">Polygon</option>
                   </select>
-
-                  <div style={compactPriceWrap}>
-                    <span>$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={paymentSettings.voice.price}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          voice: {
-                            ...prev.voice,
-                            price: e.target.value
-                          }
-                        }))
-                      }
-                      style={compactPriceInput}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-
-
-            {/* VIDEO */}
-            <div style={compactRateRow}>
-              <div style={compactRateName}>
-                <span style={compactRateIcon}>🎥</span>
-                <strong>Video</strong>
+                </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setPaymentSettings(prev => ({
-                    ...prev,
-                    video: {
-                      ...prev.video,
-                      enabled: !prev.video.enabled
-                    }
-                  }))
-                }
-                style={toggleBtn(paymentSettings.video.enabled)}
-              >
-                {paymentSettings.video.enabled ? "ON" : "OFF"}
-              </button>
-
-              {paymentSettings.video.enabled && (
-                <>
-                  <select
-                    value={paymentSettings.video.duration}
-                    onChange={e =>
-                      setPaymentSettings(prev => ({
-                        ...prev,
-                        video: {
-                          ...prev.video,
-                          duration: Number(e.target.value)
-                        }
-                      }))
-                    }
-                    style={compactRateSelect}
-                  >
-                    <option value={15}>15 min</option>
-                    <option value={30}>30 min</option>
-                    <option value={45}>45 min</option>
-                    <option value={60}>60 min</option>
-                  </select>
-
-                  <div style={compactPriceWrap}>
-                    <span>$</span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={paymentSettings.video.price}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          video: {
-                            ...prev.video,
-                            price: e.target.value
-                          }
-                        }))
-                      }
-                      style={compactPriceInput}
-                    />
-                  </div>
-                </>
-              )}
             </div>
-
           </div>
-
-        </div>
-      )}
-      {/* ================= LINKS ================= */}
-      {tab === "links" && (
-        <div style={section}>
-          <input
-            value={links.twitter}
-            onChange={(e) =>
-              setLinks({ ...links, twitter: e.target.value })
-            }
-            style={input}
-            placeholder="Twitter"
-          />
         </div>
       )}
 
@@ -931,6 +660,102 @@ const actions = {
   marginTop: 20,
 };
 
+const compactPaymentToggle = (active) => ({
+  flex: 1,
+  padding: "10px 8px",
+  borderRadius: 10,
+  border: "1px solid #263244",
+  background: active ? "rgba(124,58,237,.18)" : "#111827",
+  color: "#fff",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 6,
+  fontSize: 13,
+  fontWeight: 600,
+});
+
+const compactPaymentRow = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  padding: "10px 0",
+  borderBottom: "1px solid #263244",
+};
+
+const compactPaymentStatus = {
+  marginTop: 2,
+  fontSize: 11,
+  color: "#9ca3af",
+};
+const paymentHeader = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  marginBottom: 4,
+};
+
+const paymentCurrency = {
+  padding: "6px 28px 6px 8px",
+  borderRadius: 8,
+  border: "1px solid #263244",
+  background: "#0b1220",
+  color: "#fff",
+  fontSize: 12,
+  cursor: "pointer",
+};
+
+const paymentMethods = {
+  marginTop: 10,
+};
+
+const paymentRow = {
+  display: "grid",
+  gridTemplateColumns: "110px minmax(0, 1fr)",
+  alignItems: "center",
+  gap: 12,
+  padding: "10px 0",
+  borderBottom: "1px solid #263244",
+};
+
+const paymentName = {
+  fontSize: 13,
+  fontWeight: 600,
+  color: "#e5e7eb",
+};
+
+const paymentInput = {
+  width: "100%",
+  minWidth: 0,
+  padding: "8px 10px",
+  borderRadius: 8,
+  border: "1px solid #263244",
+  background: "#0b1220",
+  color: "#fff",
+  fontSize: 12,
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const paymentUsdt = {
+  display: "flex",
+  gap: 8,
+  minWidth: 0,
+};
+
+const paymentNetwork = {
+  flex: "0 0 105px",
+  padding: "8px 6px",
+  borderRadius: 8,
+  border: "1px solid #263244",
+  background: "#0b1220",
+  color: "#fff",
+  fontSize: 11,
+  cursor: "pointer",
+};
 const paymentCard = {
   marginTop: 16,
   padding: 16,
@@ -986,17 +811,6 @@ const fieldLabel = {
   color: "#9ca3af",
 };
 
-const paymentInput = {
-  width: "100%",
-  padding: 10,
-  borderRadius: 10,
-  border: "1px solid #333",
-  background: "#111",
-  color: "#fff",
-  boxSizing: "border-box",
-};
-
-
 const selectInput = {
   width: "100%",
   padding: 10,
@@ -1040,38 +854,6 @@ const saveBtn = {
   borderRadius: 10,
   color: "#fff",
   fontWeight: 700,
-};
-
-const compactRateRow = {
-  display: "grid",
-  gridTemplateColumns: "1fr auto 110px 90px",
-  alignItems: "center",
-  gap: 10,
-  padding: "12px 0",
-  borderBottom: "1px solid rgba(255,255,255,.07)",
-};
-
-const compactRateName = {
-  display: "flex",
-  alignItems: "center",
-  gap: 9,
-  minWidth: 0,
-};
-
-const compactRateIcon = {
-  fontSize: 18,
-  width: 24,
-  textAlign: "left",
-};
-
-const compactRateSelect = {
-  width: "100%",
-  padding: "8px 9px",
-  borderRadius: 8,
-  border: "1px solid rgba(255,255,255,.12)",
-  background: "rgba(255,255,255,.06)",
-  color: "#fff",
-  fontSize: 12,
 };
 
 const compactPriceWrap = {
@@ -1186,6 +968,21 @@ const mediaCount = {
   marginTop: 8,
   marginBottom: 0,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

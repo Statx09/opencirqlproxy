@@ -585,7 +585,7 @@ const overlay = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  zIndex: 100001,
+  zIndex: 100003,
 };
 
 const modal = {
@@ -611,6 +611,7 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
 
 
 

@@ -14,7 +14,7 @@ import { useUser } from "./hooks/useUser";
 import ChatsTab from "./components/ChatsTab";
 import MessagesModal from "./components/MessagesModal";
 import NotificationsModal from "./components/NotificationsModal";
-import ConnectionRequests from "./components/ConnectionRequests";
+import ConnectionsContent from "./components/ConnectionsContent";
 import SayThanksModal from "./components/SayThanksModal";
 import ProfileModal from "./components/ProfileModal";
 import ProfileTab from "./components/ProfileTab/ProfileTab";
@@ -38,6 +38,7 @@ const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 const [notifications, setNotifications] = useState([]);
 const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState(0);
 
 /* ================= INCOMING CALL ================= */
 
@@ -131,7 +132,33 @@ const [incomingCall, setIncomingCall] = useState(null);
       ).length
     );
   }, [user?.id]);
-  /* ================= UNREAD MESSAGES ================= */
+  /* ================= UNREAD CONNECTION REQUESTS ================= */
+
+const loadUnreadConnectionRequests = useCallback(async () => {
+  if (!user?.id) {
+    setUnreadConnectionRequestCount(0);
+    return;
+  }
+
+  const { count, error } = await supabase
+    .from("connections")
+    .select("id", { count: "exact", head: true })
+    .eq("user_b", user.id)
+    .eq("status", "pending");
+
+  if (error) {
+    console.error("UNREAD CONNECTION REQUESTS LOAD ERROR:", error);
+    return;
+  }
+
+  setUnreadConnectionRequestCount(count || 0);
+}, [user?.id]);
+
+useEffect(() => {
+  loadUnreadConnectionRequests();
+}, [loadUnreadConnectionRequests]);
+
+/* ================= UNREAD MESSAGES ================= */
 
 const loadUnreadMessages = useCallback(async () => {
   if (!user?.id) {
@@ -237,7 +264,41 @@ useEffect(() => {
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
-  /* ================= INCOMING CALL REALTIME ================= */
+  /* ================= CONNECTION REQUEST REALTIME ================= */
+
+useEffect(() => {
+  if (!user?.id) return;
+
+  const channel = supabase
+    .channel(`connection-requests-${user.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "connections",
+        filter: `user_b=eq.${user.id}`,
+      },
+      (payload) => {
+        const connection = payload.new;
+
+        if (connection.status !== "pending") {
+          return;
+        }
+
+        loadUnreadConnectionRequests();
+      }
+    )
+    .subscribe((status) => {
+      console.log("CONNECTION REQUESTS REALTIME:", status);
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [user?.id, loadUnreadConnectionRequests]);
+
+/* ================= INCOMING CALL REALTIME ================= */
 
   useEffect(() => {
     console.log("INCOMING CALL EFFECT STARTED:", user?.id);
@@ -750,13 +811,17 @@ useEffect(() => {
             return;
           }
 
+          console.log("CONNECT CHECK:", {
+            currentUser: user.id,
+            receiverId,
+          });
+
           const { data: existing, error: checkError } = await supabase
             .from("connections")
             .select("id, user_a, user_b, status")
             .or(
               `and(user_a.eq.${user.id},user_b.eq.${receiverId}),and(user_a.eq.${receiverId},user_b.eq.${user.id})`
-            )
-            .limit(1);
+            );
 
           if (checkError) {
             console.error("CONNECT CHECK ERROR:", checkError);
@@ -764,22 +829,47 @@ useEffect(() => {
             return;
           }
 
-          if (existing?.length) {
-            const connection = existing[0];
+          console.log("CONNECT EXISTING ROWS:", existing);
 
-            if (connection.status === "accepted") {
+          if (existing?.length) {
+            const accepted = existing.find(
+              (connection) => connection.status === "accepted"
+            );
+
+            if (accepted) {
+              console.log("CONNECT RESULT: ACCEPTED", accepted);
               alert("You are already connected.");
-            } else if (connection.status === "pending") {
-              if (connection.user_a === user.id && connection.user_b === receiverId) {
-                alert("Connection request already sent.");
-              } else {
-                alert("This person has already sent you a connection request.");
-              }
+              return;
             }
 
-            return;
+            const outgoing = existing.find(
+              (connection) =>
+                connection.status === "pending" &&
+                connection.user_a === user.id &&
+                connection.user_b === receiverId
+            );
+
+            if (outgoing) {
+              console.log("CONNECT RESULT: OUTGOING PENDING", outgoing);
+              alert("Connection request already sent.");
+              return;
+            }
+
+            const incoming = existing.find(
+              (connection) =>
+                connection.status === "pending" &&
+                connection.user_a === receiverId &&
+                connection.user_b === user.id
+            );
+
+            if (incoming) {
+              console.log("CONNECT RESULT: INCOMING PENDING", incoming);
+              alert("This person has already sent you a connection request.");
+              return;
+            }
           }
 
+          console.log("CONNECT RESULT: NO EXISTING RELATION — INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1132,6 +1222,7 @@ useEffect(() => {
   onAction={handleAction}
   unreadNotificationCount={unreadNotificationCount}
   unreadMessageCount={unreadMessageCount}
+  unreadConnectionRequestCount={unreadConnectionRequestCount}
 />
       </div>
 
@@ -1360,10 +1451,12 @@ useEffect(() => {
       )}
 
       {activeModal === "connections" && (
-        <ModalShell title="Connections" onClose={closeModal}>
-          <ConnectionRequests user={user} />
-        </ModalShell>
-      )}
+  <ConnectionsContent
+    user={user}
+    onClose={closeModal}
+    onOpenProfile={handleOpenProfile}
+  />
+)}
 
       {activeModal === "callsStudio" && (
   <CallsStudioModal
@@ -1922,6 +2015,13 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
+
+
+
+
+
 
 
 

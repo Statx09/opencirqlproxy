@@ -1981,8 +1981,8 @@ const themeToggle = (theme) => ({
 });
 
 const modeBtn = {
-  position: "absolute",
-  top: 16,
+  position: "fixed",
+  top: 80,
   left: 16,
 
   width: 44,
@@ -2011,9 +2011,8 @@ const modeBtn = {
 
   boxSizing: "border-box",
 
-  zIndex: 100,
+  zIndex: 9500,
 };
-
 
 const swipeStage = {
   width: "100vw",
@@ -2038,6 +2037,8 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
 
 
 

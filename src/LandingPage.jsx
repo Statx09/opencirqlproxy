@@ -380,10 +380,17 @@ useEffect(() => {
             );
           }
 
+          console.log("INCOMING CALL: ABOUT TO SET STATE", {
+            message,
+            callerProfile,
+          });
+
           setIncomingCall({
             ...message,
             callerProfile: callerProfile || null,
           });
+
+          console.log("INCOMING CALL: STATE SET REQUESTED");
         }
       )
       .subscribe((status) => {
@@ -2062,6 +2069,7 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
 
 
 

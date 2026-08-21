@@ -44,7 +44,7 @@ const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState
 
 const [incomingCall, setIncomingCall] = useState(null);
 const [outgoingCall, setOutgoingCall] = useState(null);
-const [callRealtimeStatus, setCallRealtimeStatus] = useState("INIT");
+
   const loadNotifications = useCallback(async () => {
     if (!user?.id) {
       setNotifications([]);
@@ -259,8 +259,7 @@ useEffect(() => {
         }
       )
       .subscribe((status) => {
-        setCallRealtimeStatus(status);
-        console.log("NOTIFICATIONS REALTIME:", status);
+console.log("NOTIFICATIONS REALTIME:", status);
       });
 
     return () => {
@@ -293,8 +292,7 @@ useEffect(() => {
       }
     )
     .subscribe((status) => {
-        setCallRealtimeStatus(status);
-      console.log("CONNECTION REQUESTS REALTIME:", status);
+console.log("CONNECTION REQUESTS REALTIME:", status);
     });
 
   return () => {
@@ -306,11 +304,7 @@ useEffect(() => {
 
   useEffect(() => {
     console.log("CALL REALTIME EFFECT STARTED:", user?.id);
-    setCallRealtimeStatus(
-      user?.id ? "CONNECTING" : "NO USER"
-    );
-
-    if (!user?.id) {
+if (!user?.id) {
       console.log("CALL REALTIME EFFECT: NO USER ID");
       return;
     }
@@ -328,10 +322,6 @@ useEffect(() => {
         },
         async (payload) => {
           const message = payload.new;
-          setCallRealtimeStatus(
-            "INCOMING MESSAGE: " + (payload.new?.event || "unknown")
-          );
-
           console.log("CALL REALTIME MESSAGE RECEIVED:", {
             id: message.id,
             sender_id: message.sender_id,
@@ -394,8 +384,7 @@ useEffect(() => {
         }
       )
       .subscribe((status) => {
-        setCallRealtimeStatus(status);
-        console.log(
+console.log(
           "CALL REALTIME STATUS:",
           status
         );
@@ -466,8 +455,7 @@ useEffect(() => {
         }
       )
       .subscribe((status) => {
-        setCallRealtimeStatus(status);
-        console.log("MESSAGES REALTIME:", status);
+console.log("MESSAGES REALTIME:", status);
       });
 
     return () => {
@@ -1316,26 +1304,7 @@ console.log(
 )}
 
       {/* TEMP CALL REALTIME DIAGNOSTIC */}
-      <div
-        style={{
-          position: "fixed",
-          top: "10px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 999999,
-          padding: "8px 14px",
-          borderRadius: "999px",
-          background: "rgba(0,0,0,.85)",
-          border: "1px solid rgba(255,255,255,.2)",
-          color: "#fff",
-          fontSize: "12px",
-          fontWeight: 700,
-          pointerEvents: "none",
-        }}
-      >
-        CALL REALTIME: {callRealtimeStatus}
-      </div>
-      {/* OUTGOING CALL */}
+{/* OUTGOING CALL */}
       {outgoingCall && (
         <div
           style={{
@@ -2069,6 +2038,8 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
 
 
 

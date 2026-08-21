@@ -9,6 +9,7 @@ export default function ConnectionsContent({
   user,
   onClose,
   onOpenProfile,
+  onAction,
 }) {
   const { theme } = useTheme();
 
@@ -234,6 +235,7 @@ export default function ConnectionsContent({
         <ProfileModal
           host={selectedProfile}
           onClose={() => setSelectedProfile(null)}
+          onAction={onAction}
         />
       )}
     </>
@@ -297,6 +299,7 @@ const emptyState = {
   opacity: 0.6,
   fontSize: 13,
 };
+
 
 
 

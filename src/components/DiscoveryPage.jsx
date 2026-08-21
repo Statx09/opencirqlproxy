@@ -207,12 +207,10 @@ export default function DiscoveryPage({
 /* ================= STYLES ================= */
 
 const page = (theme) => ({
-  padding: "10px 18px 120px",
+  padding: "86px 18px 120px",
   background: theme.background,
   color: theme.text,
   minHeight: "100vh",
-  overflowY: "auto",
-  WebkitOverflowScrolling: "touch",
   transition: "all .25s ease",
 });
 
@@ -246,6 +244,8 @@ const grid = {
 };
 
 const topRow = {
+  position: "relative",
+  zIndex: 1,
   display: "flex",
   gap: 8,
   marginBottom: 6,
@@ -270,6 +270,8 @@ const topButton = (theme) => ({
     "transform .18s ease, box-shadow .18s ease, background .18s ease",
   WebkitTapHighlightColor: "transparent",
 });
+
+
 
 
 

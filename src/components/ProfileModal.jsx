@@ -113,8 +113,21 @@ console.log("error =", error);
       alert("Please login to continue.");
       return;
     }
-    setCallType(type);
-    setShowCallModal(true);
+
+    if (!onAction) {
+      alert("Call action unavailable.");
+      return;
+    }
+
+    console.log("PROFILE CALL: sending through LandingPage", {
+      type,
+      host,
+    });
+
+    onAction("call", {
+      ...host,
+      callType: type,
+    });
   };
 
   console.log("PROFILE OBJECT:", profile);
@@ -611,6 +624,7 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
 
 
 

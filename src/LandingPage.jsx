@@ -43,6 +43,8 @@ const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState
 /* ================= INCOMING CALL ================= */
 
 const [incomingCall, setIncomingCall] = useState(null);
+const [outgoingCall, setOutgoingCall] = useState(null);
+const [callRealtimeStatus, setCallRealtimeStatus] = useState("INIT");
   const loadNotifications = useCallback(async () => {
     if (!user?.id) {
       setNotifications([]);
@@ -257,6 +259,7 @@ useEffect(() => {
         }
       )
       .subscribe((status) => {
+        setCallRealtimeStatus(status);
         console.log("NOTIFICATIONS REALTIME:", status);
       });
 
@@ -290,6 +293,7 @@ useEffect(() => {
       }
     )
     .subscribe((status) => {
+        setCallRealtimeStatus(status);
       console.log("CONNECTION REQUESTS REALTIME:", status);
     });
 
@@ -298,20 +302,22 @@ useEffect(() => {
   };
 }, [user?.id, loadUnreadConnectionRequests]);
 
-/* ================= INCOMING CALL REALTIME ================= */
+/* ================= INCOMING / CALL ACCEPTED REALTIME ================= */
 
   useEffect(() => {
-    console.log("INCOMING CALL EFFECT STARTED:", user?.id);
+    console.log("CALL REALTIME EFFECT STARTED:", user?.id);
+    setCallRealtimeStatus(
+      user?.id ? "CONNECTING" : "NO USER"
+    );
 
     if (!user?.id) {
-      console.log("INCOMING CALL EFFECT: NO USER ID");
+      console.log("CALL REALTIME EFFECT: NO USER ID");
       return;
     }
 
-    console.log("INCOMING CALL: creating realtime channel", user.id);
-
     const channel = supabase
-      .channel(`incoming-calls-${user.id}`)
+      .channel(`call-signals-${user.id}`)
+
       .on(
         "postgres_changes",
         {
@@ -321,29 +327,50 @@ useEffect(() => {
           filter: `receiver_id=eq.${user.id}`,
         },
         async (payload) => {
-          const callNotification = payload.new;
+          const message = payload.new;
+          setCallRealtimeStatus(
+            "INCOMING MESSAGE: " + (payload.new?.event || "unknown")
+          );
 
-          if (callNotification.event !== "incoming_call") {
+          console.log("CALL REALTIME MESSAGE RECEIVED:", {
+            id: message.id,
+            sender_id: message.sender_id,
+            receiver_id: message.receiver_id,
+            event: message.event,
+            text: message.text,
+          });
+
+          if (message.event === "call_accepted") {
+            console.log(
+              "CALL ACCEPTED REALTIME — OPENING CALL STUDIO:",
+              message
+            );
+
+            setOutgoingCall(null);
+            setSelectedProfile(null);
+            setActiveModal("callsStudio");
+
             return;
           }
 
-          if (!callNotification.sender_id) {
+          if (message.event !== "incoming_call") {
+            return;
+          }
+
+          if (!message.sender_id) {
             console.warn(
               "INCOMING CALL: missing sender_id",
-              callNotification
+              message
             );
             return;
           }
 
-          console.log(
-            "INCOMING CALL:",
-            callNotification
-          );
+          console.log("INCOMING CALL:", message);
 
           const { data: callerProfile, error } = await supabase
             .from("profiles")
             .select("*")
-            .eq("user_id", callNotification.sender_id)
+            .eq("user_id", message.sender_id)
             .maybeSingle();
 
           if (error) {
@@ -354,19 +381,50 @@ useEffect(() => {
           }
 
           setIncomingCall({
-            ...callNotification,
+            ...message,
             callerProfile: callerProfile || null,
           });
         }
       )
       .subscribe((status) => {
+        setCallRealtimeStatus(status);
         console.log(
-          "INCOMING CALL REALTIME:",
+          "CALL REALTIME STATUS:",
           status
         );
+
+        if (status === "SUBSCRIBED") {
+          console.log(
+            "CALL REALTIME SUBSCRIBED SUCCESSFULLY:",
+            user.id
+          );
+        }
+
+        if (status === "CHANNEL_ERROR") {
+          console.error(
+            "CALL REALTIME ERROR: CHANNEL_ERROR"
+          );
+        }
+
+        if (status === "TIMED_OUT") {
+          console.error(
+            "CALL REALTIME ERROR: TIMED_OUT"
+          );
+        }
+
+        if (status === "CLOSED") {
+          console.warn(
+            "CALL REALTIME CLOSED"
+          );
+        }
       });
 
     return () => {
+      console.log(
+        "CALL REALTIME CLEANUP:",
+        user.id
+      );
+
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
@@ -387,6 +445,9 @@ useEffect(() => {
         },
         (payload) => {
           const message = payload.new;
+          setCallRealtimeStatus(
+            "INCOMING MESSAGE: " + (payload.new?.event || "unknown")
+          );
 
           if (message.event !== null) {
             return;
@@ -398,6 +459,7 @@ useEffect(() => {
         }
       )
       .subscribe((status) => {
+        setCallRealtimeStatus(status);
         console.log("MESSAGES REALTIME:", status);
       });
 
@@ -717,7 +779,7 @@ useEffect(() => {
               private: true,
               event: "incoming_call",
               payload: {
-                call_type: "video",
+                call_type: callTarget.callType || "video",
               },
               created_at: new Date().toISOString(),
             })
@@ -751,7 +813,15 @@ useEffect(() => {
           );
 
           setSelectedHost(callTarget);
-          setActiveModal("callsStudio");
+setOutgoingCall({
+  ...callTarget,
+  callerName,
+});
+
+console.log(
+  "CALL: waiting for recipient to answer",
+  callTarget.user_id
+);
           break;
         }
 
@@ -980,7 +1050,7 @@ useEffect(() => {
   <div style={page(theme)}>
 
 {mode === "grid" && (
-  <div style={{ ...header(theme), position: "relative" }}>
+  <div style={header(theme)}>
 
    <div style={networkWrap}>
   <button
@@ -1238,158 +1308,133 @@ useEffect(() => {
 />
 )}
 
-      {/* INCOMING CALL */}
-      {incomingCall && (
+      {/* TEMP CALL REALTIME DIAGNOSTIC */}
+      <div
+        style={{
+          position: "fixed",
+          top: "10px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 999999,
+          padding: "8px 14px",
+          borderRadius: "999px",
+          background: "rgba(0,0,0,.85)",
+          border: "1px solid rgba(255,255,255,.2)",
+          color: "#fff",
+          fontSize: "12px",
+          fontWeight: 700,
+          pointerEvents: "none",
+        }}
+      >
+        CALL REALTIME: {callRealtimeStatus}
+      </div>
+      {/* OUTGOING CALL */}
+      {outgoingCall && (
         <div
           style={{
             position: "fixed",
-            inset: 0,
-            zIndex: 100010,
+            left: "50%",
+            bottom: "28px",
+            transform: "translateX(-50%)",
+            zIndex: 100009,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,.55)",
-            backdropFilter: "blur(8px)",
+            gap: "12px",
+            padding: "10px 14px 10px 10px",
+            borderRadius: "999px",
+            background: "rgba(15,23,42,.94)",
+            border: "1px solid rgba(34,197,94,.35)",
+            boxShadow: "0 12px 40px rgba(0,0,0,.35)",
+            backdropFilter: "blur(18px)",
+            WebkitBackdropFilter: "blur(18px)",
+            color: "#fff",
           }}
         >
           <div
             style={{
-              width: "min(92vw, 380px)",
-              padding: "28px",
-              borderRadius: "24px",
-              background: "rgba(20,24,32,.96)",
-              border: "1px solid rgba(255,255,255,.12)",
-              boxShadow: "0 24px 80px rgba(0,0,0,.45)",
-              textAlign: "center",
-              color: "#fff",
+              width: "42px",
+              height: "42px",
+              borderRadius: "50%",
+              overflow: "hidden",
+              background: "rgba(255,255,255,.08)",
+              border: "2px solid #22c55e",
+              boxShadow: "0 0 0 4px rgba(34,197,94,.12)",
+              flexShrink: 0,
             }}
           >
-            <div
-              style={{
-                width: "72px",
-                height: "72px",
-                margin: "0 auto 16px",
-                borderRadius: "50%",
-                overflow: "hidden",
-                background: "rgba(255,255,255,.08)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {incomingCall.callerProfile?.avatar_url ||
-              incomingCall.callerProfile?.avatar ? (
-                <img
-                  src={
-                    incomingCall.callerProfile.avatar_url ||
-                    incomingCall.callerProfile.avatar
-                  }
-                  alt=""
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <span style={{ fontSize: "28px" }}>📹</span>
-              )}
-            </div>
+            {outgoingCall.avatar_url || outgoingCall.avatar ? (
+              <img
+                src={outgoingCall.avatar_url || outgoingCall.avatar}
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "18px",
+                }}
+              >
+                📹
+              </div>
+            )}
+          </div>
 
+          <div style={{ minWidth: 0 }}>
             <div
               style={{
                 fontSize: "13px",
-                opacity: 0.65,
-                marginBottom: "6px",
-              }}
-            >
-              Incoming Call
-            </div>
-
-            <div
-              style={{
-                fontSize: "22px",
                 fontWeight: 700,
-                marginBottom: "8px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "180px",
               }}
             >
-              {incomingCall.callerProfile?.name ||
-                incomingCall.callerProfile?.alias ||
-                "Someone"}
+              Calling {outgoingCall.name || "Host"}
             </div>
 
             <div
               style={{
-                fontSize: "14px",
-                opacity: 0.65,
-                marginBottom: "24px",
+                fontSize: "11px",
+                color: "#22c55e",
+                marginTop: "2px",
               }}
             >
-              is calling you
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  console.log("INCOMING CALL DECLINED");
-                  setIncomingCall(null);
-                }}
-                style={{
-                  flex: 1,
-                  padding: "12px 16px",
-                  borderRadius: "12px",
-                  border: "1px solid rgba(255,255,255,.12)",
-                  background: "rgba(255,255,255,.06)",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                }}
-              >
-                Decline
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  console.log("INCOMING CALL ANSWERED");
-
-                  const caller = incomingCall.callerProfile;
-
-                  setIncomingCall(null);
-
-                  if (!caller) {
-                    console.error(
-                      "INCOMING CALL: caller profile unavailable"
-                    );
-                    return;
-                  }
-
-                  setSelectedProfile(null);
-                  setSelectedHost(caller);
-                  setActiveModal("callsStudio");
-                }}
-                style={{
-                  flex: 1,
-                  padding: "12px 16px",
-                  borderRadius: "12px",
-                  border: "none",
-                  background: "#22c55e",
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontWeight: 700,
-                }}
-              >
-                Answer
-              </button>
+              Waiting for answer...
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              console.log("OUTGOING CALL CANCELLED");
+              setOutgoingCall(null);
+              setSelectedHost(null);
+            }}
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,.12)",
+              background: "rgba(255,255,255,.07)",
+              color: "#fff",
+              cursor: "pointer",
+              fontSize: "15px",
+            }}
+            aria-label="Cancel call"
+            title="Cancel call"
+          >
+            ×
+          </button>
         </div>
       )}
 
@@ -1408,6 +1453,7 @@ useEffect(() => {
             : selectedProfile
         }
         onClose={closeModal}
+        onAction={handleAction}
       />
     </div>
   </>
@@ -1455,6 +1501,7 @@ useEffect(() => {
     user={user}
     onClose={closeModal}
     onOpenProfile={handleOpenProfile}
+    onAction={handleAction}
   />
 )}
 
@@ -2015,6 +2062,27 @@ const headerActions = {
   alignItems: "center",
   gap: 8,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

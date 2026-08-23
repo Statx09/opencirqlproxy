@@ -54,6 +54,7 @@ const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState
 /* ================= INCOMING CALL ================= */
 
 const [incomingCall, setIncomingCall] = useState(null);
+const [callRealtimeStatus, setCallRealtimeStatus] = useState("CONNECTING");
 const [outgoingCall, setOutgoingCall] = useState(null);
 
   const loadNotifications = useCallback(async () => {
@@ -1668,6 +1669,33 @@ console.log(
   </div>
 )}
   
+    {/* TEMP CALL REALTIME DIAGNOSTIC */}
+    <div
+      style={{
+        position: "fixed",
+        top: "10px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 999999,
+        padding: "6px 10px",
+        borderRadius: "999px",
+        background:
+          callRealtimeStatus === "SUBSCRIBED"
+            ? "rgba(34,197,94,.92)"
+            : callRealtimeStatus === "CHANNEL_ERROR" ||
+              callRealtimeStatus === "TIMED_OUT"
+            ? "rgba(239,68,68,.92)"
+            : "rgba(15,23,42,.92)",
+        color: "#fff",
+        fontSize: "11px",
+        fontWeight: 700,
+        letterSpacing: ".02em",
+        boxShadow: "0 6px 20px rgba(0,0,0,.25)",
+      }}
+    >
+      CALL: {callRealtimeStatus}
+    </div>
+
     {/* GRID */}
     {mode === "grid" && (
       <DiscoveryPage
@@ -1851,6 +1879,199 @@ console.log(
           >
             ×
           </button>
+        </div>
+      )}
+
+      {incomingCall && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100010,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            background: "rgba(0,0,0,.55)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "340px",
+              padding: "24px",
+              borderRadius: "22px",
+              background: "rgba(15,23,42,.97)",
+              border: "1px solid rgba(255,255,255,.12)",
+              boxShadow: "0 24px 70px rgba(0,0,0,.5)",
+              color: "#fff",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: ".08em",
+                textTransform: "uppercase",
+                color: "#22c55e",
+                marginBottom: "16px",
+              }}
+            >
+              Incoming call
+            </div>
+
+            <div
+              style={{
+                width: "76px",
+                height: "76px",
+                margin: "0 auto 14px",
+                borderRadius: "50%",
+                overflow: "hidden",
+                background: "rgba(255,255,255,.08)",
+                border: "2px solid #22c55e",
+                boxShadow: "0 0 0 5px rgba(34,197,94,.12)",
+              }}
+            >
+              {incomingCall.callerProfile?.avatar_url ||
+              incomingCall.callerProfile?.avatar ? (
+                <img
+                  src={
+                    incomingCall.callerProfile.avatar_url ||
+                    incomingCall.callerProfile.avatar
+                  }
+                  alt=""
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "28px",
+                  }}
+                >
+                  📹
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                fontSize: "20px",
+                fontWeight: 800,
+                letterSpacing: "-.3px",
+              }}
+            >
+              {incomingCall.callerProfile?.name || "Someone"}
+            </div>
+
+            <div
+              style={{
+                marginTop: "5px",
+                fontSize: "12px",
+                opacity: 0.5,
+              }}
+            >
+              {incomingCall.payload?.call_type === "audio"
+                ? "Voice call"
+                : "Video call"}
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                marginTop: "26px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={async () => {
+                  console.log(
+                    "INCOMING CALL DECLINED:",
+                    incomingCall
+                  );
+
+                  setIncomingCall(null);
+                }}
+                style={{
+                  flex: 1,
+                  height: "46px",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(239,68,68,.35)",
+                  background: "rgba(239,68,68,.12)",
+                  color: "#f87171",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Decline
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  console.log(
+                    "INCOMING CALL ACCEPTED:",
+                    incomingCall
+                  );
+
+                  const { error } = await supabase
+                    .from("messages")
+                    .insert({
+                      sender_id: user.id,
+                      receiver_id: incomingCall.sender_id,
+                      text: `${user?.name || "User"} accepted your call`,
+                      private: true,
+                      event: "call_accepted",
+                      payload: {
+                        call_type:
+                          incomingCall.payload?.call_type || "video",
+                      },
+                      created_at: new Date().toISOString(),
+                    });
+
+                  if (error) {
+                    console.error(
+                      "CALL ACCEPT ERROR:",
+                      error
+                    );
+                    return;
+                  }
+
+                  setSelectedHost(
+                    incomingCall.callerProfile || null
+                  );
+                  setIncomingCall(null);
+                  setActiveModal("callsStudio");
+                }}
+                style={{
+                  flex: 1,
+                  height: "46px",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(34,197,94,.4)",
+                  background: "#22c55e",
+                  color: "#052e16",
+                  fontSize: "13px",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                Accept
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -2656,6 +2877,10 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
+
 
 
 

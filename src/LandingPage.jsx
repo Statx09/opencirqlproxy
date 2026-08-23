@@ -54,7 +54,6 @@ const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState
 /* ================= INCOMING CALL ================= */
 
 const [incomingCall, setIncomingCall] = useState(null);
-const [callRealtimeStatus, setCallRealtimeStatus] = useState("CONNECTING");
 const [outgoingCall, setOutgoingCall] = useState(null);
 
   const loadNotifications = useCallback(async () => {
@@ -453,9 +452,6 @@ console.log(
         },
         (payload) => {
           const message = payload.new;
-          setCallRealtimeStatus(
-            "INCOMING MESSAGE: " + (payload.new?.event || "unknown")
-          );
 
           if (message.event !== null) {
             return;
@@ -1668,33 +1664,6 @@ console.log(
 
   </div>
 )}
-  
-    {/* TEMP CALL REALTIME DIAGNOSTIC */}
-    <div
-      style={{
-        position: "fixed",
-        top: "10px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        zIndex: 999999,
-        padding: "6px 10px",
-        borderRadius: "999px",
-        background:
-          callRealtimeStatus === "SUBSCRIBED"
-            ? "rgba(34,197,94,.92)"
-            : callRealtimeStatus === "CHANNEL_ERROR" ||
-              callRealtimeStatus === "TIMED_OUT"
-            ? "rgba(239,68,68,.92)"
-            : "rgba(15,23,42,.92)",
-        color: "#fff",
-        fontSize: "11px",
-        fontWeight: 700,
-        letterSpacing: ".02em",
-        boxShadow: "0 6px 20px rgba(0,0,0,.25)",
-      }}
-    >
-      CALL: {callRealtimeStatus}
-    </div>
 
     {/* GRID */}
     {mode === "grid" && (
@@ -1770,8 +1739,6 @@ console.log(
   reloadStatuses={reloadStatuses}
 />
 )}
-
-      {/* TEMP CALL REALTIME DIAGNOSTIC */}
 {/* OUTGOING CALL */}
       {outgoingCall && (
         <div
@@ -2877,6 +2844,8 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
 
 
 

@@ -27,7 +27,12 @@ import { supabase } from "./lib/supabaseClient";
 
 export default function LandingPage({ user }) {
 
-  const { login, logout } = useUser();
+  const { user: authUser, login, logout } = useUser();
+
+  console.log("SETTINGS AUTH STATE:", {
+    authUser,
+    authUserId: authUser?.id || null,
+  });
 
   const [hosts, setHosts] = useState([]);
   const [mode, setMode] = useState("grid");
@@ -35,6 +40,12 @@ export default function LandingPage({ user }) {
   const [showNetwork, setShowNetwork] = useState(false);
 const [showSettings, setShowSettings] = useState(false);
 const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+const [notificationSettings, setNotificationSettings] = useState({
+  messages: true,
+  voiceCalls: true,
+  videoCalls: true,
+  connections: true,
+});
 const [notifications, setNotifications] = useState([]);
 const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 const [unreadMessageCount, setUnreadMessageCount] = useState(0);
@@ -1062,142 +1073,239 @@ console.log(
   </button>
 
   {showNetwork && (
-  <div style={networkDropdown(theme)}>
-    {networkView === "main" ? (
-      <>
-        <div style={networkDropdownHeader}>
-          <span style={networkDot}></span>
-          <span>Cirql Network</span>
-        </div>
+    <div style={networkDropdown(theme)}>
+      {networkView === "main" ? (
+        <>
+          <div
+            style={{
+              ...networkDropdownHeader,
+              justifyContent: "space-between",
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 9,
+              }}
+            >
+              <span style={networkDot}></span>
+              <span>Cirql Network</span>
+            </span>
 
-        <div style={networkHealth}>
-          <div>
-            <div style={networkHealthLabel}>
-              Network health
+            <span style={networkBetaBadge}>
+              BETA
+            </span>
+          </div>
+
+          <div style={networkHealth}>
+            <div>
+              <div style={networkHealthLabel}>
+                Network health
+              </div>
+
+              <div style={networkBars}>
+                <span style={{ ...networkBar, height: 5 }}></span>
+                <span style={{ ...networkBar, height: 9 }}></span>
+                <span style={{ ...networkBar, height: 13 }}></span>
+                <span style={{ ...networkBar, height: 17 }}></span>
+                <span style={{ ...networkBar, height: 21 }}></span>
+              </div>
             </div>
 
-            <div style={networkBars}>
-              <span style={{ ...networkBar, height: 5 }}></span>
-              <span style={{ ...networkBar, height: 9 }}></span>
-              <span style={{ ...networkBar, height: 13 }}></span>
-              <span style={{ ...networkBar, height: 17 }}></span>
-              <span style={{ ...networkBar, height: 21 }}></span>
+            <div style={networkPercent}>94%</div>
+          </div>
+
+          <div style={networkStats}>
+            <div style={networkStat}>
+              <strong>1,284</strong>
+              <span>members</span>
+            </div>
+
+            <div style={networkStat}>
+              <strong>342</strong>
+              <span>hosts</span>
+            </div>
+
+            <div style={networkStat}>
+              <strong>86</strong>
+              <span>online</span>
             </div>
           </div>
 
-          <div style={networkPercent}>94%</div>
-        </div>
+          <div style={{ height: 10 }}></div>
 
-        <div style={networkStats}>
-          <div style={networkStat}>
-            <strong>1,284</strong>
-            <span>members</span>
+          <button
+            type="button"
+            style={networkInfoRow}
+            onClick={() => setNetworkView("founding")}
+          >
+            <span>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 650,
+                }}
+              >
+                First 100 member benefits
+              </span>
+
+              <span
+                style={{
+                  display: "block",
+                  marginTop: 2,
+                  fontSize: 9,
+                  opacity: 0.48,
+                }}
+              >
+                Lifetime access · Founder recognition
+              </span>
+            </span>
+
+            <span style={networkArrow}>
+              &rarr;
+            </span>
+          </button>
+
+          <button
+            type="button"
+            style={networkInfoRow}
+            onClick={() =>
+              window.open(
+                "https://github.com/Statx09/opencirqlproxy",
+                "_blank",
+                "noopener,noreferrer"
+              )
+            }
+          >
+            <span>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 650,
+                }}
+              >
+                GitHub
+              </span>
+
+
+            </span>
+
+            <span style={networkArrow}>
+              &rarr;
+            </span>
+          </button>
+
+          <button
+            type="button"
+            style={networkInfoRow}
+            onClick={() => setNetworkView("web3")}
+            aria-label="Web3 enabled - USDC settlement"
+          >
+            <span>
+              <span
+                style={{
+                  display: "block",
+                  fontSize: 11,
+                  fontWeight: 650,
+                }}
+              >
+                Web3 enabled
+              </span>
+
+              <span
+                style={{
+                  display: "block",
+                  marginTop: 2,
+                  fontSize: 9,
+                  opacity: 0.48,
+                }}
+              >
+                USDC settlement
+              </span>
+            </span>
+
+            <span style={networkArrow}>
+              &rarr;
+            </span>
+          </button>
+
+          <div style={networkDivider}></div>
+
+          <button
+            type="button"
+            style={networkTransparency}
+            onClick={() => setNetworkView("transparency")}
+          >
+            <span>Network costs</span>
+            <span>&rarr;</span>
+          </button>
+
+          <div style={networkDivider}></div>
+
+          <div style={networkTransparencyMessage}>
+            Cirql is built for an open, independent, and accessible network.
+          </div>
+        </>
+      ) : (
+        <>
+          <button
+            type="button"
+            style={networkBack}
+            onClick={() => setNetworkView("main")}
+          >
+            <span>&larr;</span>
+            <span>Cirql Network</span>
+          </button>
+
+          <div style={networkTransparencyTitle}>
+            Network costs
           </div>
 
-          <div style={networkStat}>
-            <strong>342</strong>
-            <span>hosts</span>
+          <div style={networkTransparencySubtitle}>
+            Monthly network target
           </div>
 
-          <div style={networkStat}>
-            <strong>86</strong>
-            <span>online</span>
-          </div>
-        </div>
-
-        <div style={networkDivider}></div>
-
-        <button
-          type="button"
-          style={networkTransparency}
-          onClick={() => setNetworkView("transparency")}
-        >
-          <span>Network costs</span>
-          <span>&rarr;</span>
-        </button>
-
-        <button
-          type="button"
-          style={networkFund}
-          aria-label="Contribute"
-        >
-          Contribute
-        </button>
-
-        <div style={networkDivider}></div>
-
-        <div style={networkTransparencyMessage}>
-          Cirql is built to keep the network available,
-          independent, and accessible.
-        </div>
-      </>
-    ) : (
-      <>
-        <button
-          type="button"
-          style={networkBack}
-          onClick={() => setNetworkView("main")}
-        >
-          <span>??</span>
-          <span>Cirql Network</span>
-        </button>
-
-        <div style={networkTransparencyTitle}>
-          Network costs
-        </div>
-
-        <div style={networkTransparencySubtitle}>
-          Monthly network target
-        </div>
-
-        <div style={networkMonthlyTarget}>
-          $1,500
-          <span>/ month</span>
-        </div>
-
-        <div style={networkCosts}>
-          <div style={networkCostRow}>
-            <span>Infrastructure</span>
-            <strong>$600</strong>
+          <div style={networkMonthlyTarget}>
+            $1,500
+            <span>/ month</span>
           </div>
 
-          <div style={networkCostRow}>
-            <span>Storage & data</span>
-            <strong>$200</strong>
+          <div style={networkCosts}>
+            <div style={networkCostRow}>
+              <span>Infrastructure</span>
+              <strong>$600</strong>
+            </div>
+
+            <div style={networkCostRow}>
+              <span>Storage & data</span>
+              <strong>$200</strong>
+            </div>
+
+            <div style={networkCostRow}>
+              <span>Calls & video</span>
+              <strong>$400</strong>
+            </div>
+
+            <div style={networkCostRow}>
+              <span>Security & services</span>
+              <strong>$300</strong>
+            </div>
           </div>
 
-          <div style={networkCostRow}>
-            <span>Calls & video</span>
-            <strong>$400</strong>
+          <div style={networkDivider}></div>
+
+          <div style={networkDivider}></div>
+
+          <div style={networkTransparencyMessage}>
+            Cirql is built for an open, independent, and accessible network.
           </div>
-
-          <div style={networkCostRow}>
-            <span>Security & services</span>
-            <strong>$300</strong>
-          </div>
-        </div>
-
-        <div style={networkDivider}></div>
-
-        <button
-          type="button"
-          style={networkFund}
-          aria-label="Contribute"
-        >
-          Contribute
-        </button>
-
-        <div style={networkDivider}></div>
-
-        <div style={networkTransparencyMessage}>
-          Cirql is built to keep the network available,
-          independent, and accessible.
-        </div>
-      </>
-    )}
-  </div>
-)}
-
+        </>
+      )}
+    </div>
+  )}
 </div>
 <div style={brandWrap}>
       <div style={brandName}>
@@ -1221,7 +1329,182 @@ console.log(
       </div>
     </div>
 
-    <div style={headerActions}><div style={settingsWrap}><button type="button" style={settingsButton(theme)} onClick={() => setShowSettings((v) => !v)} aria-label="Settings"><Settings size={17} strokeWidth={2} /></button>{showSettings && (<div style={settingsDropdown(theme)}><div style={settingsSection}><div style={settingsLabel}>Appearance</div><button type="button" style={settingsRow(theme)} onClick={toggleTheme}><span style={settingsRowLeft}>{theme.mode === "dark" ? (<Moon size={15} strokeWidth={2} />) : (<Sun size={15} strokeWidth={2} />)}<span>{theme.mode === "dark" ? "Dark mode" : "Light mode"}</span></span><span style={settingsValue}>{theme.mode === "dark" ? "Dark" : "Light"}</span></button></div><div style={settingsDivider}></div><div style={settingsSection}><div style={settingsLabel}>Notifications</div><button type="button" style={settingsRow(theme)} onClick={() => setNotificationsEnabled((v) => !v)}><span style={settingsRowLeft}><span style={{...settingsBell, background: notificationsEnabled ? "#22c55e" : "rgba(148,163,184,.35)"}}></span><span>Notifications</span></span><span style={{...settingsSwitch, background: notificationsEnabled ? "#22c55e" : "rgba(148,163,184,.22)"}}><span style={{...settingsSwitchKnob, transform: notificationsEnabled ? "translateX(14px)" : "translateX(2px)"}} /></span></button></div><div style={settingsDivider}></div><button type="button" style={settingsLogout} onClick={async () => { setShowSettings(false); await logout(); }}>Log out</button></div>)}</div>
+    <div style={headerActions}>
+  <div style={settingsWrap}>
+    <button
+      type="button"
+      style={settingsButton(theme)}
+      onClick={() => setShowSettings((v) => !v)}
+      aria-label="Settings"
+    >
+      <Settings size={17} strokeWidth={2} />
+    </button>
+
+    {showSettings && (
+      <div style={settingsDropdown(theme)}>
+
+        <div style={settingsSection}>
+          <div style={settingsLabel}>Appearance</div>
+
+          <button
+            type="button"
+            style={settingsRow(theme)}
+            onClick={toggleTheme}
+          >
+            <span style={settingsRowLeft}>
+              {theme.mode === "dark" ? (
+                <Moon size={15} strokeWidth={2} />
+              ) : (
+                <Sun size={15} strokeWidth={2} />
+              )}
+              <span>Dark mode</span>
+            </span>
+
+            <span style={settingsValue}>
+              {theme.mode === "dark" ? "Dark" : "Light"}
+            </span>
+          </button>
+        </div>
+
+        <div style={settingsDivider}></div>
+
+        <div style={settingsSection}>
+          <div style={settingsLabel}>Notifications</div>
+
+          <button
+            type="button"
+            style={settingsRow(theme)}
+            onClick={() =>
+              setNotificationsEnabled((v) => !v)
+            }
+          >
+            <span style={settingsRowLeft}>
+              <span style={settingsBell}></span>
+              <span>Notifications</span>
+            </span>
+
+            <span
+              style={{
+                ...settingsSwitch,
+                background: notificationsEnabled
+                  ? "#22c55e"
+                  : "rgba(148,163,184,.22)",
+              }}
+            >
+              <span
+                style={{
+                  ...settingsSwitchKnob,
+                  transform: notificationsEnabled
+                    ? "translateX(14px)"
+                    : "translateX(2px)",
+                }}
+              />
+            </span>
+          </button>
+
+          {notificationsEnabled && (
+            <div style={{ paddingLeft: 22 }}>
+              {[
+                ["messages", "Messages"],
+                ["voiceCalls", "Voice calls"],
+                ["videoCalls", "Video calls"],
+                ["connections", "Connections"],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  style={settingsRow(theme)}
+                  onClick={() =>
+                    setNotificationSettings((prev) => ({
+                      ...prev,
+                      [key]: !prev[key],
+                    }))
+                  }
+                >
+                  <span style={settingsRowLeft}>
+                    <span>{label}</span>
+                  </span>
+
+                  <span
+                    style={{
+                      ...settingsSwitch,
+                      background: notificationSettings[key]
+                        ? "#22c55e"
+                        : "rgba(148,163,184,.22)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        ...settingsSwitchKnob,
+                        transform: notificationSettings[key]
+                          ? "translateX(14px)"
+                          : "translateX(2px)",
+                      }}
+                    />
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={settingsDivider}></div>
+
+        <div style={settingsSection}>
+          <div style={settingsLabel}>Web3</div>
+
+          <button
+            type="button"
+            style={settingsRow(theme)}
+            onClick={() => {
+              setShowSettings(false);
+              setNetworkView("web3");
+              setShowNetwork(true);
+            }}
+          >
+            <span style={settingsRowLeft}>
+              <span style={settingsBell}></span>
+              <span>Connect Wallet</span>
+            </span>
+
+            <span style={settingsValue}>&rarr;</span>
+          </button>
+        </div>
+
+        <div style={settingsDivider}></div>
+
+        {authUser ? (
+          <button
+            type="button"
+            style={settingsLogout}
+            onClick={async () => {
+              setShowSettings(false);
+              await logout();
+            }}
+          >
+            Log out
+          </button>
+        ) : (
+          <button
+            type="button"
+            style={{
+              ...settingsLogout,
+              color: "#22c55e",
+              borderColor: "rgba(34,197,94,.28)",
+              background: "rgba(34,197,94,.08)",
+            }}
+            onClick={async () => {
+              setShowSettings(false);
+              await login();
+            }}
+          >
+            Log in
+          </button>
+        )}
+
+      </div>
+    )}
+  </div>
 
     </div>
 
@@ -1761,23 +2044,6 @@ const networkDivider = {
   background: "rgba(148,163,184,.12)",
 };
 
-const networkFund = {
-  width: "100%",
-  height: 30,
-  padding: "0 12px",
-  borderRadius: 8,
-  border: "1px solid rgba(148,163,184,.18)",
-  background: "rgba(255,255,255,.035)",
-  color: "inherit",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: 11,
-  fontWeight: 650,
-  letterSpacing: "0.1px",
-  cursor: "pointer",
-  transition: "all .2s ease",
-};
 
 const networkSupportIntro = {
   display: "flex",
@@ -2133,6 +2399,106 @@ const headerActions = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const networkBetaBadge = {
+  padding: "3px 6px",
+  borderRadius: 5,
+  background: "rgba(34,197,94,.12)",
+  border: "1px solid rgba(34,197,94,.22)",
+  color: "#22c55e",
+  fontSize: 8,
+  fontWeight: 800,
+  letterSpacing: "0.5px",
+};
+
+const networkFounding = {
+  marginTop: 16,
+  padding: "11px 12px",
+  borderRadius: 10,
+  background: "rgba(34,197,94,.055)",
+  border: "1px solid rgba(34,197,94,.12)",
+};
+
+const networkFoundingLabel = {
+  fontSize: 8,
+  fontWeight: 800,
+  letterSpacing: "0.7px",
+  color: "#22c55e",
+};
+
+const networkFoundingTitle = {
+  marginTop: 4,
+  fontSize: 13,
+  fontWeight: 750,
+};
+
+const networkFoundingSubtitle = {
+  marginTop: 3,
+  fontSize: 9,
+  lineHeight: 1.4,
+  opacity: 0.52,
+};
+
+const networkInfoRow = {
+  width: "100%",
+  padding: "9px 2px",
+  border: "none",
+  background: "transparent",
+  color: "inherit",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  textAlign: "left",
+  cursor: "pointer",
+};
+
+const networkArrow = {
+  fontSize: 14,
+  opacity: 0.45,
+  marginLeft: 8,
+};
+
+const networkWeb3Card = {
+  marginTop: 18,
+  padding: 12,
+  borderRadius: 10,
+  background: "rgba(148,163,184,.055)",
+  border: "1px solid rgba(148,163,184,.12)",
+};
+
+const networkWeb3Status = {
+  display: "flex",
+  alignItems: "center",
+  gap: 7,
+  fontSize: 10,
+  fontWeight: 700,
+};
+
+const networkWeb3Text = {
+  marginTop: 9,
+  fontSize: 11,
+  lineHeight: 1.5,
+  opacity: 0.62,
+};
 
 
 

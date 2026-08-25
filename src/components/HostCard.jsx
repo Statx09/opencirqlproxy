@@ -3,7 +3,7 @@ import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign } from "
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 
-function HostCard({ host, onAction, variant = "swipe" }) {
+function HostCard({ host, onAction, onNext, onPrev, variant = "swipe" }) {
   if (!host) return null;
 
   const {
@@ -192,9 +192,11 @@ console.log("HOSTCARD normalized", expressions);
 
             <button
               style={arrowBtn}
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                handle("prev");
+                onPrev?.();
               }}
             >
               ‹
@@ -202,9 +204,11 @@ console.log("HOSTCARD normalized", expressions);
 
             <button
               style={arrowBtn}
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation();
-                handle("next");
+                onNext?.();
               }}
             >
               ›
@@ -565,6 +569,8 @@ const flagBubble = {
 
   color: "#fff",
 };
+
+
 
 
 

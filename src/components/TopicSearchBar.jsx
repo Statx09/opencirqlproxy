@@ -12,23 +12,17 @@ export default function TopicSearchBar({
 
   const filters = [
     { id: "all", label: "All" },
+    { id: "ai_hosts", label: "AI Hosts" },
     { id: "social", label: "Social" },
-    { id: "networking", label: "Networking" },
-    { id: "dating", label: "Dating" },
     { id: "professionals", label: "Professionals" },
-    { id: "hire_me", label: "Hire Me" },
-    { id: "recruiting", label: "Recruiting" },
-    { id: "services", label: "Services" },
-    { id: "consulting", label: "Consulting" },
-    { id: "make_money", label: "Make Money" },
-    { id: "investments", label: "Investments" },
+    { id: "consulting", label: "Consult" },
     { id: "opportunities", label: "Opportunities" },
     { id: "collaboration", label: "Collaboration" },
-    { id: "support", label: "Support" },
     { id: "languages", label: "Languages" },
-    { id: "entertainment", label: "Entertainment" },
+    { id: "support", label: "Support" },
     { id: "podcasting", label: "Podcasting" },
     { id: "promotion", label: "Promotion" },
+    { id: "freelancers", label: "Freelancers" },
   ];
 
   return (
@@ -120,6 +114,7 @@ export default function TopicSearchBar({
     </div>
   );
 }
+
 
 
 

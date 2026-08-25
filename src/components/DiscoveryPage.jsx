@@ -99,9 +99,19 @@ export default function DiscoveryPage({
       if (filter === "all") return true;
 
       const filterMap = {
-        social: ["friendship", "social", "community"],
-        networking: ["networking", "business", "professional"],
-        dating: ["dating", "relationship", "romance"],
+        ai_hosts: [
+          "ai",
+          "artificial intelligence",
+          "ai host",
+          "ai hosts",
+        ],
+
+        social: [
+          "friendship",
+          "social",
+          "community",
+        ],
+
         professionals: [
           "professional",
           "professionals",
@@ -109,31 +119,9 @@ export default function DiscoveryPage({
           "expertise",
           "specialist",
           "career",
+          "business",
         ],
-        hire_me: [
-          "hire me",
-          "available for work",
-          "freelance",
-          "freelancer",
-          "freelancers",
-          "contractor",
-        ],
-        recruiting: [
-          "recruiting",
-          "recruiter",
-          "recruitment",
-          "hiring",
-          "employer",
-          "talent",
-        ],
-        services: [
-          "services",
-          "service",
-          "freelance",
-          "freelancer",
-          "consultant",
-          "consulting",
-        ],
+
         consulting: [
           "consulting",
           "consultant",
@@ -141,7 +129,19 @@ export default function DiscoveryPage({
           "advisory",
           "expertise",
         ],
-        make_money: [
+
+        opportunities: [
+          "opportunity",
+          "opportunities",
+          "recruiting",
+          "recruiter",
+          "recruitment",
+          "hiring",
+          "employer",
+          "talent",
+          "investment",
+          "investments",
+          "investing",
           "make money",
           "making money",
           "income",
@@ -150,72 +150,54 @@ export default function DiscoveryPage({
           "monetize",
           "monetization",
           "side hustle",
-          "business",
         ],
-        investments: [
-          "investment",
-          "investments",
-          "investor",
-          "investors",
-          "funding",
-          "finance",
-          "venture capital",
-          "angel",
-        ],
-        opportunities: [
-          "opportunity",
-          "opportunities",
-          "job",
-          "jobs",
-          "gig",
-          "gigs",
-          "career",
-          "partnership",
-        ],
+
         collaboration: [
           "collaboration",
-          "partner",
+          "collaborate",
+          "partnership",
+          "partnerships",
           "project",
-          "cofounder",
-          "co-founder",
-          "build together",
+          "projects",
         ],
-        support: [
-          "support",
-          "help",
-          "mentoring",
-          "advice",
-        ],
+
         languages: [
           "language",
           "languages",
-          "learn",
-          "practice",
-          "conversation",
-          "translation",
           "language exchange",
+          "translation",
+          "translator",
         ],
-        entertainment: [
-          "entertainment",
-          "creator",
-          "music",
-          "comedy",
-          "performer",
-          "performance",
+
+        support: [
+          "support",
+          "help",
+          "advice",
+          "guidance",
+          "mentoring",
+          "mentor",
         ],
+
         podcasting: [
           "podcast",
           "podcasting",
           "podcaster",
-          "podcasters",
-          "guest",
-          "host",
         ],
+
         promotion: [
           "promotion",
-          "product",
+          "promote",
           "marketing",
-          "sales",
+          "exposure",
+          "promotion services",
+        ],
+
+        freelancers: [
+          "freelance",
+          "freelancer",
+          "freelancers",
+          "contractor",
+          "available for work",
         ],
       };
 
@@ -381,6 +363,7 @@ const topButton = (theme) => ({
     "transform .18s ease, box-shadow .18s ease, background .18s ease",
   WebkitTapHighlightColor: "transparent",
 });
+
 
 
 

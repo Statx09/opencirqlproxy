@@ -3295,7 +3295,7 @@ const themeToggle = (theme) => ({
 
 const modeBtn = {
   position: "fixed",
-  top: 16,
+  top: 80,
   left: 16,
 
   width: 44,
@@ -3546,9 +3546,6 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
 
 
 

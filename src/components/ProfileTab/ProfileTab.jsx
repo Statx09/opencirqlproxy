@@ -51,6 +51,11 @@ const [intents, setIntents] = useState([]);
   const [paymentSettings, setPaymentSettings] = useState({
     currency: "USD",
     enabled: [],
+    free: false,
+    acceptTips: false,
+    requestPayment: false,
+    voice: { enabled: false, ratePerMinute: 0.60 },
+    video: { enabled: false, ratePerMinute: 0.60 },
   });
 
 /* ================= UPLOAD ================= */
@@ -137,13 +142,12 @@ setExpressions(profile.expression_badges || []);
   );
 
   setCrypto(
-    savedPayments.usdt ||
-    profile.usdtwallet ||
+    savedPayments.usdc ||
     ""
   );
 
   setCryptoNetwork(
-    savedPayments.usdtNetwork ||
+    savedPayments.usdcNetwork ||
     "Solana"
   );
 
@@ -152,6 +156,22 @@ setExpressions(profile.expression_badges || []);
     enabled: Array.isArray(savedPayments.enabled)
       ? savedPayments.enabled
       : [],
+
+    free: savedPayments.free ?? false,
+
+    acceptTips:
+      savedPayments.acceptTips ??
+      savedPayments.tips ??
+      false,
+
+    requestPayment:
+      savedPayments.requestPayment ??
+      savedPayments.request_payment ??
+      false,
+
+    voice: { enabled: savedPayments.voice?.enabled ?? false, ratePerMinute: savedPayments.voice?.ratePerMinute ?? savedPayments.voice?.price ?? 0.60 },
+
+    video: { enabled: savedPayments.video?.enabled ?? false, ratePerMinute: savedPayments.video?.ratePerMinute ?? savedPayments.video?.price ?? 0.60 },
   });
 }, [profile]);
 
@@ -160,6 +180,9 @@ setExpressions(profile.expression_badges || []);
     if (!user?.id) return;
     setLoading(true);
 
+    console.log("PAYMENT STATE AT SAVE:", JSON.stringify(paymentSettings, null, 2));
+    console.log("VOICE STATE AT SAVE:", paymentSettings.voice);
+    console.log("VIDEO STATE AT SAVE:", paymentSettings.video);
     const payload = {
   user_id: user.id,
   email: user.email || null,
@@ -186,8 +209,6 @@ expression_badges: expressions,
 
   /* Monetization */
   paypal_link: paypal,
-  usdtwallet: crypto,
-
   /* Payment Settings */
   payment_methods: {
     currency: paymentSettings.currency,
@@ -196,14 +217,26 @@ expression_badges: expressions,
     kofi: kofi.trim(),
     stripe: stripe.trim(),
 
-    usdt: crypto.trim(),
-    usdtNetwork: cryptoNetwork,
+    usdc: crypto.trim(),
+    usdcNetwork: cryptoNetwork,
+
+    free: paymentSettings.free,
+    acceptTips: paymentSettings.acceptTips,
+    requestPayment: paymentSettings.requestPayment,
+
+    voice: {
+      enabled: paymentSettings.voice?.enabled ?? false,      ratePerMinute: paymentSettings.voice?.ratePerMinute ?? 0.60,
+    },
+
+    video: {
+      enabled: paymentSettings.video?.enabled ?? false,      ratePerMinute: paymentSettings.video?.ratePerMinute ?? 0.60,
+    },
 
     enabled: [
       ...(paypal.trim() ? ["paypal"] : []),
       ...(kofi.trim() ? ["kofi"] : []),
       ...(stripe.trim() ? ["stripe"] : []),
-      ...(crypto.trim() ? ["usdt"] : []),
+      ...(crypto.trim() ? ["usdc"] : []),
     ],
   },
 updated_at: new Date().toISOString(),
@@ -460,54 +493,163 @@ if (url) setAvatarUrl(url);
 
             <div style={paymentMethods}>
 
-              {/* PAYPAL */}
-              <div style={paymentRow}>
-                <div style={paymentName}>PayPal</div>
 
-                <input
-                  type="url"
-                  value={paypal}
-                  onChange={e => setPaypal(e.target.value)}
-                  style={paymentInput}
-                  placeholder="paypal.me/username"
-                />
+              {/* VOICE CALLS */}
+              <div style={rateCard}>
+                <div style={rateHeader}>
+                  <div>
+                    <div style={paymentName}>Voice Calls</div>
+                    <div style={mutedText}>
+                      Allow people to request paid voice calls.
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPaymentSettings(prev => ({
+                        ...prev,
+                        voice: {
+                          ...prev.voice,
+                          enabled: !prev.voice?.enabled,
+                        },
+                      }))
+                    }
+                    style={toggleBtn(paymentSettings.voice?.enabled)}
+                  >
+                    {paymentSettings.voice?.enabled ? "ON" : "OFF"}
+                  </button>
+                </div>
+
+                {paymentSettings.voice?.enabled && (
+                  <div style={sliderGroup}>
+
+                    <div style={sliderHeader}>
+                      <span style={fieldLabel}>Rate per minute</span>
+
+                      <strong style={sliderValue}>
+                        {paymentSettings.currency}{" "}
+                        {(paymentSettings.voice?.ratePerMinute ?? 0.60).toFixed(2)}
+                        {" "} / min
+                      </strong>
+                    </div>
+
+                    <input
+                      type="range"
+                      min="0.20"
+                      max="1.00"
+                      step="0.05"
+                      value={paymentSettings.voice?.ratePerMinute ?? 0.60}
+                      onChange={e =>
+                        setPaymentSettings(prev => ({
+                          ...prev,
+                          voice: {
+                            ...prev.voice,
+                            ratePerMinute: Number(e.target.value),
+                          },
+                        }))
+                      }
+                      style={paymentSlider}
+                    />
+
+                    <div style={sliderScale}>
+                      <span>{paymentSettings.currency} 0.20</span>
+                      <span>{paymentSettings.currency} 0.40</span>
+                      <span>{paymentSettings.currency} 0.60</span>
+                      <span>{paymentSettings.currency} 0.80</span>
+                      <span>{paymentSettings.currency} 1.00</span>
+                    </div>
+
+                    <div style={paymentRateHelp}>
+                      Callers are charged based on the actual duration of the call.
+                    </div>
+
+                  </div>
+                )}
               </div>
 
-              {/* KO-FI */}
-              <div style={paymentRow}>
-                <div style={paymentName}>Ko-fi</div>
+              {/* VIDEO CALLS */}
+              <div style={rateCard}>
+                <div style={rateHeader}>
+                  <div>
+                    <div style={paymentName}>Video Calls</div>
+                    <div style={mutedText}>
+                      Allow people to request paid video calls.
+                    </div>
+                  </div>
 
-                <input
-                  type="url"
-                  value={kofi}
-                  onChange={e => setKofi(e.target.value)}
-                  style={paymentInput}
-                  placeholder="ko-fi.com/username"
-                />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPaymentSettings(prev => ({
+                        ...prev,
+                        video: {
+                          ...prev.video,
+                          enabled: !prev.video?.enabled,
+                        },
+                      }))
+                    }
+                    style={toggleBtn(paymentSettings.video?.enabled)}
+                  >
+                    {paymentSettings.video?.enabled ? "ON" : "OFF"}
+                  </button>
+                </div>
+
+                {paymentSettings.video?.enabled && (
+                  <div style={sliderGroup}>
+
+                    <div style={sliderHeader}>
+                      <span style={fieldLabel}>Rate per minute</span>
+
+                      <strong style={sliderValue}>
+                        {paymentSettings.currency}{" "}
+                        {(paymentSettings.video?.ratePerMinute ?? 0.60).toFixed(2)}
+                        {" "} / min
+                      </strong>
+                    </div>
+
+                    <input
+                      type="range"
+                      min="0.20"
+                      max="1.00"
+                      step="0.05"
+                      value={paymentSettings.video?.ratePerMinute ?? 0.60}
+                      onChange={e =>
+                        setPaymentSettings(prev => ({
+                          ...prev,
+                          video: {
+                            ...prev.video,
+                            ratePerMinute: Number(e.target.value),
+                          },
+                        }))
+                      }
+                      style={paymentSlider}
+                    />
+
+                    <div style={sliderScale}>
+                      <span>{paymentSettings.currency} 0.20</span>
+                      <span>{paymentSettings.currency} 0.40</span>
+                      <span>{paymentSettings.currency} 0.60</span>
+                      <span>{paymentSettings.currency} 0.80</span>
+                      <span>{paymentSettings.currency} 1.00</span>
+                    </div>
+
+                    <div style={paymentRateHelp}>
+                      Callers are charged based on the actual duration of the call.
+                    </div>
+
+                  </div>
+                )}
               </div>
-
-              {/* STRIPE */}
-              <div style={paymentRow}>
-                <div style={paymentName}>Card / Stripe</div>
-
-                <input
-                  type="url"
-                  value={stripe}
-                  onChange={e => setStripe(e.target.value)}
-                  style={paymentInput}
-                  placeholder="Stripe Payment Link"
-                />
-              </div>
-
-              {/* USDT */}
+              {/* USDC */}
               <div style={{
                 ...paymentRow,
                 borderBottom: "none",
                 paddingBottom: 2,
               }}>
-                <div style={paymentName}>USDT</div>
+                <div style={paymentName}>USDC</div>
 
-                <div style={paymentUsdt}>
+                <div style={paymentUsdc}>
                   <input
                     value={crypto}
                     onChange={e => setCrypto(e.target.value)}
@@ -740,7 +882,7 @@ const paymentInput = {
   boxSizing: "border-box",
 };
 
-const paymentUsdt = {
+const paymentUsdc = {
   display: "flex",
   gap: 8,
   minWidth: 0,
@@ -793,6 +935,52 @@ const rateHeader = {
   gap: 12,
 };
 
+const sliderControls = {
+  display: "grid",
+  gridTemplateColumns: "1fr",
+  gap: 18,
+  marginTop: 16,
+};
+
+const sliderGroup = {
+  width: "100%",
+};
+
+const sliderHeader = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  marginBottom: 8,
+};
+
+const sliderValue = {
+  fontSize: 14,
+  fontWeight: 700,
+  color: "#fff",
+  whiteSpace: "nowrap",
+};
+
+const paymentSlider = {
+  width: "100%",
+  height: 5,
+  cursor: "pointer",
+  accentColor: "#22c55e",
+};
+
+const paymentRateHelp = {
+  marginTop: 8,
+  fontSize: 11,
+  lineHeight: 1.4,
+  color: "#9ca3af",
+};
+const sliderScale = {
+  display: "flex",
+  justifyContent: "space-between",
+  marginTop: 5,
+  fontSize: 10,
+  color: "#6b7280",
+};
 const rateControls = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
@@ -968,6 +1156,22 @@ const mediaCount = {
   marginTop: 8,
   marginBottom: 0,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

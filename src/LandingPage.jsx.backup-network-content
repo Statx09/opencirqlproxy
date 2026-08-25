@@ -7,7 +7,7 @@ import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
-import { ArrowLeft, Sun, Moon, Settings, Wallet } from "lucide-react";
+import { Grid3X3, Sun, Moon, Settings, Wallet } from "lucide-react";
 import { useUser } from "./hooks/useUser";
 
 
@@ -1213,27 +1213,6 @@ useEffect(() => {
   <>
     <div
       style={{
-        ...networkDropdownHeader,
-        justifyContent: "space-between",
-        marginBottom: 10,
-      }}
-    >
-      <span
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 9,
-        }}
-      >
-        <span style={networkDot}></span>
-        <span>Cirql Network</span>
-      </span>
-
-      <span style={networkBetaBadge}>BETA</span>
-    </div>
-
-    <div
-      style={{
         display: "flex",
         flexDirection: "column",
         gap: 7,
@@ -1297,7 +1276,8 @@ useEffect(() => {
         </div>
       </div>
 
-      <div
+      <button
+        type="button"
         style={{
           width: "100%",
           padding: "10px 11px",
@@ -1305,28 +1285,41 @@ useEffect(() => {
           background: "rgba(255,255,255,.035)",
           border: "1px solid rgba(255,255,255,.06)",
           color: theme.text,
+          cursor: "pointer",
+          textAlign: "left",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
         }}
+        onClick={() => setNetworkView("web3")}
       >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Web3 / USDC
-        </div>
+        <span>
+          <span
+            style={{
+              display: "block",
+              fontSize: 10,
+              fontWeight: 700,
+            }}
+          >
+            Web3 / USDC
+          </span>
 
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Earnings enabled · USDC payouts
-        </div>
-      </div>
+          <span
+            style={{
+              display: "block",
+              marginTop: 3,
+              fontSize: 9,
+              lineHeight: 1.45,
+              opacity: 0.48,
+            }}
+          >
+            Earnings enabled · USDC payouts for eligible host earnings.
+          </span>
+        </span>
+
+        <span style={networkArrow}>&rarr;</span>
+      </button>
 
       <button
         type="button"
@@ -1375,7 +1368,8 @@ useEffect(() => {
     </div>
 
     <div style={networkDivider}></div>
-  </>) : networkView === "founding" ? (
+  </>
+) : networkView === "founding" ? (
   <>
     <button
       type="button"
@@ -1858,7 +1852,7 @@ useEffect(() => {
       style={modeBtn}
       onClick={() => setMode("grid")}
     >
-      <ArrowLeft size={19} strokeWidth={1.8} />
+      <Grid3X3 size={19} strokeWidth={1.8} />
     </button>
 
     <div
@@ -3295,7 +3289,7 @@ const themeToggle = (theme) => ({
 
 const modeBtn = {
   position: "fixed",
-  top: 16,
+  top: 80,
   left: 16,
 
   width: 44,
@@ -3546,19 +3540,6 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

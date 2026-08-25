@@ -7,7 +7,7 @@ import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
-import { ArrowLeft, Sun, Moon, Settings, Wallet } from "lucide-react";
+import { Grid3X3, Sun, Moon, Settings, Wallet } from "lucide-react";
 import { useUser } from "./hooks/useUser";
 
 
@@ -1858,7 +1858,7 @@ useEffect(() => {
       style={modeBtn}
       onClick={() => setMode("grid")}
     >
-      <ArrowLeft size={19} strokeWidth={1.8} />
+      <Grid3X3 size={19} strokeWidth={1.8} />
     </button>
 
     <div
@@ -3295,7 +3295,7 @@ const themeToggle = (theme) => ({
 
 const modeBtn = {
   position: "fixed",
-  top: 16,
+  top: 80,
   left: 16,
 
   width: 44,
@@ -3546,10 +3546,6 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
 
 
 

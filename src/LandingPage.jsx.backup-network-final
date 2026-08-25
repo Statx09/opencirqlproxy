@@ -7,7 +7,7 @@ import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
-import { ArrowLeft, Sun, Moon, Settings, Wallet } from "lucide-react";
+import { Grid3X3, Sun, Moon, Settings, Wallet } from "lucide-react";
 import { useUser } from "./hooks/useUser";
 
 
@@ -1211,26 +1211,7 @@ useEffect(() => {
     <div style={networkDropdown(theme)}>
 {networkView === "main" ? (
   <>
-    <div
-      style={{
-        ...networkDropdownHeader,
-        justifyContent: "space-between",
-        marginBottom: 10,
-      }}
-    >
-      <span
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 9,
-        }}
-      >
-        <span style={networkDot}></span>
-        <span>Cirql Network</span>
-      </span>
-
-      <span style={networkBetaBadge}>BETA</span>
-    </div>
+    <div style={{...networkDropdownHeader,justifyContent:"space-between",marginBottom:10}}><span style={{display:"flex",alignItems:"center",gap:9}}><span style={networkDot}></span><span>Cirql Network</span></span><span style={networkBetaBadge}>BETA</span></div>
 
     <div
       style={{
@@ -1297,6 +1278,31 @@ useEffect(() => {
         </div>
       </div>
 
+      <div style={{ width: "100%", padding: "10px 11px", borderRadius: 9, background: "rgba(255,255,255,.035)", border: "1px solid rgba(255,255,255,.06)", color: theme.text }}>
+        
+      >
+        <span>
+          <span
+            style={{
+              display: "block",
+              fontSize: 10,
+              fontWeight: 700,
+            }}
+          >
+            Web3 / USDC
+          </span>
+
+          <span
+            style={{
+              display: "block",
+              marginTop: 3,
+              fontSize: 9,
+              lineHeight: 1.45,
+              opacity: 0.48,
+            }}
+          >
+            Earnings enabled · USDC payouts</span></span></div>
+
       <div
         style={{
           width: "100%",
@@ -1307,12 +1313,7 @@ useEffect(() => {
           color: theme.text,
         }}
       >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
+        <div style={{ fontSize: 10, fontWeight: 700 }}>
           Web3 / USDC
         </div>
 
@@ -1330,28 +1331,15 @@ useEffect(() => {
 
       <button
         type="button"
-        style={{
-          width: "100%",
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: theme.text,
-          cursor: "pointer",
-          textAlign: "left",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-        }}
+        style={networkInfoRow}
         onClick={() => setNetworkView("founding")}
       >
         <span>
           <span
             style={{
               display: "block",
-              fontSize: 10,
-              fontWeight: 700,
+              fontSize: 11,
+              fontWeight: 650,
             }}
           >
             First 100 member benefits
@@ -1360,9 +1348,8 @@ useEffect(() => {
           <span
             style={{
               display: "block",
-              marginTop: 3,
+              marginTop: 2,
               fontSize: 9,
-              lineHeight: 1.45,
               opacity: 0.48,
             }}
           >
@@ -1372,10 +1359,9 @@ useEffect(() => {
 
         <span style={networkArrow}>&rarr;</span>
       </button>
-    </div>
-
     <div style={networkDivider}></div>
-  </>) : networkView === "founding" ? (
+  </>
+) : networkView === "founding" ? (
   <>
     <button
       type="button"
@@ -1858,7 +1844,7 @@ useEffect(() => {
       style={modeBtn}
       onClick={() => setMode("grid")}
     >
-      <ArrowLeft size={19} strokeWidth={1.8} />
+      <Grid3X3 size={19} strokeWidth={1.8} />
     </button>
 
     <div
@@ -3295,7 +3281,7 @@ const themeToggle = (theme) => ({
 
 const modeBtn = {
   position: "fixed",
-  top: 16,
+  top: 80,
   left: 16,
 
   width: 44,
@@ -3546,11 +3532,6 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
-
 
 
 

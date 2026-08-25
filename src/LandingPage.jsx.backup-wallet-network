@@ -7,7 +7,7 @@ import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
-import { ArrowLeft, Sun, Moon, Settings, Wallet } from "lucide-react";
+import { Grid3X3, Sun, Moon, Settings, Wallet } from "lucide-react";
 import { useUser } from "./hooks/useUser";
 
 
@@ -1209,13 +1209,12 @@ useEffect(() => {
 
   {showNetwork && (
     <div style={networkDropdown(theme)}>
-{networkView === "main" ? (
+  {networkView === "main" ? (
   <>
     <div
       style={{
         ...networkDropdownHeader,
         justifyContent: "space-between",
-        marginBottom: 10,
       }}
     >
       <span
@@ -1229,153 +1228,132 @@ useEffect(() => {
         <span>Cirql Network</span>
       </span>
 
-      <span style={networkBetaBadge}>BETA</span>
+      <span style={networkBetaBadge}>
+        BETA
+      </span>
     </div>
 
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 7,
-      }}
+    <div style={networkHealth}>
+      <div>
+        <div style={networkHealthLabel}>
+          Network health
+        </div>
+
+        <div style={networkBars}>
+          <span style={{ ...networkBar, height: 5 }}></span>
+          <span style={{ ...networkBar, height: 9 }}></span>
+          <span style={{ ...networkBar, height: 13 }}></span>
+          <span style={{ ...networkBar, height: 17 }}></span>
+          <span style={{ ...networkBar, height: 21 }}></span>
+        </div>
+      </div>
+
+      <div style={networkPercent}>94%</div>
+    </div>
+
+    <div style={networkStats}>
+      <div style={networkStat}>
+        <strong>1,284</strong>
+        <span>members</span>
+      </div>
+
+      <div style={networkStat}>
+        <strong>342</strong>
+        <span>hosts</span>
+      </div>
+
+      <div style={networkStat}>
+        <strong>86</strong>
+        <span>online</span>
+      </div>
+    </div>
+
+    <div style={{ height: 10 }}></div>
+
+    <button
+      type="button"
+      style={networkInfoRow}
+      onClick={() => setNetworkView("founding")}
     >
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Balance & calls
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Your Cirql Balance is used for calls and tips.
-        </div>
-      </div>
-
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Host earnings
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Completed call earnings are added to your available balance.
-        </div>
-      </div>
-
-      <div
-        style={{
-          width: "100%",
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: theme.text,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Web3 / USDC
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Earnings enabled · USDC payouts
-        </div>
-      </div>
-
-      <button
-        type="button"
-        style={{
-          width: "100%",
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: theme.text,
-          cursor: "pointer",
-          textAlign: "left",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-        }}
-        onClick={() => setNetworkView("founding")}
-      >
-        <span>
-          <span
-            style={{
-              display: "block",
-              fontSize: 10,
-              fontWeight: 700,
-            }}
-          >
-            First 100 member benefits
-          </span>
-
-          <span
-            style={{
-              display: "block",
-              marginTop: 3,
-              fontSize: 9,
-              lineHeight: 1.45,
-              opacity: 0.48,
-            }}
-          >
-            Lifetime access · Founder recognition
-          </span>
+      <span>
+        <span style={{ display: "block", fontSize: 11, fontWeight: 650 }}>
+          First 100 member benefits
         </span>
 
-        <span style={networkArrow}>&rarr;</span>
-      </button>
-    </div>
+        <span
+          style={{
+            display: "block",
+            marginTop: 2,
+            fontSize: 9,
+            opacity: 0.48,
+          }}
+        >
+          Lifetime access · Founder recognition
+        </span>
+      </span>
+
+      <span style={networkArrow}>&rarr;</span>
+    </button>
+
+    <button
+      type="button"
+      style={networkInfoRow}
+      onClick={() =>
+        window.open(
+          "https://github.com/Statx09/opencirqlproxy",
+          "_blank",
+          "noopener,noreferrer"
+        )
+      }
+    >
+      <span>
+        <span style={{ display: "block", fontSize: 11, fontWeight: 650 }}>
+          GitHub
+        </span>
+      </span>
+
+      <span style={networkArrow}>&rarr;</span>
+    </button>
+
+    <button
+      type="button"
+      style={networkInfoRow}
+      onClick={() => setNetworkView("web3")}
+    >
+      <span>
+        <span style={{ display: "block", fontSize: 11, fontWeight: 650 }}>
+          Web3 enabled
+        </span>
+
+        <span
+          style={{
+            display: "block",
+            marginTop: 2,
+            fontSize: 9,
+            opacity: 0.48,
+          }}
+        >
+          Call rate · USDC escrow
+        </span>
+      </span>
+
+      <span style={networkArrow}>&rarr;</span>
+    </button>
 
     <div style={networkDivider}></div>
-  </>) : networkView === "founding" ? (
+
+    <button
+      type="button"
+      style={networkTransparency}
+      onClick={() => setNetworkView("transparency")}
+    >
+      <span>Network costs</span>
+      <span>&rarr;</span>
+    </button>
+
+    <div style={networkDivider}></div>
+  </>
+) : networkView === "founding" ? (
   <>
     <button
       type="button"
@@ -1442,7 +1420,7 @@ useEffect(() => {
           letterSpacing: "-0.01em",
         }}
       >
-        Web3 / USDC
+        Web3 calls
       </div>
 
       <div
@@ -1452,7 +1430,7 @@ useEffect(() => {
           opacity: 0.42,
         }}
       >
-        Earnings enabled
+        Solana · USDC
       </div>
     </div>
 
@@ -1461,7 +1439,7 @@ useEffect(() => {
         marginTop: 8,
         display: "flex",
         flexDirection: "column",
-        gap: 7,
+        gap: 8,
       }}
     >
       <div
@@ -1478,7 +1456,7 @@ useEffect(() => {
             fontWeight: 700,
           }}
         >
-          Host earnings
+          Set your rate
         </div>
 
         <div
@@ -1489,7 +1467,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          Eligible host earnings can be paid out in USDC.
+          Host chooses the price per minute.
         </div>
       </div>
 
@@ -1507,7 +1485,7 @@ useEffect(() => {
             fontWeight: 700,
           }}
         >
-          Solana
+          Connect & call
         </div>
 
         <div
@@ -1518,7 +1496,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          USDC is the planned payout currency for Web3 earnings.
+          Both wallets connect. Call time is tracked.
         </div>
       </div>
 
@@ -1536,7 +1514,7 @@ useEffect(() => {
             fontWeight: 700,
           }}
         >
-          Cirql Balance first
+          Automatic settlement
         </div>
 
         <div
@@ -1547,7 +1525,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          Calls and tips use your internal Cirql Balance.
+          When the call ends, payment is calculated from call time and settled automatically.
         </div>
       </div>
     </div>
@@ -1562,7 +1540,7 @@ useEffect(() => {
         textTransform: "uppercase",
       }}
     >
-      Balance · Earnings · USDC
+      Wallet · Call · Settlement
     </div>
 
     <div style={networkDivider}></div>
@@ -1579,32 +1557,37 @@ useEffect(() => {
     </button>
 
     <div style={networkTransparencyTitle}>
-      How Cirql works
+      Network costs
     </div>
 
     <div style={networkTransparencySubtitle}>
-      Simple internal balance
+      Monthly network target
+    </div>
+
+    <div style={networkMonthlyTarget}>
+      $1,500
+      <span>/ month</span>
     </div>
 
     <div style={networkCosts}>
       <div style={networkCostRow}>
-        <span>Add balance</span>
-        <strong>Cirql Balance</strong>
+        <span>Infrastructure</span>
+        <strong>$600</strong>
       </div>
 
       <div style={networkCostRow}>
-        <span>Calls</span>
-        <strong>Balance</strong>
+        <span>Storage & data</span>
+        <strong>$200</strong>
       </div>
 
       <div style={networkCostRow}>
-        <span>Tips</span>
-        <strong>Balance</strong>
+        <span>Calls & video</span>
+        <strong>$400</strong>
       </div>
 
       <div style={networkCostRow}>
-        <span>Host earnings</span>
-        <strong>Balance</strong>
+        <span>Security & services</span>
+        <strong>$300</strong>
       </div>
     </div>
 
@@ -1858,7 +1841,7 @@ useEffect(() => {
       style={modeBtn}
       onClick={() => setMode("grid")}
     >
-      <ArrowLeft size={19} strokeWidth={1.8} />
+      <Grid3X3 size={19} strokeWidth={1.8} />
     </button>
 
     <div
@@ -2324,378 +2307,334 @@ useEffect(() => {
       {/* MODALS */}
 
       {activeModal === "wallet" && (
-  <div
-    style={{
-      position: "fixed",
-      inset: 0,
-      zIndex: 100005,
-      display: "flex",
-      alignItems: "flex-start",
-      justifyContent: "flex-end",
-      padding: "76px 16px 24px",
-      pointerEvents: "none",
-    }}
-  >
-    <div
-      style={{
-        width: "min(300px, calc(100vw - 32px))",
-        maxHeight: "calc(100vh - 110px)",
-        overflowY: "auto",
-        borderRadius: 14,
-        background:
-          theme.mode === "dark"
-            ? "rgba(15,23,42,.97)"
-            : "rgba(255,255,255,.98)",
-        color: theme.text,
-        border: `1px solid ${theme.border}`,
-        boxShadow:
-          theme.mode === "dark"
-            ? "0 18px 55px rgba(0,0,0,.45)"
-            : "0 18px 55px rgba(15,23,42,.14)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        pointerEvents: "auto",
-        padding: 13,
-      }}
-    >
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "2px 2px 9px",
-        }}
-      >
         <div
           style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100005,
             display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 12,
-            fontWeight: 750,
-          }}
-        >
-          <Wallet size={15} strokeWidth={2.1} />
-          <span>Cirql Balance</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={closeModal}
-          aria-label="Close wallet"
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            border: `1px solid ${theme.border}`,
-            background: "transparent",
-            color: theme.text,
-            cursor: "pointer",
-            fontSize: 15,
-            lineHeight: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          ×
-        </button>
-      </div>
-
-      <div
-        style={{
-          padding: "9px 2px 11px",
-          borderTop: `1px solid ${theme.border}`,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 650,
-            opacity: 0.42,
-            textTransform: "uppercase",
-            letterSpacing: ".07em",
-          }}
-        >
-          Available balance
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 25,
-            lineHeight: 1,
-            fontWeight: 800,
-            letterSpacing: "-.7px",
-          }}
-        >
-          ${walletBalance.toFixed(2)}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            console.log("ADD BALANCE — MoonPay integration pending");
-          }}
-          style={{
-            marginTop: 10,
-            width: "100%",
-            height: 34,
-            borderRadius: 9,
-            border: "1px solid rgba(34,197,94,.3)",
-            background: "rgba(34,197,94,.09)",
-            color: "#22c55e",
-            fontSize: 10,
-            fontWeight: 750,
-            cursor: "pointer",
-          }}
-        >
-          + Add Balance
-        </button>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-        }}
-      >
-
-        <div
-          style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
+            alignItems: "flex-start",
+            justifyContent: "flex-end",
+            padding: "76px 16px 24px",
+            pointerEvents: "none",
           }}
         >
           <div
             style={{
-              fontSize: 9,
-              fontWeight: 700,
+              width: "min(380px, calc(100vw - 32px))",
+              maxHeight: "calc(100vh - 100px)",
+              overflowY: "auto",
+              borderRadius: 20,
+              background:
+                theme.mode === "dark"
+                  ? "rgba(15,23,42,.97)"
+                  : "rgba(255,255,255,.98)",
+              color: theme.text,
+              border: `1px solid ${theme.border}`,
+              boxShadow:
+                theme.mode === "dark"
+                  ? "0 24px 70px rgba(0,0,0,.55)"
+                  : "0 24px 70px rgba(15,23,42,.16)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              pointerEvents: "auto",
+              padding: 20,
             }}
           >
-            Recent activity
-          </div>
 
-          {walletTransactions.length === 0 ? (
             <div
               style={{
-                marginTop: 5,
-                fontSize: 9,
-                lineHeight: 1.4,
-                opacity: 0.4,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 20,
               }}
             >
-              No transactions yet
-            </div>
-          ) : (
-            <div style={{ marginTop: 5 }}>
-              {walletTransactions.slice(0, 3).map((tx) => {
-                const positive = [
-                  "deposit",
-                  "call_earning",
-                  "tip_received",
-                  "refund",
-                ].includes(tx.type);
-
-                const labelMap = {
-                  deposit: "Balance added",
-                  call_charge: "Call payment",
-                  call_earning: "Call earnings",
-                  tip_sent: "Tip sent",
-                  tip_received: "Tip received",
-                  withdrawal: "Withdrawal",
-                  refund: "Refund",
-                };
-
-                const label =
-                  labelMap[tx.type] ||
-                  tx.description ||
-                  "Wallet transaction";
-
-                return (
-                  <div
-                    key={tx.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 8,
-                      padding: "5px 0",
-                      borderBottom: `1px solid ${theme.border}`,
-                    }}
-                  >
-                    <div
-                      style={{
-                        minWidth: 0,
-                        fontSize: 9,
-                        fontWeight: 650,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {label}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 750,
-                        whiteSpace: "nowrap",
-                        color: positive ? "#22c55e" : theme.text,
-                      }}
-                    >
-                      {positive ? "+" : "-"}$
-                      {Number(tx.amount || 0).toFixed(2)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div
-          style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-            }}
-          >
-            Earnings
-          </div>
-
-          <div
-            style={{
-              marginTop: 5,
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: 9,
-            }}
-          >
-            <span style={{ opacity: 0.45 }}>Available</span>
-            <strong>
-              ${walletAvailableEarnings.toFixed(2)}
-            </strong>
-          </div>
-
-          <div
-            style={{
-              marginTop: 4,
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: 9,
-            }}
-          >
-            <span style={{ opacity: 0.45 }}>Pending</span>
-            <strong>
-              ${walletPendingEarnings.toFixed(2)}
-            </strong>
-          </div>
-        </div>
-
-        <div
-          style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div>
               <div
                 style={{
-                  fontSize: 9,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  fontSize: 15,
+                  fontWeight: 800,
+                }}
+              >
+                <Wallet size={18} strokeWidth={2} />
+                <span>Wallet</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeModal}
+                aria-label="Close wallet"
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  border: `1px solid ${theme.border}`,
+                  background: "transparent",
+                  color: theme.text,
+                  cursor: "pointer",
+                  fontSize: 18,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div
+              style={{
+                textAlign: "center",
+                padding: "8px 0 20px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 34,
+                  lineHeight: 1,
+                  fontWeight: 850,
+                  letterSpacing: "-1px",
+                }}
+              >
+                ${walletBalance.toFixed(2)}
+              </div>
+
+              <div
+                style={{
+                  marginTop: 7,
+                  fontSize: 11,
+                  opacity: 0.5,
+                  textTransform: "uppercase",
+                  letterSpacing: ".08em",
                   fontWeight: 700,
                 }}
               >
-                Solana wallet
+                Available balance
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("ADD BALANCE — MoonPay integration pending");
+                }}
+                style={{
+                  marginTop: 18,
+                  width: "100%",
+                  height: 44,
+                  borderRadius: 999,
+                  border: "1px solid rgba(34,197,94,.35)",
+                  background: "rgba(34,197,94,.12)",
+                  color: "#22c55e",
+                  fontSize: 13,
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                + Add Balance
+              </button>
+            </div>
+
+            <div style={walletSection(theme)}>
+              <div style={walletSectionTitle}>Recent Activity</div>
+
+              {walletTransactions.length === 0 ? (
+                <div
+                  style={{
+                    padding: "16px 0 4px",
+                    textAlign: "center",
+                    fontSize: 12,
+                    opacity: 0.45,
+                  }}
+                >
+                  No transactions yet
+                </div>
+              ) : (
+                <div style={{ marginTop: 8 }}>
+                  {walletTransactions.map((tx) => {
+                    const positive = [
+                      "deposit",
+                      "call_earning",
+                      "tip_received",
+                      "refund",
+                    ].includes(tx.type);
+
+                    const labelMap = {
+                      deposit: "Balance added",
+                      call_charge: "Call payment",
+                      call_earning: "Call earnings",
+                      tip_sent: "Tip sent",
+                      tip_received: "Tip received",
+                      withdrawal: "Withdrawal",
+                      refund: "Refund",
+                    };
+
+                    const label =
+                      labelMap[tx.type] ||
+                      tx.description ||
+                      "Wallet transaction";
+
+                    return (
+                      <div
+                        key={tx.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 12,
+                          padding: "10px 0",
+                          borderBottom: `1px solid ${theme.border}`,
+                        }}
+                      >
+                        <div style={{ minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 700,
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {label}
+                          </div>
+
+                          <div
+                            style={{
+                              marginTop: 3,
+                              fontSize: 10,
+                              opacity: 0.45,
+                            }}
+                          >
+                            {new Date(tx.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 800,
+                            whiteSpace: "nowrap",
+                            color: positive ? "#22c55e" : theme.text,
+                          }}
+                        >
+                          {positive ? "+" : "-"}$
+                          {Number(tx.amount || 0).toFixed(2)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={walletSection(theme)}>
+              <div style={walletSectionTitle}>Earnings</div>
+
+              <div style={walletRow(theme)}>
+                <span>Available</span>
+                <strong>${walletAvailableEarnings.toFixed(2)}</strong>
+              </div>
+
+              <div style={walletRow(theme)}>
+                <span>Pending</span>
+                <strong>${walletPendingEarnings.toFixed(2)}</strong>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  console.log("WITHDRAW USDC — payout integration pending");
+                }}
+                style={{
+                  marginTop: 12,
+                  width: "100%",
+                  height: 40,
+                  borderRadius: 999,
+                  border: `1px solid ${theme.border}`,
+                  background: "transparent",
+                  color: theme.text,
+                  fontSize: 12,
+                  fontWeight: 750,
+                  cursor: "pointer",
+                }}
+              >
+                Withdraw USDC
+              </button>
+            </div>
+
+            <div style={walletSection(theme)}>
+              <div style={walletSectionTitle}>Solana Wallet</div>
 
               <div
                 style={{
-                  marginTop: 3,
-                  fontSize: 8,
-                  opacity: 0.38,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "12px 0 4px",
+                  fontSize: 12,
                 }}
               >
-                Optional for future Web3 payouts
+                <span style={{ opacity: 0.65 }}>
+                  Not connected
+                </span>
+
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#f59e0b",
+                  }}
+                >
+                  READY
+                </span>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveModal(null);
+                  setShowNetwork(true);
+                  setNetworkView("web3");
+                }}
+                style={{
+                  marginTop: 12,
+                  width: "100%",
+                  height: 40,
+                  borderRadius: 999,
+                  border: `1px solid ${theme.border}`,
+                  background: "transparent",
+                  color: theme.text,
+                  fontSize: 12,
+                  fontWeight: 750,
+                  cursor: "pointer",
+                }}
+              >
+                Connect Wallet
+              </button>
             </div>
 
-            <span
+            <div
               style={{
-                fontSize: 8,
-                fontWeight: 700,
-                color: "#f59e0b",
+                marginTop: 16,
+                paddingTop: 12,
+                borderTop: `1px solid ${theme.border}`,
+                fontSize: 10,
+                lineHeight: 1.5,
+                opacity: 0.4,
+                textAlign: "center",
               }}
             >
-              OPTIONAL
-            </span>
+              Cirql Balance is used for calls, tips and future
+              platform services.
+            </div>
+
           </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveModal(null);
-              setShowNetwork(true);
-              setNetworkView("balance");
-            }}
-            style={{
-              marginTop: 7,
-              width: "100%",
-              height: 30,
-              borderRadius: 8,
-              border: `1px solid ${theme.border}`,
-              background: "transparent",
-              color: theme.text,
-              fontSize: 9,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Wallet options
-          </button>
         </div>
-
-      </div>
-
-      <div
-        style={{
-          marginTop: 9,
-          paddingTop: 8,
-          borderTop: `1px solid ${theme.border}`,
-          fontSize: 8,
-          lineHeight: 1.45,
-          opacity: 0.28,
-          textAlign: "center",
-        }}
-      >
-        Cirql Balance is used for calls, tips and platform services.
-      </div>
-
-    </div>
-  </div>
-)}
-{activeModal === "profile" && (selectedHost || selectedProfile) && (
+      )}
+      {activeModal === "profile" && (selectedHost || selectedProfile) && (
   <>
     {console.log("SELECTED HOST:", selectedHost)}
     {console.log("SELECTED PROFILE:", selectedProfile)}
@@ -3295,7 +3234,7 @@ const themeToggle = (theme) => ({
 
 const modeBtn = {
   position: "fixed",
-  top: 16,
+  top: 80,
   left: 16,
 
   width: 44,
@@ -3546,20 +3485,6 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

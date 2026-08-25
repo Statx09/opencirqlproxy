@@ -7,7 +7,7 @@ import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
-import { ArrowLeft, Sun, Moon, Settings, Wallet } from "lucide-react";
+import { Grid3X3,  Sun, Moon, Settings } from "lucide-react";
 import { useUser } from "./hooks/useUser";
 
 
@@ -39,100 +39,6 @@ export default function LandingPage({ user }) {
   const [index, setIndex] = useState(0);
   const [showNetwork, setShowNetwork] = useState(false);
 const [showSettings, setShowSettings] = useState(false);
-const [walletBalance, setWalletBalance] = useState(0);
-
-const loadWalletBalance = useCallback(async () => {
-  if (!user?.id) {
-    setWalletBalance(0);
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("balance")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    console.error("WALLET BALANCE LOAD ERROR:", error);
-    return;
-  }
-
-  setWalletBalance(Number(data?.balance || 0));
-}, [user?.id]);
-
-useEffect(() => {
-  loadWalletBalance();
-}, [loadWalletBalance]);
-
-const [walletTransactions, setWalletTransactions] = useState([]);
-const [walletAvailableEarnings, setWalletAvailableEarnings] = useState(0);
-const [walletPendingEarnings, setWalletPendingEarnings] = useState(0);
-
-const loadWalletActivity = useCallback(async () => {
-  if (!user?.id) {
-    setWalletTransactions([]);
-    setWalletAvailableEarnings(0);
-    setWalletPendingEarnings(0);
-    return;
-  }
-
-  const { data: transactions, error: transactionsError } = await supabase
-    .from("wallet_transactions")
-    .select(`
-      id,
-      type,
-      amount,
-      currency,
-      status,
-      reference_id,
-      call_id,
-      description,
-      created_at
-    `)
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(8);
-
-  if (transactionsError) {
-    console.error("WALLET TRANSACTIONS LOAD ERROR:", transactionsError);
-  } else {
-    setWalletTransactions(transactions || []);
-  }
-
-  const { data: earnings, error: earningsError } = await supabase
-    .from("call_earnings")
-    .select("host_amount, status")
-    .eq("host_id", user.id);
-
-  if (earningsError) {
-    console.error("CALL EARNINGS LOAD ERROR:", earningsError);
-    return;
-  }
-
-  const available = (earnings || [])
-    .filter((earning) => earning.status === "completed")
-    .reduce(
-      (total, earning) => total + Number(earning.host_amount || 0),
-      0
-    );
-
-  const pending = (earnings || [])
-    .filter((earning) => earning.status === "pending")
-    .reduce(
-      (total, earning) => total + Number(earning.host_amount || 0),
-      0
-    );
-
-  setWalletAvailableEarnings(available);
-  setWalletPendingEarnings(pending);
-}, [user?.id]);
-
-useEffect(() => {
-  loadWalletActivity();
-}, [loadWalletActivity]);
-
-
 const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 const [notificationSettings, setNotificationSettings] = useState({
   messages: true,
@@ -148,6 +54,7 @@ const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState
 /* ================= INCOMING CALL ================= */
 
 const [incomingCall, setIncomingCall] = useState(null);
+const [callRealtimeStatus, setCallRealtimeStatus] = useState("CONNECTING");
 const [outgoingCall, setOutgoingCall] = useState(null);
 
   const loadNotifications = useCallback(async () => {
@@ -546,6 +453,9 @@ console.log(
         },
         (payload) => {
           const message = payload.new;
+          setCallRealtimeStatus(
+            "INCOMING MESSAGE: " + (payload.new?.event || "unknown")
+          );
 
           if (message.event !== null) {
             return;
@@ -861,46 +771,7 @@ useEffect(() => {
             user?.email ||
             "Someone";
 
-          console.log("CALL: creating call record", {
-            caller_id: user.id,
-            host_id: callTarget.user_id,
-            status: "ringing",
-          });
-
-          const { data: callData, error: callError } = await supabase
-            .from("calls")
-            .insert({
-              caller_id: user.id,
-              host_id: callTarget.user_id,
-              start_time: new Date().toISOString(),
-              end_time: null,
-              rate: null,
-              currency: null,
-              max_amount: null,
-              actual_amount: null,
-              status: "ringing",
-              created_at: new Date().toISOString(),
-            })
-            .select()
-            .single();
-
-          if (callError) {
-            console.error(
-              "CALL RECORD ERROR:",
-              callError
-            );
-            return;
-          }
-
-          console.log(
-            "CALL RECORD CREATED:",
-            callData
-          );
-
-          const callId = callData.id;
-
           console.log("CALL: inserting signal", {
-            callId,
             sender_id: user.id,
             receiver_id: callTarget.user_id,
             event: "incoming_call",
@@ -915,7 +786,6 @@ useEffect(() => {
               private: true,
               event: "incoming_call",
               payload: {
-                call_id: callId,
                 call_type: callTarget.callType || "video",
               },
               created_at: new Date().toISOString(),
@@ -928,14 +798,6 @@ useEffect(() => {
               "CALL SIGNAL ERROR:",
               callSignalError
             );
-
-            await supabase
-              .from("calls")
-              .update({
-                status: "cancelled",
-              })
-              .eq("id", callId);
-
             return;
           }
 
@@ -944,28 +806,32 @@ useEffect(() => {
             callSignalData
           );
 
+          if (callSignalError) {
+            console.error(
+              "CALL SIGNAL ERROR:",
+              callSignalError
+            );
+            return;
+          }
+
           console.log(
             "CALL SIGNAL SENT:",
             callTarget.user_id
           );
 
           setSelectedHost(callTarget);
+setOutgoingCall({
+  ...callTarget,
+  callerName,
+});
 
-          setOutgoingCall({
-            ...callTarget,
-            callerName,
-            call_id: callId,
-          });
-
-          console.log(
-            "CALL: waiting for recipient to answer",
-            callTarget.user_id,
-            "call_id:",
-            callId
-          );
-
+console.log(
+  "CALL: waiting for recipient to answer",
+  callTarget.user_id
+);
           break;
         }
+
         case "callsStudio":
   setActiveModal("callsStudio");
   break;
@@ -1209,13 +1075,12 @@ useEffect(() => {
 
   {showNetwork && (
     <div style={networkDropdown(theme)}>
-{networkView === "main" ? (
+  {networkView === "main" ? (
   <>
     <div
       style={{
         ...networkDropdownHeader,
         justifyContent: "space-between",
-        marginBottom: 10,
       }}
     >
       <span
@@ -1229,153 +1094,132 @@ useEffect(() => {
         <span>Cirql Network</span>
       </span>
 
-      <span style={networkBetaBadge}>BETA</span>
+      <span style={networkBetaBadge}>
+        BETA
+      </span>
     </div>
 
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 7,
-      }}
+    <div style={networkHealth}>
+      <div>
+        <div style={networkHealthLabel}>
+          Network health
+        </div>
+
+        <div style={networkBars}>
+          <span style={{ ...networkBar, height: 5 }}></span>
+          <span style={{ ...networkBar, height: 9 }}></span>
+          <span style={{ ...networkBar, height: 13 }}></span>
+          <span style={{ ...networkBar, height: 17 }}></span>
+          <span style={{ ...networkBar, height: 21 }}></span>
+        </div>
+      </div>
+
+      <div style={networkPercent}>94%</div>
+    </div>
+
+    <div style={networkStats}>
+      <div style={networkStat}>
+        <strong>1,284</strong>
+        <span>members</span>
+      </div>
+
+      <div style={networkStat}>
+        <strong>342</strong>
+        <span>hosts</span>
+      </div>
+
+      <div style={networkStat}>
+        <strong>86</strong>
+        <span>online</span>
+      </div>
+    </div>
+
+    <div style={{ height: 10 }}></div>
+
+    <button
+      type="button"
+      style={networkInfoRow}
+      onClick={() => setNetworkView("founding")}
     >
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Balance & calls
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Your Cirql Balance is used for calls and tips.
-        </div>
-      </div>
-
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Host earnings
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Completed call earnings are added to your available balance.
-        </div>
-      </div>
-
-      <div
-        style={{
-          width: "100%",
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: theme.text,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Web3 / USDC
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Earnings enabled · USDC payouts
-        </div>
-      </div>
-
-      <button
-        type="button"
-        style={{
-          width: "100%",
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: theme.text,
-          cursor: "pointer",
-          textAlign: "left",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-        }}
-        onClick={() => setNetworkView("founding")}
-      >
-        <span>
-          <span
-            style={{
-              display: "block",
-              fontSize: 10,
-              fontWeight: 700,
-            }}
-          >
-            First 100 member benefits
-          </span>
-
-          <span
-            style={{
-              display: "block",
-              marginTop: 3,
-              fontSize: 9,
-              lineHeight: 1.45,
-              opacity: 0.48,
-            }}
-          >
-            Lifetime access · Founder recognition
-          </span>
+      <span>
+        <span style={{ display: "block", fontSize: 11, fontWeight: 650 }}>
+          First 100 member benefits
         </span>
 
-        <span style={networkArrow}>&rarr;</span>
-      </button>
-    </div>
+        <span
+          style={{
+            display: "block",
+            marginTop: 2,
+            fontSize: 9,
+            opacity: 0.48,
+          }}
+        >
+          Lifetime access · Founder recognition
+        </span>
+      </span>
+
+      <span style={networkArrow}>&rarr;</span>
+    </button>
+
+    <button
+      type="button"
+      style={networkInfoRow}
+      onClick={() =>
+        window.open(
+          "https://github.com/Statx09/opencirqlproxy",
+          "_blank",
+          "noopener,noreferrer"
+        )
+      }
+    >
+      <span>
+        <span style={{ display: "block", fontSize: 11, fontWeight: 650 }}>
+          GitHub
+        </span>
+      </span>
+
+      <span style={networkArrow}>&rarr;</span>
+    </button>
+
+    <button
+      type="button"
+      style={networkInfoRow}
+      onClick={() => setNetworkView("web3")}
+    >
+      <span>
+        <span style={{ display: "block", fontSize: 11, fontWeight: 650 }}>
+          Web3 enabled
+        </span>
+
+        <span
+          style={{
+            display: "block",
+            marginTop: 2,
+            fontSize: 9,
+            opacity: 0.48,
+          }}
+        >
+          Call rate · USDC escrow
+        </span>
+      </span>
+
+      <span style={networkArrow}>&rarr;</span>
+    </button>
 
     <div style={networkDivider}></div>
-  </>) : networkView === "founding" ? (
+
+    <button
+      type="button"
+      style={networkTransparency}
+      onClick={() => setNetworkView("transparency")}
+    >
+      <span>Network costs</span>
+      <span>&rarr;</span>
+    </button>
+
+    <div style={networkDivider}></div>
+  </>
+) : networkView === "founding" ? (
   <>
     <button
       type="button"
@@ -1442,7 +1286,7 @@ useEffect(() => {
           letterSpacing: "-0.01em",
         }}
       >
-        Web3 / USDC
+        Web3 calls
       </div>
 
       <div
@@ -1452,7 +1296,7 @@ useEffect(() => {
           opacity: 0.42,
         }}
       >
-        Earnings enabled
+        Solana · USDC
       </div>
     </div>
 
@@ -1461,7 +1305,7 @@ useEffect(() => {
         marginTop: 8,
         display: "flex",
         flexDirection: "column",
-        gap: 7,
+        gap: 8,
       }}
     >
       <div
@@ -1478,7 +1322,7 @@ useEffect(() => {
             fontWeight: 700,
           }}
         >
-          Host earnings
+          Set your rate
         </div>
 
         <div
@@ -1489,7 +1333,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          Eligible host earnings can be paid out in USDC.
+          Host chooses the price per minute.
         </div>
       </div>
 
@@ -1507,7 +1351,7 @@ useEffect(() => {
             fontWeight: 700,
           }}
         >
-          Solana
+          Connect & call
         </div>
 
         <div
@@ -1518,7 +1362,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          USDC is the planned payout currency for Web3 earnings.
+          Both wallets connect. Call time is tracked.
         </div>
       </div>
 
@@ -1536,7 +1380,7 @@ useEffect(() => {
             fontWeight: 700,
           }}
         >
-          Cirql Balance first
+          Automatic settlement
         </div>
 
         <div
@@ -1547,7 +1391,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          Calls and tips use your internal Cirql Balance.
+          When the call ends, payment is calculated from call time and settled automatically.
         </div>
       </div>
     </div>
@@ -1562,7 +1406,7 @@ useEffect(() => {
         textTransform: "uppercase",
       }}
     >
-      Balance · Earnings · USDC
+      Wallet · Call · Settlement
     </div>
 
     <div style={networkDivider}></div>
@@ -1579,32 +1423,37 @@ useEffect(() => {
     </button>
 
     <div style={networkTransparencyTitle}>
-      How Cirql works
+      Network costs
     </div>
 
     <div style={networkTransparencySubtitle}>
-      Simple internal balance
+      Monthly network target
+    </div>
+
+    <div style={networkMonthlyTarget}>
+      $1,500
+      <span>/ month</span>
     </div>
 
     <div style={networkCosts}>
       <div style={networkCostRow}>
-        <span>Add balance</span>
-        <strong>Cirql Balance</strong>
+        <span>Infrastructure</span>
+        <strong>$600</strong>
       </div>
 
       <div style={networkCostRow}>
-        <span>Calls</span>
-        <strong>Balance</strong>
+        <span>Storage & data</span>
+        <strong>$200</strong>
       </div>
 
       <div style={networkCostRow}>
-        <span>Tips</span>
-        <strong>Balance</strong>
+        <span>Calls & video</span>
+        <strong>$400</strong>
       </div>
 
       <div style={networkCostRow}>
-        <span>Host earnings</span>
-        <strong>Balance</strong>
+        <span>Security & services</span>
+        <strong>$300</strong>
       </div>
     </div>
 
@@ -1639,20 +1488,6 @@ useEffect(() => {
     </div>
 
     <div style={headerActions}>
-
-      <button
-        type="button"
-        onClick={() => setActiveModal("wallet")}
-        aria-label="Cirql Balance"
-        title="Cirql Balance"
-        style={walletButton(theme)}
-      >
-        <Wallet size={14} strokeWidth={2.2} />
-        <span style={walletBalanceText(theme)}>
-          ${walletBalance.toFixed(2)}
-        </span>
-      </button>
-
   <div style={settingsWrap}>
     <button
       type="button"
@@ -1833,6 +1668,33 @@ useEffect(() => {
 
   </div>
 )}
+  
+    {/* TEMP CALL REALTIME DIAGNOSTIC */}
+    <div
+      style={{
+        position: "fixed",
+        top: "10px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 999999,
+        padding: "6px 10px",
+        borderRadius: "999px",
+        background:
+          callRealtimeStatus === "SUBSCRIBED"
+            ? "rgba(34,197,94,.92)"
+            : callRealtimeStatus === "CHANNEL_ERROR" ||
+              callRealtimeStatus === "TIMED_OUT"
+            ? "rgba(239,68,68,.92)"
+            : "rgba(15,23,42,.92)",
+        color: "#fff",
+        fontSize: "11px",
+        fontWeight: 700,
+        letterSpacing: ".02em",
+        boxShadow: "0 6px 20px rgba(0,0,0,.25)",
+      }}
+    >
+      CALL: {callRealtimeStatus}
+    </div>
 
     {/* GRID */}
     {mode === "grid" && (
@@ -1858,7 +1720,7 @@ useEffect(() => {
       style={modeBtn}
       onClick={() => setMode("grid")}
     >
-      <ArrowLeft size={19} strokeWidth={1.8} />
+      <Grid3X3 size={19} strokeWidth={1.8} />
     </button>
 
     <div
@@ -1908,6 +1770,8 @@ useEffect(() => {
   reloadStatuses={reloadStatuses}
 />
 )}
+
+      {/* TEMP CALL REALTIME DIAGNOSTIC */}
 {/* OUTGOING CALL */}
       {outgoingCall && (
         <div
@@ -2018,684 +1882,9 @@ useEffect(() => {
         </div>
       )}
 
-      {incomingCall && (
-        <div
-          style={{
-            position: "fixed",
-            right: "20px",
-            bottom: "20px",
-            zIndex: 100010,
-            width: "min(380px, calc(100vw - 32px))",
-            padding: "14px",
-            borderRadius: "18px",
-            background: "rgba(15,23,42,.96)",
-            border: "1px solid rgba(34,197,94,.28)",
-            boxShadow:
-              "0 18px 55px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.04)",
-            color: "#fff",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              borderRadius: "18px",
-              pointerEvents: "none",
-              boxShadow: "inset 0 0 0 1px rgba(34,197,94,.08)",
-            }}
-          />
-
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-            }}
-          >
-            <div
-              style={{
-                position: "relative",
-                width: "58px",
-                height: "58px",
-                flex: "0 0 58px",
-                borderRadius: "50%",
-              }}
-            >
-              <div
-                style={{
-                  position: "absolute",
-                  inset: "-4px",
-                  borderRadius: "50%",
-                  border: "2px solid #22c55e",
-                  animation: "upcallIncomingPulse 1.5s ease-out infinite",
-                }}
-              />
-
-              <div
-                style={{
-                  position: "relative",
-                  width: "58px",
-                  height: "58px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  background: "rgba(255,255,255,.08)",
-                  border: "2px solid #22c55e",
-                  boxShadow: "0 0 18px rgba(34,197,94,.28)",
-                }}
-              >
-                {incomingCall.callerProfile?.avatar_url ||
-                incomingCall.callerProfile?.avatar ? (
-                  <img
-                    src={
-                      incomingCall.callerProfile.avatar_url ||
-                      incomingCall.callerProfile.avatar
-                    }
-                    alt=""
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "23px",
-                    }}
-                  >
-                    📹
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div
-              style={{
-                minWidth: 0,
-                flex: 1,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  marginBottom: "3px",
-                }}
-              >
-                <span
-                  style={{
-                    width: "7px",
-                    height: "7px",
-                    borderRadius: "50%",
-                    background: "#22c55e",
-                    boxShadow: "0 0 10px rgba(34,197,94,.8)",
-                    animation: "upcallIncomingDot 1s ease-in-out infinite",
-                  }}
-                />
-
-                <span
-                  style={{
-                    fontSize: "10px",
-                    fontWeight: 800,
-                    letterSpacing: ".1em",
-                    textTransform: "uppercase",
-                    color: "#4ade80",
-                  }}
-                >
-                  LIVE CALL
-                </span>
-              </div>
-
-              <div
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 800,
-                  lineHeight: 1.2,
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {incomingCall.callerProfile?.name || "Someone"}
-              </div>
-
-              <div
-                style={{
-                  marginTop: "3px",
-                  fontSize: "11px",
-                  color: "rgba(255,255,255,.52)",
-                }}
-              >
-                {incomingCall.payload?.call_type === "audio"
-                  ? "Voice call"
-                  : "Video call"}
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              position: "relative",
-              display: "flex",
-              gap: "9px",
-              marginTop: "13px",
-            }}
-          >
-            <button
-              type="button"
-              onClick={async () => {
-                console.log(
-                  "INCOMING CALL DECLINED:",
-                  incomingCall
-                );
-
-                setIncomingCall(null);
-              }}
-              style={{
-                flex: 1,
-                height: "38px",
-                borderRadius: "10px",
-                border: "1px solid rgba(239,68,68,.3)",
-                background: "rgba(239,68,68,.1)",
-                color: "#f87171",
-                fontSize: "12px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Decline
-            </button>
-
-            <button
-              type="button"
-              onClick={async () => {
-                console.log(
-                  "INCOMING CALL ACCEPTED:",
-                  incomingCall
-                );
-
-                const { error } = await supabase
-                  .from("messages")
-                  .insert({
-                    sender_id: user.id,
-                    receiver_id: incomingCall.sender_id,
-                    text: `${user?.name || "User"} accepted your call`,
-                    private: true,
-                    event: "call_accepted",
-                    payload: {
-                      call_id:
-                        incomingCall.payload?.call_id || null,
-                      call_type:
-                        incomingCall.payload?.call_type || "video",
-                    },
-                    created_at: new Date().toISOString(),
-                  });
-
-                if (error) {
-                  console.error(
-                    "CALL ACCEPT ERROR:",
-                    error
-                  );
-                  return;
-                }
-
-                const callId = incomingCall.payload?.call_id;
-
-                if (callId) {
-                  const { error: callUpdateError } = await supabase
-                    .from("calls")
-                    .update({
-                      status: "active",
-                    })
-                    .eq("id", callId);
-
-                  if (callUpdateError) {
-                    console.error(
-                      "CALL STATUS UPDATE ERROR:",
-                      callUpdateError
-                    );
-                  } else {
-                    console.log(
-                      "CALL STATUS UPDATED TO ACTIVE:",
-                      callId
-                    );
-                  }
-                }
-
-                setSelectedHost(
-                  incomingCall.callerProfile || null
-                );
-                setIncomingCall(null);
-                setActiveModal("callsStudio");
-              }}
-              style={{
-                flex: 1,
-                height: "38px",
-                borderRadius: "10px",
-                border: "1px solid rgba(34,197,94,.4)",
-                background: "#22c55e",
-                color: "#052e16",
-                fontSize: "12px",
-                fontWeight: 800,
-                cursor: "pointer",
-              }}
-            >
-              Accept
-            </button>
-          </div>
-
-          <style>{`
-            @keyframes upcallIncomingPulse {
-              0% {
-                transform: scale(0.92);
-                opacity: 0.9;
-              }
-              70% {
-                transform: scale(1.16);
-                opacity: 0;
-              }
-              100% {
-                transform: scale(1.16);
-                opacity: 0;
-              }
-            }
-
-            @keyframes upcallIncomingDot {
-              0%, 100% {
-                opacity: 1;
-                transform: scale(1);
-              }
-              50% {
-                opacity: 0.45;
-                transform: scale(0.75);
-              }
-            }
-          `}</style>
-        </div>
-      )}
       {/* MODALS */}
 
-      {activeModal === "wallet" && (
-  <div
-    style={{
-      position: "fixed",
-      inset: 0,
-      zIndex: 100005,
-      display: "flex",
-      alignItems: "flex-start",
-      justifyContent: "flex-end",
-      padding: "76px 16px 24px",
-      pointerEvents: "none",
-    }}
-  >
-    <div
-      style={{
-        width: "min(300px, calc(100vw - 32px))",
-        maxHeight: "calc(100vh - 110px)",
-        overflowY: "auto",
-        borderRadius: 14,
-        background:
-          theme.mode === "dark"
-            ? "rgba(15,23,42,.97)"
-            : "rgba(255,255,255,.98)",
-        color: theme.text,
-        border: `1px solid ${theme.border}`,
-        boxShadow:
-          theme.mode === "dark"
-            ? "0 18px 55px rgba(0,0,0,.45)"
-            : "0 18px 55px rgba(15,23,42,.14)",
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        pointerEvents: "auto",
-        padding: 13,
-      }}
-    >
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "2px 2px 9px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 12,
-            fontWeight: 750,
-          }}
-        >
-          <Wallet size={15} strokeWidth={2.1} />
-          <span>Cirql Balance</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={closeModal}
-          aria-label="Close wallet"
-          style={{
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            border: `1px solid ${theme.border}`,
-            background: "transparent",
-            color: theme.text,
-            cursor: "pointer",
-            fontSize: 15,
-            lineHeight: 1,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          ×
-        </button>
-      </div>
-
-      <div
-        style={{
-          padding: "9px 2px 11px",
-          borderTop: `1px solid ${theme.border}`,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 650,
-            opacity: 0.42,
-            textTransform: "uppercase",
-            letterSpacing: ".07em",
-          }}
-        >
-          Available balance
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 25,
-            lineHeight: 1,
-            fontWeight: 800,
-            letterSpacing: "-.7px",
-          }}
-        >
-          ${walletBalance.toFixed(2)}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            console.log("ADD BALANCE — MoonPay integration pending");
-          }}
-          style={{
-            marginTop: 10,
-            width: "100%",
-            height: 34,
-            borderRadius: 9,
-            border: "1px solid rgba(34,197,94,.3)",
-            background: "rgba(34,197,94,.09)",
-            color: "#22c55e",
-            fontSize: 10,
-            fontWeight: 750,
-            cursor: "pointer",
-          }}
-        >
-          + Add Balance
-        </button>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
-        }}
-      >
-
-        <div
-          style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-            }}
-          >
-            Recent activity
-          </div>
-
-          {walletTransactions.length === 0 ? (
-            <div
-              style={{
-                marginTop: 5,
-                fontSize: 9,
-                lineHeight: 1.4,
-                opacity: 0.4,
-              }}
-            >
-              No transactions yet
-            </div>
-          ) : (
-            <div style={{ marginTop: 5 }}>
-              {walletTransactions.slice(0, 3).map((tx) => {
-                const positive = [
-                  "deposit",
-                  "call_earning",
-                  "tip_received",
-                  "refund",
-                ].includes(tx.type);
-
-                const labelMap = {
-                  deposit: "Balance added",
-                  call_charge: "Call payment",
-                  call_earning: "Call earnings",
-                  tip_sent: "Tip sent",
-                  tip_received: "Tip received",
-                  withdrawal: "Withdrawal",
-                  refund: "Refund",
-                };
-
-                const label =
-                  labelMap[tx.type] ||
-                  tx.description ||
-                  "Wallet transaction";
-
-                return (
-                  <div
-                    key={tx.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 8,
-                      padding: "5px 0",
-                      borderBottom: `1px solid ${theme.border}`,
-                    }}
-                  >
-                    <div
-                      style={{
-                        minWidth: 0,
-                        fontSize: 9,
-                        fontWeight: 650,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {label}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 750,
-                        whiteSpace: "nowrap",
-                        color: positive ? "#22c55e" : theme.text,
-                      }}
-                    >
-                      {positive ? "+" : "-"}$
-                      {Number(tx.amount || 0).toFixed(2)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div
-          style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-            }}
-          >
-            Earnings
-          </div>
-
-          <div
-            style={{
-              marginTop: 5,
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: 9,
-            }}
-          >
-            <span style={{ opacity: 0.45 }}>Available</span>
-            <strong>
-              ${walletAvailableEarnings.toFixed(2)}
-            </strong>
-          </div>
-
-          <div
-            style={{
-              marginTop: 4,
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: 9,
-            }}
-          >
-            <span style={{ opacity: 0.45 }}>Pending</span>
-            <strong>
-              ${walletPendingEarnings.toFixed(2)}
-            </strong>
-          </div>
-        </div>
-
-        <div
-          style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 9,
-                  fontWeight: 700,
-                }}
-              >
-                Solana wallet
-              </div>
-
-              <div
-                style={{
-                  marginTop: 3,
-                  fontSize: 8,
-                  opacity: 0.38,
-                }}
-              >
-                Optional for future Web3 payouts
-              </div>
-            </div>
-
-            <span
-              style={{
-                fontSize: 8,
-                fontWeight: 700,
-                color: "#f59e0b",
-              }}
-            >
-              OPTIONAL
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveModal(null);
-              setShowNetwork(true);
-              setNetworkView("balance");
-            }}
-            style={{
-              marginTop: 7,
-              width: "100%",
-              height: 30,
-              borderRadius: 8,
-              border: `1px solid ${theme.border}`,
-              background: "transparent",
-              color: theme.text,
-              fontSize: 9,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Wallet options
-          </button>
-        </div>
-
-      </div>
-
-      <div
-        style={{
-          marginTop: 9,
-          paddingTop: 8,
-          borderTop: `1px solid ${theme.border}`,
-          fontSize: 8,
-          lineHeight: 1.45,
-          opacity: 0.28,
-          textAlign: "center",
-        }}
-      >
-        Cirql Balance is used for calls, tips and platform services.
-      </div>
-
-    </div>
-  </div>
-)}
-{activeModal === "profile" && (selectedHost || selectedProfile) && (
+      {activeModal === "profile" && (selectedHost || selectedProfile) && (
   <>
     {console.log("SELECTED HOST:", selectedHost)}
     {console.log("SELECTED PROFILE:", selectedProfile)}
@@ -2781,57 +1970,6 @@ useEffect(() => {
 }
 
 /* ================= STYLES ================= */
-
-
-const walletBalanceText = (theme) => ({
-  fontSize: 11,
-  fontWeight: 800,
-  letterSpacing: "-0.15px",
-  color: theme.text,
-  whiteSpace: "nowrap",
-});
-const walletButton = (theme) => ({
-  height: 32,
-  minWidth: 76,
-  padding: "0 10px",
-  borderRadius: 999,
-  border: `1px solid ${theme.border}`,
-  background:
-    theme.mode === "dark"
-      ? "rgba(255,255,255,.045)"
-      : "rgba(15,23,42,.035)",
-  color: theme.text,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 6,
-  cursor: "pointer",
-  fontSize: 11,
-  fontWeight: 800,
-  letterSpacing: "-.1px",
-});
-
-const walletSection = (theme) => ({
-  padding: "16px 0",
-  borderTop: `1px solid ${theme.border}`,
-});
-
-const walletSectionTitle = {
-  fontSize: 10,
-  fontWeight: 800,
-  textTransform: "uppercase",
-  letterSpacing: ".08em",
-  opacity: 0.5,
-};
-
-const walletRow = (theme) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  paddingTop: 12,
-  fontSize: 12,
-  color: theme.text,
-});
 
 const settingsWrap = {
   position: "relative",
@@ -3295,7 +2433,7 @@ const themeToggle = (theme) => ({
 
 const modeBtn = {
   position: "fixed",
-  top: 16,
+  top: 80,
   left: 16,
 
   width: 44,
@@ -3546,46 +2684,6 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -57,6 +57,10 @@ console.log("data =", data);
 console.log("error =", error);
 
     console.log("PROFILE DATA:", data);
+    console.log("PAYMENT METHODS FROM SUPABASE:", data?.payment_methods);
+    console.log("USDC FROM SUPABASE:", data?.payment_methods?.usdc);
+    console.log("VOICE FROM SUPABASE:", JSON.stringify(data?.payment_methods?.voice, null, 2));
+    console.log("VIDEO FROM SUPABASE:", JSON.stringify(data?.payment_methods?.video, null, 2));
     console.log("PROFILE ERROR:", error);
 
     setProfile(data || null);
@@ -99,6 +103,49 @@ console.log("error =", error);
           .filter(Boolean)
       : [];
 
+  // ---------------- PAYMENT DISPLAY ----------------
+  const paymentSettings = profile.payment_methods || {};
+
+  const freeEnabled = paymentSettings.free ?? false;
+  const tipsEnabled =
+    paymentSettings.acceptTips ??
+    paymentSettings.tips ??
+    false;
+
+  const requestPaymentEnabled =
+    paymentSettings.requestPayment ??
+    paymentSettings.request_payment ??
+    false;
+
+  const voiceEnabled =
+    paymentSettings.voice?.enabled ?? false;
+
+  const videoEnabled =
+    paymentSettings.video?.enabled ?? false;
+  const voiceRatePerMinute =
+    paymentSettings.voice?.ratePerMinute ?? 0.60;
+
+  const videoRatePerMinute =
+    paymentSettings.video?.ratePerMinute ?? 0.60;
+
+  const paymentCurrency =
+    paymentSettings.currency || "USD";
+
+  const usdcWallet =
+    paymentSettings.usdc ||
+    "";
+
+  const usdcNetwork =
+    paymentSettings.usdcNetwork ||
+    "Solana";
+
+  const hasCallRates =
+    voiceEnabled || videoEnabled;
+
+  const hasSupportOptions =
+    freeEnabled ||
+    tipsEnabled ||
+    requestPaymentEnabled;
     // ---------------- ACTIONS ----------------
   const handleMessage = () => {
     if (!sessionUser?.id) {
@@ -227,6 +274,51 @@ console.log("error =", error);
           )}
         </div>
 
+        {/* ================= CALL RATES ================= */}
+
+        {hasCallRates && (
+          <div style={paymentDisplayCard}>
+
+            <div style={paymentDisplayTitle}>
+              Call Rates
+            </div>
+
+            <div style={paymentDisplayRows}>
+
+              {voiceEnabled && (
+                <div style={paymentDisplayRow}>
+                  <div style={paymentDisplayLabel}>
+                    <Phone size={15} strokeWidth={1.8} />
+                    <span>Voice</span>
+                  </div>
+
+                  <div style={paymentDisplayValue}>
+                    {voiceRatePerMinute > 0
+                      ? `${paymentCurrency} ${voiceRatePerMinute.toFixed(2)} / min`
+                      : "Free"}
+                  </div>
+                </div>
+              )}
+
+              {videoEnabled && (
+                <div style={paymentDisplayRow}>
+                  <div style={paymentDisplayLabel}>
+                    <Video size={15} strokeWidth={1.8} />
+                    <span>Video</span>
+                  </div>
+
+                  <div style={paymentDisplayValue}>
+                    {videoRatePerMinute > 0
+                      ? `${paymentCurrency} ${videoRatePerMinute.toFixed(2)} / min`
+                      : "Free"}
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+          </div>
+        )}
         {/* SOCIAL / LINKS */}
         {profile.social_links?.[0] &&
           Object.values(profile.social_links[0]).some(Boolean) && (
@@ -591,6 +683,69 @@ const glassActionButton = {
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
   transition: "background 0.15s ease, border-color 0.15s ease, transform 0.15s ease",
 };
+const paymentDisplayCard = {
+  margin: "12px 16px 4px",
+  padding: "14px",
+  background: "rgba(255,255,255,0.035)",
+  border: "1px solid rgba(255,255,255,0.09)",
+  borderRadius: 13,
+};
+
+const paymentDisplayTitle = {
+  fontSize: 11,
+  fontWeight: 700,
+  color: "rgba(255,255,255,0.55)",
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+  marginBottom: 9,
+};
+
+const paymentDisplayRows = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 7,
+  marginBottom: 13,
+};
+
+const paymentDisplayRow = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 12,
+  padding: "9px 10px",
+  background: "rgba(255,255,255,0.035)",
+  border: "1px solid rgba(255,255,255,0.07)",
+  borderRadius: 10,
+};
+
+const paymentDisplayLabel = {
+  display: "flex",
+  alignItems: "center",
+  gap: 7,
+  color: "rgba(255,255,255,0.78)",
+  fontSize: 12,
+  fontWeight: 600,
+};
+
+const paymentDisplayValue = {
+  color: "rgba(255,255,255,0.95)",
+  fontSize: 12,
+  fontWeight: 700,
+  textAlign: "right",
+};
+
+const paymentPill = {
+  display: "inline-flex",
+  alignItems: "center",
+  width: "fit-content",
+  padding: "6px 9px",
+  borderRadius: 999,
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.08)",
+  color: "rgba(255,255,255,0.78)",
+  fontSize: 11,
+  fontWeight: 600,
+};
 const overlay = {
   position: "fixed",
   inset: 0,
@@ -624,6 +779,15 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
+
+
+
+
+
+
 
 
 

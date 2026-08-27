@@ -7,16 +7,15 @@ function HostCard({ host, onAction, onNext, onPrev, variant = "swipe" }) {
   if (!host) return null;
 
   const {
-  name,
-  alias,
-  avatar_url,
-  avatar: avatarImage,
-  banner_url,
-  topics,
-} = host;
+    name,
+    alias,
+    avatar,
+    banner,
+    topics,
+  } = host;
 
   const displayName = name || alias || "Unnamed";
-  const avatarSrc = avatar_url || avatarImage || "";
+  const avatarSrc = avatar || "";
 
   const flags = normalizeArray(host?.flags);
   const expressions = normalizeArray(
@@ -62,8 +61,8 @@ console.log("HOSTCARD normalized", expressions);
     <div style={container}>
 
       {/* BANNER */}
-      {banner_url ? (
-        <img src={banner_url} style={banner} />
+      {banner ? (
+        <img src={banner} style={bannerStyle} />
       ) : (
         <div style={fallbackBanner} />
       )}
@@ -271,7 +270,7 @@ const container = {
   background: "#000",
 };
 
-const banner = {
+const bannerStyle = {
   position: "absolute",
   inset: 0,
   width: "100%",
@@ -569,6 +568,10 @@ const flagBubble = {
 
   color: "#fff",
 };
+
+
+
+
 
 
 

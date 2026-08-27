@@ -1,0 +1,350 @@
+﻿
+[adventurer]
+    label: "Adventurer",
+    category: "Personality",
+    svg: "adventurer",
+    keywords: ["adventure", "adventurer", "exploration", "explorer", "outdoors"],
+----------------------------------------
+
+[animal_lover]
+    label: "Animal Lover",
+    category: "Interests",
+    svg: "animal_lover",
+    keywords: ["animals", "animal lover", "pets", "dogs", "cats", "wildlife"],
+----------------------------------------
+
+[anime]
+    label: "Anime",
+    category: "Entertainment",
+    svg: "gaming",
+----------------------------------------
+
+[artificial_intelligence]
+    label: "Artificial Intelligence",
+    category: "Technology",
+    svg: "artificial_intelligence",
+    keywords: ["ai", "artificial intelligence", "machine learning", "chatgpt"],
+----------------------------------------
+
+[australia]
+    label: "Australia",
+    category: "Countries",
+    svg: "australia",
+    keywords: ["australia", "australian", "aussie"],
+----------------------------------------
+
+[basketball]
+    label: "Basketball",
+    category: "Sports",
+    svg: "basketball",
+    keywords: ["basketball", "nba", "hoops", "sports"],
+----------------------------------------
+
+[bitcoin]
+    label: "Bitcoin",
+    category: "Technology",
+    svg: "bitcoin",
+    keywords: ["bitcoin", "btc", "crypto", "cryptocurrency"],
+----------------------------------------
+
+[books]
+    label: "Books",
+    category: "Lifestyle",
+    svg: "book",
+    keywords: ["books", "reading", "literature", "author", "bookworm"],
+----------------------------------------
+
+[brazil]
+    label: "Brazil",
+    category: "Countries",
+    svg: "brazil",
+    keywords: ["brazil", "brazilian", "south america"],
+----------------------------------------
+
+[cars]
+    label: "Cars",
+    category: "Lifestyle",
+    svg: "car",
+    keywords: ["cars", "car", "automotive", "motors", "driving"],
+----------------------------------------
+
+[cooking]
+    label: "Cooking",
+    category: "Lifestyle",
+    svg: "cooking",
+    keywords: ["cooking", "cook", "chef", "recipes", "kitchen"],
+----------------------------------------
+
+[creative]
+    label: "Creative",
+    category: "Creative",
+    svg: "art",
+    keywords: ["creative", "creativity", "design", "art", "ideas"],
+----------------------------------------
+
+[curious]
+    label: "Curious",
+    category: "Personality",
+    svg: "curious",
+    keywords: ["curious", "curiosity", "learning", "questions"],
+----------------------------------------
+
+[cybersecurity]
+    label: "Cybersecurity",
+    category: "Technology",
+    svg: "cybersecurity",
+    keywords: ["cybersecurity", "cyber security", "security", "infosec", "hacking"],
+----------------------------------------
+
+[data_science]
+    label: "Data Science",
+    category: "Technology",
+    svg: "data_science",
+    keywords: ["data science", "data", "analytics", "machine learning", "ai"],
+----------------------------------------
+
+[deep_thinker]
+    label: "Deep Thinker",
+    category: "Personality",
+    svg: "deep_thinker",
+    keywords: ["deep thinker", "deep thinking", "philosophy", "thinking", "ideas"],
+----------------------------------------
+
+[entrepreneur]
+    label: "Entrepreneur",
+    category: "Professional",
+    svg: "startup",
+    keywords: ["founder", "business", "startup"],
+----------------------------------------
+
+[ethereum]
+    label: "Ethereum",
+    category: "Technology",
+    svg: "ethereum",
+    keywords: ["ethereum", "eth", "crypto", "cryptocurrency", "blockchain"],
+----------------------------------------
+
+[extrovert]
+    label: "Extrovert",
+    category: "Personality",
+    svg: "extrovert",
+    keywords: ["extrovert", "extroverted", "social", "outgoing"],
+----------------------------------------
+
+[fashion]
+    label: "Fashion",
+    category: "Lifestyle",
+    svg: "fashion",
+    keywords: ["fashion", "style", "clothing", "designer", "streetwear"],
+----------------------------------------
+
+[fitness]
+    label: "Fitness",
+    category: "Lifestyle",
+    svg: "gym",
+    keywords: ["fitness", "gym", "workout", "health", "exercise"],
+----------------------------------------
+
+[food]
+    label: "Food",
+    category: "Lifestyle",
+    svg: "food",
+    keywords: ["food", "foodie", "cuisine", "restaurants", "eating"],
+----------------------------------------
+
+[football]
+    label: "Football",
+    category: "Sports",
+    svg: "sports",
+    keywords: ["football", "soccer", "soccer fan", "football fan", "sports"],
+----------------------------------------
+
+[funny]
+    label: "Funny",
+    category: "Personality",
+    svg: "funny",
+    keywords: ["funny", "humor", "humour", "comedy", "jokes", "lol"],
+----------------------------------------
+
+[ghana]
+    label: "Ghana",
+    category: "Countries",
+    svg: "ghana",
+    keywords: ["ghana", "ghanaian", "africa"],
+----------------------------------------
+
+[good_vibes]
+    label: "Good Vibes",
+    category: "Personality",
+    svg: "good_vibes",
+    keywords: ["good vibes", "positive", "positivity", "happy", "happiness", "energy"],
+----------------------------------------
+
+[hiking]
+    label: "Hiking",
+    category: "Lifestyle",
+    svg: "travel",
+    keywords: ["hiking", "hike", "mountains", "trails", "outdoors"],
+----------------------------------------
+
+[india]
+    label: "India",
+    category: "Countries",
+    svg: "india",
+    keywords: ["india", "indian", "asia"],
+----------------------------------------
+
+[introvert]
+    label: "Introvert",
+    category: "Personality",
+    svg: "introvert",
+    keywords: ["introvert", "introverted", "quiet", "solitude"],
+----------------------------------------
+
+[japan]
+    label: "Japan",
+    category: "Countries",
+    svg: "japan",
+    keywords: ["japan", "japanese", "tokyo", "asia"],
+----------------------------------------
+
+[kenya]
+    label: "Kenya",
+    category: "Countries",
+    svg: "kenya",
+    keywords: ["kenya", "kenyan", "africa"],
+----------------------------------------
+
+[movies]
+    label: "Movies",
+    category: "Interests",
+    svg: "movies",
+    keywords: ["movies", "film", "films", "cinema", "tv"],
+----------------------------------------
+
+[nature_lover]
+    label: "Nature Lover",
+    category: "Lifestyle",
+    svg: "nature_lover",
+    keywords: ["nature", "nature lover", "outdoors", "environment", "wildlife"],
+----------------------------------------
+
+[networking]
+    label: "Networking",
+    category: "Professional",
+    svg: "world",
+----------------------------------------
+
+[nigeria]
+    label: "Nigeria",
+    category: "Countries",
+    svg: "nigeria",
+    keywords: ["nigeria", "nigerian", "africa"],
+----------------------------------------
+
+[open_source]
+    label: "Open Source",
+    category: "Technology",
+    svg: "open_source",
+    keywords: ["open source", "opensource", "github", "software", "coding"],
+----------------------------------------
+
+[opensource]
+    label: "Open Source",
+    category: "Technology",
+    svg: "developer",
+----------------------------------------
+
+[photography]
+    label: "Photography",
+    category: "Interests",
+    svg: "photography",
+    keywords: ["photography", "photographer", "photos", "camera"],
+----------------------------------------
+
+[plants]
+    label: "Plants",
+    category: "Lifestyle",
+    svg: "world",
+----------------------------------------
+
+[privacy]
+    label: "Privacy",
+    category: "Technology",
+    svg: "linux",
+----------------------------------------
+
+[running]
+    label: "Running",
+    category: "Sports",
+    svg: "running",
+    keywords: ["running", "runner", "marathon", "jogging", "fitness"],
+----------------------------------------
+
+[south_africa_art]
+    label: "South Africa",
+    category: "Countries",
+    svg: "south_africa",
+    keywords: ["south africa", "south african", "africa", "mzansi"],
+----------------------------------------
+
+[surf]
+    label: "Surfing",
+    category: "Lifestyle",
+    svg: "surf",
+----------------------------------------
+
+[surfing]
+    label: "Surfing",
+    category: "Lifestyle",
+    svg: "surfing",
+    keywords: ["surfing", "surf", "surfer", "ocean", "waves"],
+----------------------------------------
+
+[tea]
+    label: "Tea",
+    category: "Lifestyle",
+    svg: "tea",
+    keywords: ["tea", "teahouse", "chai", "herbal tea"],
+----------------------------------------
+
+[tennis]
+    label: "Tennis",
+    category: "Sports",
+    svg: "tennis",
+    keywords: ["tennis", "tennis player", "racket", "sports"],
+----------------------------------------
+
+[united_kingdom]
+    label: "United Kingdom",
+    category: "Countries",
+    svg: "united_kingdom",
+    keywords: ["uk", "united kingdom", "britain", "british", "england"],
+----------------------------------------
+
+[usa_art]
+    label: "USA",
+    category: "Countries",
+    svg: "usa",
+    keywords: ["usa", "united states", "america", "american"],
+----------------------------------------
+
+[vanlife]
+    label: "Van Life",
+    category: "Lifestyle",
+    svg: "travel",
+----------------------------------------
+
+[web3]
+    label: "Web3",
+    category: "Technology",
+    svg: "web3",
+    keywords: ["web3", "web 3", "decentralized", "decentralisation", "blockchain"],
+----------------------------------------
+
+[yoga]
+    label: "Yoga",
+    category: "Lifestyle",
+    svg: "yoga",
+    keywords: ["yoga", "meditation", "mindfulness", "wellness"],
+----------------------------------------

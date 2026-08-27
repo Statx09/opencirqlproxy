@@ -488,6 +488,14 @@ keywords: ["bat", "animal", "night", "wildlife"],
     keywords: ["usa", "united states", "america", "american"],
   },
 {
+    id: "surfing",
+    label: "Surfing",
+    category: "Lifestyle",
+    svg: "surfing",
+    color: "#8B5CF6",
+    keywords: ["surfing", "surf", "surfer", "ocean", "waves"],
+  },
+{
     id: "funny",
     label: "Funny",
     category: "Personality",
@@ -959,7 +967,6 @@ export function searchExpressions(query) {
       )
   );
 }
-
 
 
 

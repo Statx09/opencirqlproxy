@@ -1,19 +1,43 @@
-﻿import {
+import {
+  Coffee,
+  Plane,
+  Music,
+  Gamepad2,
+  Code2,
+  Camera,
+  BookOpen,
+  GraduationCap,
+  Dumbbell,
+  Bike,
+  Car,
+  Dog,
+  Cat,
+  Film,
+  Pizza,
+  Mic,
+  Headphones,
+  Briefcase,
+  Globe,
+  Heart,
+  Cpu,
+  Database,
+  Cloud,
+  Terminal,
+  Wrench,
+  Trophy,
+  Palette,
   PenTool,
+  Laptop,
+  Monitor,
+  Rocket,
 } from "lucide-react";
+
+import AIIcon from "./svg/ai";
+import CryptoIcon from "./svg/crypto";
+import RoboticsIcon from "./svg/robotics";
 import ManchesterUnitedIcon from "./svg/ManchesterUnitedIcon";
 
 export const iconMap = {
-  inspirational_quote: {
-    type: "image",
-    src: "/expressions/inspirational_quote.svg",
-    color: "#8B5CF6",
-  },  youtube: {
-    type: "image",
-    src: "/expressions/youtube.svg",
-    color: "#FF0000",
-  },
-
 manchester_united: {
     type: "image",
     src: "/expressions/manchester-united.svg",
@@ -52,7 +76,7 @@ barcelona: {
 
 liverpool: {
   type: "image",
-  src: "/expressions/liverpool.svg",
+  src: "/src/components/expressions/badges/liverpool.svg",
   color: "#C8102E",
 },
 
@@ -66,6 +90,171 @@ liverpool: {
     type: "image",
     src: "/expressions/prismatic_monarch_butterfly_ii.svg",
     color: "#8B5CF6",
+  },
+
+  ai: {
+    component: AIIcon,
+    color: "#8B5CF6",
+  },
+
+  crypto: {
+    component: CryptoIcon,
+    color: "#F7931A",
+  },
+
+  robotics: {
+    component: RoboticsIcon,
+    color: "#EC4899",
+  },
+
+  coffee: {
+    component: Coffee,
+    color: "#C58A4A",
+  },
+
+  travel: {
+    component: Plane,
+    color: "#38BDF8",
+  },
+
+  music: {
+    component: Music,
+    color: "#EC4899",
+  },
+
+  gaming: {
+    component: Gamepad2,
+    color: "#22C55E",
+  },
+
+  developer: {
+    component: Code2,
+    color: "#60A5FA",
+  },
+
+  teacher: {
+    component: GraduationCap,
+    color: "#10B981",
+  },
+
+  camera: {
+    component: Camera,
+    color: "#0EA5E9",
+  },
+
+  book: {
+    component: BookOpen,
+    color: "#F59E0B",
+  },
+
+  gym: {
+    component: Dumbbell,
+    color: "#EF4444",
+  },
+
+  bicycle: {
+    component: Bike,
+    color: "#10B981",
+  },
+
+  car: {
+    component: Car,
+    color: "#3B82F6",
+  },
+
+  dog: {
+    component: Dog,
+    color: "#F59E0B",
+  },
+
+  cat: {
+    component: Cat,
+    color: "#A855F7",
+  },
+
+  movie: {
+    component: Film,
+    color: "#F43F5E",
+  },
+
+  pizza: {
+    component: Pizza,
+    color: "#F97316",
+  },
+
+  microphone: {
+    component: Mic,
+    color: "#F43F5E",
+  },
+
+  headphones: {
+    component: Headphones,
+    color: "#8B5CF6",
+  },
+
+  business: {
+    component: Briefcase,
+    color: "#0EA5E9",
+  },
+
+  world: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  heart: {
+    component: Heart,
+    color: "#EF4444",
+  },
+
+  cpu: {
+    component: Cpu,
+    color: "#8B5CF6",
+  },
+
+  database: {
+    component: Database,
+    color: "#6366F1",
+  },
+
+  cloud: {
+    component: Cloud,
+    color: "#38BDF8",
+  },
+
+  linux: {
+    component: Terminal,
+    color: "#FACC15",
+  },
+
+  tools: {
+    component: Wrench,
+    color: "#64748B",
+  },
+
+  sports: {
+    component: Trophy,
+    color: "#EAB308",
+  },
+
+  art: {
+    component: Palette,
+    color: "#EC4899",
+  },
+
+  design: {
+    component: PenTool,
+    color: "#A855F7",
+  },
+
+  laptop: {
+    component: Laptop,
+    color: "#3B82F6",
+  },
+
+  computer: {
+    component: Monitor,
+    color: "#60A5FA",
   },
 
 night_owl: {
@@ -85,6 +274,11 @@ peace_for_palestine: {
   src: "/expressions/peace-for-palestine-vector-decal.svg",
   color: "#22C55E",
 },
+
+  startup: {
+    component: Rocket,
+    color: "#F97316",
+  },
 
   american_trump: {
     type: "image",
@@ -280,121 +474,6 @@ peace_for_palestine: {
     src: "/expressions/organic_food_label.svg",
     color: "#22C55E",
   },
-
-  cannabis: {
-    type: "image",
-    src: "/expressions/cannabis.png",
-    color: "#22C55E",
-  },
-  dope_poster: {
-    type: "image",
-    src: "/expressions/dope_poster.png",
-    color: "#8B5CF6",
-  },
-  bong_marijuana_prismatic: {
-    type: "image",
-    src: "/expressions/bong_marijuana_prismatic.png",
-    color: "#22C55E",
-  },
-  cross_and_heart: {
-    type: "image",
-    src: "/expressions/cross_and_heart.png",
-    color: "#EF4444",
-  },
-  bible_vector_image: {
-    type: "image",
-    src: "/expressions/bible_vector_image.png",
-    color: "#F59E0B",
-  },
-  jesus_surfing: {
-    type: "image",
-    src: "/expressions/jesus_surfing.png",
-    color: "#38BDF8",
-  },
-  muslim_symbol: {
-    type: "image",
-    src: "/expressions/muslim_symbol.png",
-    color: "#22C55E",
-  },
-  bob_marley: {
-    type: "image",
-    src: "/expressions/bob_marley.png",
-    color: "#22C55E",
-  },
-  rastafarian_head: {
-    type: "image",
-    src: "/expressions/rastafarian_head.png",
-    color: "#F59E0B",
-  },
-  lotus_blossom: {
-    type: "image",
-    src: "/expressions/lotus_blossom.png",
-    color: "#EC4899",
-  },
-  graffiti_cats: {
-    type: "image",
-    src: "/expressions/graffiti_cats.png",
-    color: "#A855F7",
-  },
-  golden_royal_crown: {
-    type: "image",
-    src: "/expressions/golden_royal_crown.png",
-    color: "#F59E0B",
-  },
-  hugs_and_kisses: {
-    type: "image",
-    src: "/expressions/hugs_and_kisses.png",
-    color: "#EC4899",
-  },
-  south_africa: {
-    type: "image",
-    src: "/expressions/south_africa.png",
-    color: "#22C55E",
-  },
-  france: {
-    type: "image",
-    src: "/expressions/france.png",
-    color: "#2563EB",
-  },
-  spain: {
-    type: "image",
-    src: "/expressions/spain.png",
-    color: "#EF4444",
-  },
-  netherlands: {
-    type: "image",
-    src: "/expressions/netherlands.png",
-    color: "#EF4444",
-  },
-  usa: {
-    type: "image",
-    src: "/expressions/usa.png",
-    color: "#2563EB",
-  },
-
-  funny: {
-    type: "image",
-    src: "/expressions/laughing-out-loud.svg",
-    color: "#8B5CF6",
-  },
-
-  surf: {
-    type: "image",
-    src: "/expressions/surf.svg",
-    color: "#8B5CF6",
-  },
-
-  surfing: {
-    type: "image",
-    src: "/expressions/surfing.svg",
-    color: "#8B5CF6",
-  },
 };
-
-
-
-
-
-
 
 

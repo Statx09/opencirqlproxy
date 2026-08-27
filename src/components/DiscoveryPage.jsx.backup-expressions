@@ -1,6 +1,5 @@
 ﻿import React, { useMemo, useState } from "react";
 import TopicSearchBar from "./TopicSearchBar";
-import { expressions } from "./expressions/expressions";
 import MiniHostCard from "./MiniHostCard";
 import HeroCallCard from "./HeroCallCard";
 import { normalizeHost } from "../utils/normalizeHost";
@@ -93,8 +92,7 @@ export default function DiscoveryPage({
       const matchesSearch =
         name.includes(q) ||
         topics.includes(q) ||
-        intents.includes(q) ||
-        (h.expressions || []).some((e) => String(e).toLowerCase().includes(q));
+        intents.includes(q);
 
       if (!matchesSearch) return false;
 
@@ -365,9 +363,6 @@ const topButton = (theme) => ({
     "transform .18s ease, box-shadow .18s ease, background .18s ease",
   WebkitTapHighlightColor: "transparent",
 });
-
-
-
 
 
 

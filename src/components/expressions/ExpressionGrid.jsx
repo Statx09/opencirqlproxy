@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+﻿import React, { useMemo } from "react";
 import ExpressionIcon from "./ExpressionIcon";
 import { expressions } from "./expressions";
 
@@ -77,6 +77,7 @@ export default function ExpressionGrid({
           >
             <ExpressionIcon
               type={item.svg}
+              src={item.src}
               size={26}
               color={item.color}
             />
@@ -97,3 +98,5 @@ export default function ExpressionGrid({
     </div>
   );
 }
+
+

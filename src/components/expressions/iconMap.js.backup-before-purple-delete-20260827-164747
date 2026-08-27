@@ -1,19 +1,43 @@
 ﻿import {
+  Coffee,
+  Plane,
+  Music,
+  Gamepad2,
+  Code2,
+  Camera,
+  BookOpen,
+  GraduationCap,
+  Dumbbell,
+  Bike,
+  Car,
+  Dog,
+  Cat,
+  Film,
+  Pizza,
+  Mic,
+  Headphones,
+  Briefcase,
+  Globe,
+  Heart,
+  Cpu,
+  Database,
+  Cloud,
+  Terminal,
+  Wrench,
+  Trophy,
+  Palette,
   PenTool,
+  Laptop,
+  Monitor,
+  Rocket,
 } from "lucide-react";
+
+import AIIcon from "./svg/ai";
+import CryptoIcon from "./svg/crypto";
+import RoboticsIcon from "./svg/robotics";
 import ManchesterUnitedIcon from "./svg/ManchesterUnitedIcon";
 
 export const iconMap = {
-  inspirational_quote: {
-    type: "image",
-    src: "/expressions/inspirational_quote.svg",
-    color: "#8B5CF6",
-  },  youtube: {
-    type: "image",
-    src: "/expressions/youtube.svg",
-    color: "#FF0000",
-  },
-
 manchester_united: {
     type: "image",
     src: "/expressions/manchester-united.svg",
@@ -68,6 +92,171 @@ liverpool: {
     color: "#8B5CF6",
   },
 
+  ai: {
+    component: AIIcon,
+    color: "#8B5CF6",
+  },
+
+  crypto: {
+    component: CryptoIcon,
+    color: "#F7931A",
+  },
+
+  robotics: {
+    component: RoboticsIcon,
+    color: "#EC4899",
+  },
+
+  coffee: {
+    component: Coffee,
+    color: "#C58A4A",
+  },
+
+  travel: {
+    component: Plane,
+    color: "#38BDF8",
+  },
+
+  music: {
+    component: Music,
+    color: "#EC4899",
+  },
+
+  gaming: {
+    component: Gamepad2,
+    color: "#22C55E",
+  },
+
+  developer: {
+    component: Code2,
+    color: "#60A5FA",
+  },
+
+  teacher: {
+    component: GraduationCap,
+    color: "#10B981",
+  },
+
+  camera: {
+    component: Camera,
+    color: "#0EA5E9",
+  },
+
+  book: {
+    component: BookOpen,
+    color: "#F59E0B",
+  },
+
+  gym: {
+    component: Dumbbell,
+    color: "#EF4444",
+  },
+
+  bicycle: {
+    component: Bike,
+    color: "#10B981",
+  },
+
+  car: {
+    component: Car,
+    color: "#3B82F6",
+  },
+
+  dog: {
+    component: Dog,
+    color: "#F59E0B",
+  },
+
+  cat: {
+    component: Cat,
+    color: "#A855F7",
+  },
+
+  movie: {
+    component: Film,
+    color: "#F43F5E",
+  },
+
+  pizza: {
+    component: Pizza,
+    color: "#F97316",
+  },
+
+  microphone: {
+    component: Mic,
+    color: "#F43F5E",
+  },
+
+  headphones: {
+    component: Headphones,
+    color: "#8B5CF6",
+  },
+
+  business: {
+    component: Briefcase,
+    color: "#0EA5E9",
+  },
+
+  world: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  heart: {
+    component: Heart,
+    color: "#EF4444",
+  },
+
+  cpu: {
+    component: Cpu,
+    color: "#8B5CF6",
+  },
+
+  database: {
+    component: Database,
+    color: "#6366F1",
+  },
+
+  cloud: {
+    component: Cloud,
+    color: "#38BDF8",
+  },
+
+  linux: {
+    component: Terminal,
+    color: "#FACC15",
+  },
+
+  tools: {
+    component: Wrench,
+    color: "#64748B",
+  },
+
+  sports: {
+    component: Trophy,
+    color: "#EAB308",
+  },
+
+  art: {
+    component: Palette,
+    color: "#EC4899",
+  },
+
+  design: {
+    component: PenTool,
+    color: "#A855F7",
+  },
+
+  laptop: {
+    component: Laptop,
+    color: "#3B82F6",
+  },
+
+  computer: {
+    component: Monitor,
+    color: "#60A5FA",
+  },
+
 night_owl: {
   type: "image",
   src: "/expressions/night-owl.svg",
@@ -85,6 +274,11 @@ peace_for_palestine: {
   src: "/expressions/peace-for-palestine-vector-decal.svg",
   color: "#22C55E",
 },
+
+  startup: {
+    component: Rocket,
+    color: "#F97316",
+  },
 
   american_trump: {
     type: "image",
@@ -372,6 +566,166 @@ peace_for_palestine: {
     color: "#2563EB",
   },
 
+  adventurer: {
+    component: Plane,
+    color: "#38BDF8",
+  },
+
+  animal_lover: {
+    component: Dog,
+    color: "#F59E0B",
+  },
+
+  artificial_intelligence: {
+    component: AIIcon,
+    color: "#8B5CF6",
+  },
+
+  australia: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  basketball: {
+    component: Trophy,
+    color: "#EAB308",
+  },
+
+  bitcoin: {
+    component: CryptoIcon,
+    color: "#F7931A",
+  },
+
+  brazil: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  cooking: {
+    component: Pizza,
+    color: "#F97316",
+  },
+
+  curious: {
+    component: Heart,
+    color: "#EF4444",
+  },
+
+  cybersecurity: {
+    component: Terminal,
+    color: "#FACC15",
+  },
+
+  data_science: {
+    component: Database,
+    color: "#6366F1",
+  },
+
+  deep_thinker: {
+    component: Cloud,
+    color: "#38BDF8",
+  },
+
+  ethereum: {
+    component: CryptoIcon,
+    color: "#8B5CF6",
+  },
+
+  extrovert: {
+    component: Mic,
+    color: "#F43F5E",
+  },
+
+  fashion: {
+    component: Palette,
+    color: "#EC4899",
+  },
+
+  food: {
+    component: Pizza,
+    color: "#F97316",
+  },
+
+  ghana: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  good_vibes: {
+    component: Heart,
+    color: "#EF4444",
+  },
+
+  india: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  introvert: {
+    component: Headphones,
+    color: "#8B5CF6",
+  },
+
+  japan: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  kenya: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  movies: {
+    component: Film,
+    color: "#F43F5E",
+  },
+
+  nature_lover: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  nigeria: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  open_source: {
+    component: Code2,
+    color: "#60A5FA",
+  },
+
+  photography: {
+    component: Camera,
+    color: "#0EA5E9",
+  },
+
+  running: {
+    component: Bike,
+    color: "#10B981",
+  },
+
+  tennis: {
+    component: Trophy,
+    color: "#EAB308",
+  },
+
+  united_kingdom: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  web3: {
+    component: Globe,
+    color: "#22C55E",
+  },
+
+  yoga: {
+    component: Heart,
+    color: "#EF4444",
+  },
+
   funny: {
     type: "image",
     src: "/expressions/laughing-out-loud.svg",
@@ -390,11 +744,5 @@ peace_for_palestine: {
     color: "#8B5CF6",
   },
 };
-
-
-
-
-
-
 
 

@@ -106,9 +106,11 @@ export default function ExpressionChip({
       <ExpressionIcon
         type={expression.svg}
         src={expression.src}
-        size={22}
+        size={26}
         color={expression.color}
       />
     </button>
   );
 }
+
+

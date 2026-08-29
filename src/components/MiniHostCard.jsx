@@ -156,7 +156,7 @@ console.log("BANNER:", h.banner);
 <ExpressionBadges
   badges={h.expressions || []}
   max={5}
-  size={32}
+  size={36}
 />
 
         {/* INTENTS */}
@@ -363,7 +363,7 @@ const identityStack = {
 
 const name = {
   fontWeight: 700,
-  fontSize: 14,
+  fontSize: 13,
   whiteSpace: "nowrap",
   overflow: "hidden",
   textOverflow: "ellipsis",
@@ -372,7 +372,7 @@ const name = {
 };
 
 const headline = {
-  fontSize: 13,
+  fontSize: 12,
   fontWeight: 500,
   fontFamily: "Georgia, 'Times New Roman', serif",
   fontStyle: "italic",
@@ -535,6 +535,9 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
+
+
 
 
 

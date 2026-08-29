@@ -123,6 +123,7 @@ console.log("HOSTCARD normalized", expressions);
   <ExpressionBadges
     badges={expressions}
     max={5}
+    size={56}
   />
 
   {flags.map((flag) => (
@@ -568,6 +569,7 @@ const flagBubble = {
 
   color: "#fff",
 };
+
 
 
 

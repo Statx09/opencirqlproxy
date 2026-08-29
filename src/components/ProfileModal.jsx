@@ -232,6 +232,7 @@ console.log("error =", error);
       badges={expressions}
       max={999}
       showLabels
+      size={56}
     />
   </div>
 )}
@@ -779,6 +780,7 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
 
 
 

@@ -1,4 +1,4 @@
-ï»¿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -437,7 +437,7 @@ if (!user?.id) {
 
           if (message.event === "call_accepted") {
             console.log(
-              "CALL ACCEPTED REALTIME â€” OPENING CALL STUDIO:",
+              "CALL ACCEPTED REALTIME — OPENING CALL STUDIO:",
               message
             );
 
@@ -1080,7 +1080,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION â€” INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION — INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1324,7 +1324,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          Earnings enabled Â· USDC payouts
+          Earnings enabled · USDC payouts
         </div>
       </div>
 
@@ -1366,7 +1366,7 @@ useEffect(() => {
               opacity: 0.48,
             }}
           >
-            Lifetime access Â· Founder recognition
+            Lifetime access · Founder recognition
           </span>
         </span>
 
@@ -1562,7 +1562,7 @@ useEffect(() => {
         textTransform: "uppercase",
       }}
     >
-      Balance Â· Earnings Â· USDC
+      Balance · Earnings · USDC
     </div>
 
     <div style={networkDivider}></div>
@@ -1963,7 +1963,7 @@ useEffect(() => {
                   fontSize: "18px",
                 }}
               >
-                ðŸ“¹
+                ??
               </div>
             )}
           </div>
@@ -2013,7 +2013,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            Ã—
+            ×
           </button>
         </div>
       )}
@@ -2110,7 +2110,7 @@ useEffect(() => {
                       fontSize: "23px",
                     }}
                   >
-                    ðŸ“¹
+                    ??
                   </div>
                 )}
               </div>
@@ -2399,7 +2399,7 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          Ã—
+          ×
         </button>
       </div>
 
@@ -2435,9 +2435,7 @@ useEffect(() => {
 
         <button
           type="button"
-          onClick={() => {
-            console.log("ADD BALANCE â€” MoonPay integration pending");
-          }}
+          onClick={async () => { const r = await fetch("/api/snapscan-create-payment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, amount: 100 }) }); const { paymentUrl } = await r.json(); if (paymentUrl) window.location.href = paymentUrl; }}
           style={{
             marginTop: 10,
             width: "100%",
@@ -3546,6 +3544,8 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
 
 
 

@@ -19,7 +19,7 @@ export default function ChatsTab({
       .from("messages")
       .select("*")
       .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-      .eq("event", "message")
+      .is("event", null)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -37,7 +37,12 @@ export default function ChatsTab({
 
       if (map.has(otherId)) continue;
 
-      const host = hosts.find((h) => h.user_id === otherId);
+      const host = hosts.find(
+        (h) =>
+          h.user_id === otherId ||
+          h.profile_id === otherId ||
+          h.id === otherId
+      );
 
       if (!host) continue;
 
@@ -46,8 +51,6 @@ export default function ChatsTab({
         preview: msg.text || "",
       });
     }
-
-    setConversations([...map.values()]);
   }, [user?.id, hosts]);
 
   useEffect(() => {
@@ -71,7 +74,7 @@ export default function ChatsTab({
         (payload) => {
           const message = payload.new;
 
-          if (message.event !== "message") {
+          if (message.event !== null) {
             return;
           }
 
@@ -204,6 +207,7 @@ export default function ChatsTab({
     </div>
   );
 }
+
 
 
 

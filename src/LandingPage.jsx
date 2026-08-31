@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -40,6 +40,8 @@ export default function LandingPage({ user }) {
   const [showNetwork, setShowNetwork] = useState(false);
 const [showSettings, setShowSettings] = useState(false);
 const [walletBalance, setWalletBalance] = useState(0);
+const [showPaymentOverlay, setShowPaymentOverlay] = useState(false);
+const [paymentAmount, setPaymentAmount] = useState(100);
 
 const loadWalletBalance = useCallback(async () => {
   if (!user?.id) {
@@ -359,7 +361,7 @@ useEffect(() => {
           });
 
           if (!notification.read_at) {
-            loadNotifications();
+            setUnreadNotificationCount((count) => count + 1);
           }
         }
       )
@@ -437,7 +439,7 @@ if (!user?.id) {
 
           if (message.event === "call_accepted") {
             console.log(
-              "CALL ACCEPTED REALTIME � OPENING CALL STUDIO:",
+              "CALL ACCEPTED REALTIME ï¿½ OPENING CALL STUDIO:",
               message
             );
 
@@ -547,17 +549,17 @@ console.log(
         (payload) => {
           const message = payload.new;
 
-          if (message.event !== null) {
+          // Only normal chat messages affect the message badge.
+          if (message.event !== null || message.read_at) {
             return;
           }
 
-          if (!message.read_at) {
-            loadUnreadMessages();
-          }
+          // Update immediately without another database query.
+          setUnreadMessageCount((count) => count + 1);
         }
       )
       .subscribe((status) => {
-console.log("MESSAGES REALTIME:", status);
+        console.log("MESSAGES REALTIME:", status);
       });
 
     return () => {
@@ -1080,7 +1082,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION � INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1324,7 +1326,7 @@ useEffect(() => {
             opacity: 0.48,
           }}
         >
-          Earnings enabled � USDC payouts
+          Earnings enabled ï¿½ USDC payouts
         </div>
       </div>
 
@@ -1366,7 +1368,7 @@ useEffect(() => {
               opacity: 0.48,
             }}
           >
-            Lifetime access � Founder recognition
+            Lifetime access ï¿½ Founder recognition
           </span>
         </span>
 
@@ -1562,7 +1564,7 @@ useEffect(() => {
         textTransform: "uppercase",
       }}
     >
-      Balance � Earnings � USDC
+      Balance ï¿½ Earnings ï¿½ USDC
     </div>
 
     <div style={networkDivider}></div>
@@ -2013,7 +2015,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            �
+            ï¿½
           </button>
         </div>
       )}
@@ -2364,7 +2366,7 @@ useEffect(() => {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "2px 2px 9px",
+          padding: "2px 2px 12px",
         }}
       >
         <div
@@ -2399,21 +2401,26 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          �
+          ×
         </button>
       </div>
 
       <div
         style={{
-          padding: "9px 2px 11px",
-          borderTop: `1px solid ${theme.border}`,
+          padding: "14px 13px",
+          borderRadius: 12,
+          background:
+            theme.mode === "dark"
+              ? "rgba(255,255,255,.045)"
+              : "rgba(15,23,42,.035)",
+          border: `1px solid ${theme.border}`,
         }}
       >
         <div
           style={{
             fontSize: 9,
             fontWeight: 650,
-            opacity: 0.42,
+            opacity: 0.45,
             textTransform: "uppercase",
             letterSpacing: ".07em",
           }}
@@ -2423,11 +2430,11 @@ useEffect(() => {
 
         <div
           style={{
-            marginTop: 3,
-            fontSize: 25,
+            marginTop: 5,
+            fontSize: 28,
             lineHeight: 1,
             fontWeight: 800,
-            letterSpacing: "-.7px",
+            letterSpacing: "-.8px",
           }}
         >
           ${walletBalance.toFixed(2)}
@@ -2435,13 +2442,13 @@ useEffect(() => {
 
         <button
           type="button"
-          onClick={async () => { const r = await fetch("/api/snapscan-create-payment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, amount: 100 }) }); const { paymentUrl } = await r.json(); if (paymentUrl) window.location.href = paymentUrl; }}
+          onClick={() => setShowPaymentOverlay(true)}
           style={{
-            marginTop: 10,
+            marginTop: 12,
             width: "100%",
             height: 34,
-            borderRadius: 9,
-            border: "1px solid rgba(34,197,94,.3)",
+            borderRadius: 8,
+            border: "1px solid rgba(34,197,94,.32)",
             background: "rgba(34,197,94,.09)",
             color: "#22c55e",
             fontSize: 10,
@@ -2455,241 +2462,254 @@ useEffect(() => {
 
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 6,
+          marginTop: 8,
+          padding: "11px 12px",
+          borderRadius: 11,
+          border: `1px solid ${theme.border}`,
+          background: "rgba(255,255,255,.025)",
         }}
       >
-
         <div
           style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
           <div
             style={{
               fontSize: 9,
               fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: ".06em",
+              opacity: 0.48,
             }}
           >
-            Recent activity
+            Host earnings
           </div>
 
-          {walletTransactions.length === 0 ? (
-            <div
-              style={{
-                marginTop: 5,
-                fontSize: 9,
-                lineHeight: 1.4,
-                opacity: 0.4,
-              }}
-            >
-              No transactions yet
-            </div>
-          ) : (
-            <div style={{ marginTop: 5 }}>
-              {walletTransactions.slice(0, 3).map((tx) => {
-                const positive = [
-                  "deposit",
-                  "call_earning",
-                  "tip_received",
-                  "refund",
-                ].includes(tx.type);
-
-                const labelMap = {
-                  deposit: "Balance added",
-                  call_charge: "Call payment",
-                  call_earning: "Call earnings",
-                  tip_sent: "Tip sent",
-                  tip_received: "Tip received",
-                  withdrawal: "Withdrawal",
-                  refund: "Refund",
-                };
-
-                const label =
-                  labelMap[tx.type] ||
-                  tx.description ||
-                  "Wallet transaction";
-
-                return (
-                  <div
-                    key={tx.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 8,
-                      padding: "5px 0",
-                      borderBottom: `1px solid ${theme.border}`,
-                    }}
-                  >
-                    <div
-                      style={{
-                        minWidth: 0,
-                        fontSize: 9,
-                        fontWeight: 650,
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {label}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 9,
-                        fontWeight: 750,
-                        whiteSpace: "nowrap",
-                        color: positive ? "#22c55e" : theme.text,
-                      }}
-                    >
-                      {positive ? "+" : "-"}$
-                      {Number(tx.amount || 0).toFixed(2)}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <span
+            style={{
+              fontSize: 8,
+              fontWeight: 750,
+              color: "#22c55e",
+            }}
+          >
+            USDC
+          </span>
         </div>
 
         <div
           style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
-            border: `1px solid ${theme.border}`,
+            marginTop: 7,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          <div
+          <strong
             style={{
-              fontSize: 9,
-              fontWeight: 700,
+              fontSize: 19,
+              lineHeight: 1,
+              fontWeight: 800,
+              letterSpacing: "-.4px",
             }}
           >
-            Earnings
-          </div>
+            ${walletAvailableEarnings.toFixed(2)}
+          </strong>
 
-          <div
+          <span
             style={{
-              marginTop: 5,
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: 9,
+              fontSize: 8,
+              opacity: 0.38,
             }}
           >
-            <span style={{ opacity: 0.45 }}>Available</span>
-            <strong>
-              ${walletAvailableEarnings.toFixed(2)}
-            </strong>
-          </div>
-
-          <div
-            style={{
-              marginTop: 4,
-              display: "flex",
-              justifyContent: "space-between",
-              fontSize: 9,
-            }}
-          >
-            <span style={{ opacity: 0.45 }}>Pending</span>
-            <strong>
-              ${walletPendingEarnings.toFixed(2)}
-            </strong>
-          </div>
+            available for payout
+          </span>
         </div>
 
-        <div
+        <button
+          type="button"
+          onClick={() =>
+            console.log("WITHDRAW USDC — payout integration pending")
+          }
           style={{
-            padding: "9px 10px",
-            borderRadius: 9,
-            background: "rgba(255,255,255,.035)",
+            marginTop: 10,
+            width: "100%",
+            height: 31,
+            borderRadius: 8,
             border: `1px solid ${theme.border}`,
+            background: "transparent",
+            color: theme.text,
+            fontSize: 9,
+            fontWeight: 700,
+            cursor: "pointer",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <div>
-              <div
-                style={{
-                  fontSize: 9,
-                  fontWeight: 700,
-                }}
-              >
-                Solana wallet
-              </div>
-
-              <div
-                style={{
-                  marginTop: 3,
-                  fontSize: 8,
-                  opacity: 0.38,
-                }}
-              >
-                Optional for future Web3 payouts
-              </div>
-            </div>
-
-            <span
-              style={{
-                fontSize: 8,
-                fontWeight: 700,
-                color: "#f59e0b",
-              }}
-            >
-              OPTIONAL
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveModal(null);
-              setShowNetwork(true);
-              setNetworkView("balance");
-            }}
-            style={{
-              marginTop: 7,
-              width: "100%",
-              height: 30,
-              borderRadius: 8,
-              border: `1px solid ${theme.border}`,
-              background: "transparent",
-              color: theme.text,
-              fontSize: 9,
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Wallet options
-          </button>
-        </div>
-
+          Withdraw USDC
+        </button>
       </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          setActiveModal(null);
+          setShowNetwork(true);
+          setNetworkView("balance");
+        }}
+        style={{
+          marginTop: 8,
+          width: "100%",
+          height: 31,
+          borderRadius: 8,
+          border: `1px solid ${theme.border}`,
+          background: "transparent",
+          color: theme.text,
+          fontSize: 9,
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >Connect Wallet</button>
 
       <div
         style={{
-          marginTop: 9,
+          marginTop: 10,
           paddingTop: 8,
           borderTop: `1px solid ${theme.border}`,
           fontSize: 8,
-          lineHeight: 1.45,
+          lineHeight: 1.4,
           opacity: 0.28,
           textAlign: "center",
         }}
       >
-        Cirql Balance is used for calls, tips and platform services.
+        Cirql Balance is used for paid calls only. Call payments go directly to hosts.
       </div>
 
+    </div>
+  </div>
+)}
+{showPaymentOverlay && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      zIndex: 100010,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20,
+      background:
+        theme.mode === "dark"
+          ? "rgba(0,0,0,.78)"
+          : "rgba(15,23,42,.42)",
+      backdropFilter: "blur(5px)",
+      WebkitBackdropFilter: "blur(5px)",
+    }}
+  >
+    <div
+      style={{
+        width: "min(360px, calc(100vw - 40px))",
+        borderRadius: 16,
+        padding: 20,
+        background: theme.panel,
+        border: `1px solid ${theme.border}`,
+        boxShadow: "0 20px 60px rgba(0,0,0,.45)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 15,
+          fontWeight: 800,
+        }}
+      >
+        Add Balance
+      </div>
+
+      <div
+        style={{
+          marginTop: 6,
+          fontSize: 10,
+          opacity: 0.5,
+        }}
+      >
+        Add funds to your Cirql balance.
+      </div>
+          <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+            {[5, 10, 25, 50, 100].map((amount) => (
+              <button
+                key={amount}
+                type="button"
+                onClick={() => setPaymentAmount(amount)}
+                style={{
+                  flex: 1,
+                  height: 32,
+                  borderRadius: 8,
+                  border: `1px solid ${paymentAmount === amount ? "#22c55e" : theme.border}`,
+                  background: paymentAmount === amount ? "rgba(34,197,94,.12)" : "transparent",
+                  color: paymentAmount === amount ? "#22c55e" : theme.text,
+                  fontSize: 9,
+                  fontWeight: 750,
+                  cursor: "pointer",
+                }}
+              >
+                ${amount}
+              </button>
+            ))}
+          </div>
+        <div style={{ fontSize: 9, opacity: 0.45 }}>
+          Amount
+        </div>
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 24,
+            fontWeight: 800,
+          }}
+        >
+          ${paymentAmount.toFixed(2)}
+        </div>
+
+      <button
+        type="button"
+        onClick={async () => {
+          const r = await fetch("/api/snapscan-create-payment", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId: user.id, amount: paymentAmount }) });
+          const { paymentUrl } = await r.json();
+          if (paymentUrl) window.open(paymentUrl, "snapscan_payment", "width=430,height=760,resizable=yes,scrollbars=yes");
+        }}
+        style={{
+          marginTop: 14,
+          width: "100%",
+          height: 40,
+          borderRadius: 10,
+          border: "none",
+          background: "#22c55e",
+          color: "#07110a",
+          fontSize: 11,
+          fontWeight: 800,
+          cursor: "pointer",
+        }}
+      >
+        Add ${paymentAmount.toFixed(2)}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => setShowPaymentOverlay(false)}
+        style={{
+          marginTop: 8,
+          width: "100%",
+          height: 34,
+          borderRadius: 9,
+          border: `1px solid ${theme.border}`,
+          background: "transparent",
+          color: theme.text,
+          fontSize: 10,
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        Cancel
+      </button>
     </div>
   </div>
 )}
@@ -3544,6 +3564,33 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

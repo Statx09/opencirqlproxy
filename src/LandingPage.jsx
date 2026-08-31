@@ -1211,410 +1211,73 @@ useEffect(() => {
 
   {showNetwork && (
     <div style={networkDropdown(theme)}>
-{networkView === "main" ? (
-  <>
-    <div
-      style={{
-        ...networkDropdownHeader,
-        justifyContent: "space-between",
-        marginBottom: 10,
-      }}
-    >
-      <span
+      <div
         style={{
           display: "flex",
-          alignItems: "center",
-          gap: 9,
+          flexDirection: "column",
+          gap: 8,
         }}
       >
-        <span style={networkDot}></span>
-        <span>Cirql Network</span>
-      </span>
-
-      <span style={networkBetaBadge}>BETA</span>
-    </div>
-
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: 7,
-      }}
-    >
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Balance & calls
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Your Cirql Balance is used for calls and tips.
-        </div>
-      </div>
-
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Host earnings
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Completed call earnings are added to your available balance.
-        </div>
-      </div>
-
-      <div
-        style={{
-          width: "100%",
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: theme.text,
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Web3 / USDC
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Earnings enabled ï¿½ USDC payouts
-        </div>
-      </div>
-
-      <button
-        type="button"
-        style={{
-          width: "100%",
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-          color: theme.text,
-          cursor: "pointer",
-          textAlign: "left",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 10,
-        }}
-        onClick={() => setNetworkView("founding")}
-      >
-        <span>
-          <span
+        {[
+          "Free to use",
+          "No ads",
+          "Verified profiles",
+          "Direct host earnings",
+          "Real people, real conversations",
+        ].map((item) => (
+          <div
+            key={item}
             style={{
-              display: "block",
-              fontSize: 10,
-              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 9,
+              padding: "7px 2px",
             }}
           >
-            First 100 member benefits
-          </span>
-
-          <span
-            style={{
-              display: "block",
-              marginTop: 3,
-              fontSize: 9,
-              lineHeight: 1.45,
-              opacity: 0.48,
-            }}
-          >
-            Lifetime access ï¿½ Founder recognition
-          </span>
-        </span>
-
-        <span style={networkArrow}>&rarr;</span>
-      </button>
-    </div>
-
-    <div style={networkDivider}></div>
-  </>) : networkView === "founding" ? (
-  <>
-    <button
-      type="button"
-      style={networkBack}
-      onClick={() => setNetworkView("main")}
-    >
-      <span>&larr;</span>
-      <span>Cirql Network</span>
-    </button>
-
-    <div style={networkTransparencyTitle}>
-      First 100 member benefits
-    </div>
-
-    <div style={networkTransparencySubtitle}>
-      Founding beta
-    </div>
-
-    <div style={networkCosts}>
-      <div style={networkCostRow}>
-        <span>Lifetime access</span>
-        <strong>Free</strong>
+            <span
+              style={{
+                width: 5,
+                height: 5,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,.7)",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 10,
+                lineHeight: 1.35,
+                fontWeight: 600,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {item}
+            </span>
+          </div>
+        ))}
       </div>
 
-      <div style={networkCostRow}>
-        <span>Founder recognition</span>
-        <strong>Included</strong>
-      </div>
-
-      <div style={networkCostRow}>
-        <span>Early access</span>
-        <strong>Included</strong>
-      </div>
-
-      <div style={networkCostRow}>
-        <span>Founding network</span>
-        <strong>100</strong>
-      </div>
-    </div>
-
-    <div style={networkDivider}></div>
-  </>
-) : networkView === "web3" ? (
-  <>
-    <button
-      type="button"
-      style={networkBack}
-      onClick={() => setNetworkView("main")}
-    >
-      <span>&larr;</span>
-      <span>Cirql Network</span>
-    </button>
-
-    <div
-      style={{
-        padding: "10px 2px 8px",
-        textAlign: "center",
-      }}
-    >
       <div
         style={{
-          fontSize: 13,
-          fontWeight: 700,
-          letterSpacing: "-0.01em",
+          height: 1,
+          margin: "8px 0 10px",
+          background: "rgba(255,255,255,.07)",
         }}
-      >
-        Web3 / USDC
-      </div>
+      />
 
       <div
         style={{
-          marginTop: 3,
+          padding: "2px 2px 1px",
           fontSize: 9,
-          opacity: 0.42,
+          lineHeight: 1.45,
+          opacity: 0.5,
+          letterSpacing: "0.01em",
         }}
       >
-        Earnings enabled
+        Independent peer-to-peer network
       </div>
     </div>
-
-    <div
-      style={{
-        marginTop: 8,
-        display: "flex",
-        flexDirection: "column",
-        gap: 7,
-      }}
-    >
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Host earnings
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Eligible host earnings can be paid out in USDC.
-        </div>
-      </div>
-
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Solana
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          USDC is the planned payout currency for Web3 earnings.
-        </div>
-      </div>
-
-      <div
-        style={{
-          padding: "10px 11px",
-          borderRadius: 9,
-          background: "rgba(255,255,255,.035)",
-          border: "1px solid rgba(255,255,255,.06)",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 700,
-          }}
-        >
-          Cirql Balance first
-        </div>
-
-        <div
-          style={{
-            marginTop: 3,
-            fontSize: 9,
-            lineHeight: 1.45,
-            opacity: 0.48,
-          }}
-        >
-          Calls and tips use your internal Cirql Balance.
-        </div>
-      </div>
-    </div>
-
-    <div
-      style={{
-        marginTop: 12,
-        textAlign: "center",
-        fontSize: 8,
-        letterSpacing: "0.08em",
-        opacity: 0.28,
-        textTransform: "uppercase",
-      }}
-    >
-      Balance ï¿½ Earnings ï¿½ USDC
-    </div>
-
-    <div style={networkDivider}></div>
-  </>
-) : (
-  <>
-    <button
-      type="button"
-      style={networkBack}
-      onClick={() => setNetworkView("main")}
-    >
-      <span>&larr;</span>
-      <span>Cirql Network</span>
-    </button>
-
-    <div style={networkTransparencyTitle}>
-      How Cirql works
-    </div>
-
-    <div style={networkTransparencySubtitle}>
-      Simple internal balance
-    </div>
-
-    <div style={networkCosts}>
-      <div style={networkCostRow}>
-        <span>Add balance</span>
-        <strong>Cirql Balance</strong>
-      </div>
-
-      <div style={networkCostRow}>
-        <span>Calls</span>
-        <strong>Balance</strong>
-      </div>
-
-      <div style={networkCostRow}>
-        <span>Tips</span>
-        <strong>Balance</strong>
-      </div>
-
-      <div style={networkCostRow}>
-        <span>Host earnings</span>
-        <strong>Balance</strong>
-      </div>
-    </div>
-
-    <div style={networkDivider}></div>
-  </>
-)}
-  </div>
-)}
+  )}
 </div>
 
 <div style={brandWrap}>

@@ -51,6 +51,7 @@ export default function ChatsTab({
         preview: msg.text || "",
       });
     }
+  setConversations(Array.from(map.values()));
   }, [user?.id, hosts]);
 
   useEffect(() => {
@@ -207,6 +208,8 @@ export default function ChatsTab({
     </div>
   );
 }
+
+
 
 
 

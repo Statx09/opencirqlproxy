@@ -26,6 +26,7 @@ export default function MessagesModal({
     "https://placehold.co/100x100";
 
 const chatRef = useRef(null);
+const inputRef = useRef(null);
 
 const scrollToBottom = () => {
   requestAnimationFrame(() => {
@@ -191,6 +192,7 @@ const sendMessage = async () => {
     }
 
     requestAnimationFrame(() => {
+      inputRef.current?.focus();
       scrollToBottom();
     });
 
@@ -255,7 +257,7 @@ const sendMessage = async () => {
 
         {/* INPUT */}
         <div className="messages-modal-input-area" style={{ ...inputArea, background: theme.surface, borderTopColor: theme.border }}>
-          <input className="messages-modal-input" value={message}
+          <input ref={inputRef} className="messages-modal-input" value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Send a message..."
             style={{ ...input, background: theme.surface, color: theme.text, borderColor: theme.border }}
@@ -382,31 +384,4 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

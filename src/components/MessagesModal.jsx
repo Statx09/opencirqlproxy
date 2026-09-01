@@ -69,7 +69,7 @@ const scrollToBottom = () => {
       .update({ read_at: new Date().toISOString() })
       .eq("receiver_id", user.id)
       .eq("sender_id", hostId)
-      .eq("event", "message")
+      .is("event", null)
       .is("read_at", null);
 
     if (error) {
@@ -140,82 +140,70 @@ const scrollToBottom = () => {
 /* ================= SEND MESSAGE ================= */
 
 const sendMessage = async () => {
-    console.log("SEND CLICKED");
+  console.log("SEND CLICKED");
 
-    if (sending) {
-      console.log("SEND ALREADY IN PROGRESS");
-      return;
-    }
+  if (sending) {
+    console.log("SEND ALREADY IN PROGRESS");
+    return;
+  }
 
-    const text = message.trim();
+  const text = message.trim();
 
-    if (!text || !user?.id || !hostId) {
+  if (!text || !user?.id || !hostId) {
     console.log("FAILED CHECK", {
       message,
       user,
       hostId,
     });
     return;
-    }
+  }
 
+  setMessage("");
   setSending(true);
 
-    try {
-      const response = await fetch("https://cirql-ai-chatbot.vercel.app/api/message", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+  try {
+    const { data, error } = await supabase
+      .from("messages")
+      .insert({
         sender_id: user.id,
         receiver_id: hostId,
         text,
-      }),
-    });
+      })
+      .select("*")
+      .single();
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("MESSAGE API ERROR:", data);
+    if (error) {
+      console.error("MESSAGE INSERT ERROR:", error);
+      setMessage(text);
       return;
     }
 
-    console.log("MESSAGE API SUCCESS:", data);
+    console.log("MESSAGE INSERT SUCCESS:", data);
 
-    setMessage("");
-
-    if (data.message) {
+    if (data) {
       setMessages((current) => {
-        if (current.some((msg) => msg.id === data.message.id)) {
+        if (current.some((msg) => msg.id === data.id)) {
           return current;
         }
 
-        return [...current, data.message];
+        return [...current, data];
       });
     }
 
-    if (data.ai_message) {
-      setMessages((current) => {
-        if (current.some((msg) => msg.id === data.ai_message.id)) {
-          return current;
-        }
-
-        return [...current, data.ai_message];
-      });
-    }
+    requestAnimationFrame(() => {
+      scrollToBottom();
+    });
 
     onMessageSent?.();
 
-    scrollToBottom();
-
-  } catch (err) {    console.error("MESSAGE SEND EXCEPTION:", err);
+  } catch (err) {
+    console.error("MESSAGE SEND EXCEPTION:", err);
+    setMessage(text);
   } finally {
     setSending(false);
   }
 };
-
-
-  /* ================= EARLY SAFE GUARD (FIXED) ================= */
+/* ================= EARLY SAFE GUARD (FIXED) ================= */
 
   if (!host || !user) return null;
 
@@ -394,6 +382,8 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
+
+
 
 
 

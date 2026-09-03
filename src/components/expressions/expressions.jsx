@@ -780,15 +780,6 @@ keywords: ["bat", "animal", "night", "wildlife"],
   },
 
   {
-    id: "rainbow_caticorn",
-    label: "Rainbow Caticorn",
-    category: "Fun",
-    svg: "rainbow-caticorn",
-    src: "/expressions/rainbow-caticorn.svg",
-    color: "#EC4899",
-    keywords: ["rainbow", "cat", "unicorn", "cute", "fun"],
-  },
-  {
     id: "sassy_since_birth",
     label: "Sassy Since Birth",
     category: "Fun",

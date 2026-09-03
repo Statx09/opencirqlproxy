@@ -16,6 +16,8 @@ export default function DiscoveryPage({
   onToggleMode,
   onOpenPulse,
   onOpenCallsStudio,
+  incomingCall,
+  outgoingCall,
 }) {
   const { theme } = useTheme();
 
@@ -225,6 +227,27 @@ export default function DiscoveryPage({
 
   return (
     <div style={page(theme)}>
+      <style>{`
+        @keyframes callStudioGlow {
+          0%, 100% {
+            box-shadow:
+              0 0 0 1px rgba(34,197,94,.45),
+              0 0 8px rgba(34,197,94,.16),
+              0 5px 14px rgba(0,0,0,.16);
+          }
+          50% {
+            box-shadow:
+              0 0 0 2px rgba(34,197,94,.75),
+              0 0 16px rgba(34,197,94,.30),
+              0 5px 14px rgba(0,0,0,.16);
+          }
+        }
+
+        .call-studio-button {
+          border: 1px solid rgba(34,197,94,.8) !important;
+          animation: callStudioGlow 3s ease-in-out infinite;
+        }
+      `}</style>
       <div style={header}>
 
         <div style={topRow}>
@@ -243,8 +266,8 @@ export default function DiscoveryPage({
             type="button"
             aria-label="Call Studio"
             title="Call Studio"
-            style={topButton(theme)}
-            onClick={onOpenCallsStudio}
+            className="call-studio-button"
+             style={{ ...topButton(theme), ...(incomingCall || outgoingCall ? { border: "1px solid rgba(34,197,94,.95)", boxShadow: "0 0 0 2px rgba(34,197,94,.45), 0 0 22px rgba(34,197,94,.45), 0 5px 14px rgba(0,0,0,.16)" } : {}) }}
           >
             <Video size={19} strokeWidth={2.2} />
           </button>
@@ -365,6 +388,10 @@ const topButton = (theme) => ({
     "transform .18s ease, box-shadow .18s ease, background .18s ease",
   WebkitTapHighlightColor: "transparent",
 });
+
+
+
+
 
 
 

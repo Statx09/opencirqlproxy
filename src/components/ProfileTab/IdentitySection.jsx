@@ -14,6 +14,9 @@ export default function IdentitySection({
 
   languages,
   setLanguages,
+
+  topics = [],
+  setTopics,
 }) {
   return (
     <div style={section}>
@@ -99,6 +102,28 @@ const intentButtonActive = {
   border: "1px solid #7c3aed",
 };
 
+const topicTitle = {
+  marginBottom: 8,
+  fontSize: 13,
+  fontWeight: 700,
+  color: "#fff",
+};
+
+const topicList = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 7,
+};
+
+const topicChip = {
+  padding: "6px 10px",
+  borderRadius: 999,
+  border: "1px solid rgba(255,255,255,.12)",
+  background: "rgba(255,255,255,.06)",
+  color: "#fff",
+  cursor: "pointer",
+  fontSize: 12,
+};
 const input = {
   width: "100%",
   marginBottom: 10,
@@ -108,3 +133,8 @@ const input = {
   background: "#111",
   color: "#fff",
 };
+
+
+
+
+

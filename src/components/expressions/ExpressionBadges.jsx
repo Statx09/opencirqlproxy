@@ -53,6 +53,11 @@ export default function ExpressionBadges({
                 e?.preventDefault?.();
                 e?.stopPropagation?.();
 
+                if (onRemove) {
+                  onRemove(expression.id);
+                  return;
+                }
+
                 console.log(
                   "🔥 EXPRESSION EXPANDED:",
                   expression.id,
@@ -153,3 +158,4 @@ export default function ExpressionBadges({
     </>
   );
 }
+

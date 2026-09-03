@@ -39,6 +39,7 @@ const [aiPersonality, setAiPersonality] = useState("");
  
 const [expressions, setExpressions] = useState([]);
 const [intents, setIntents] = useState([]);
+const [topics, setTopics] = useState([]);
 
     /* ================= MONETIZATION ================= */
   const [paypal, setPaypal] = useState("");
@@ -113,6 +114,7 @@ setAiPersonality(profile.ai_personality || "");
   setGalleryUrls(profile.gallery_urls || []);
 
 setExpressions(profile.expression_badges || []);
+setTopics(profile.topics || []);
   setIntents(
     Array.isArray(profile.intent_tags)
       ? profile.intent_tags
@@ -205,6 +207,7 @@ setExpressions(profile.expression_badges || []);
 
   /* Expressions */
 expression_badges: expressions,
+  topics,
   intent_tags: intents,
 
   /* Monetization */
@@ -250,7 +253,7 @@ updated_at: new Date().toISOString(),
   .select()
   .single();
 
-console.log("PROFILE UPSERT RESULT:", { data, error });
+console.log("PROFILE UPSERT RESULT:", JSON.stringify({ data, error }, null, 2));
 
     setLoading(false);
 
@@ -287,7 +290,7 @@ console.log("PROFILE UPSERT RESULT:", { data, error });
       }}
     />
 
-    <label htmlFor="bannerUpload" style={uploadBtn}>
+    <label htmlFor="bannerUpload" style={uploadBtnBanner}>
       Upload Banner
     </label>
   </div>
@@ -297,12 +300,7 @@ console.log("PROFILE UPSERT RESULT:", { data, error });
           <button
             type="button"
             onClick={onViewCard}
-            style={{
-              ...logoutTopBtn,
-              border: "1px solid rgba(124,58,237,0.6)",
-              background: "rgba(124,58,237,0.14)",
-              color: "#c4b5fd",
-            }}
+            style={uploadBtnSmall}
           >
             View My Card
           </button>
@@ -368,6 +366,9 @@ if (url) setAvatarUrl(url);
     languages={languages}
     setLanguages={setLanguages}
 
+    topics={topics}
+    setTopics={setTopics}
+
     isAI={isAI}
     setIsAI={setIsAI}
 
@@ -385,7 +386,100 @@ if (url) setAvatarUrl(url);
       setIntents={setIntents}
     />
 
-    <div style={{ marginTop: 16 }}>
+        
+    <div
+      style={{
+        marginTop: 16,
+        padding: 16,
+        borderRadius: 16,
+        background: "rgba(255,255,255,.04)",
+        border: "1px solid rgba(255,255,255,.08)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 14,
+          fontWeight: 700,
+          color: "#fff",
+          marginBottom: 6,
+        }}
+      >
+        Interests & Topics
+      </div>
+
+      <div
+        style={{
+          fontSize: 12,
+          color: "#9ca3af",
+          marginBottom: 10,
+        }}
+      >
+        What do you like talking about?
+      </div>
+
+      <input
+        type="text"
+        placeholder="Add an interest and press Enter..."
+        style={{
+          width: "100%",
+          padding: "10px 12px",
+          borderRadius: 10,
+          border: "1px solid rgba(255,255,255,.10)",
+          background: "#111",
+          color: "#fff",
+          outline: "none",
+          fontSize: 13,
+        }}
+        onKeyDown={(e) => {
+          if (e.key !== "Enter") return;
+
+          e.preventDefault();
+
+          const value = e.currentTarget.value.trim();
+
+          if (!value) return;
+
+          if (!topics.includes(value)) {
+            setTopics([...topics, value]);
+          }
+
+          e.currentTarget.value = "";
+        }}
+      />
+
+      {topics.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 7,
+            marginTop: 10,
+          }}
+        >
+          {topics.map((topic) => (
+            <button
+              key={topic}
+              type="button"
+              onClick={() =>
+                setTopics(topics.filter((item) => item !== topic))
+              }
+              style={{
+                padding: "6px 10px",
+                borderRadius: 999,
+                border: "1px solid rgba(255,255,255,.12)",
+                background: "rgba(255,255,255,.06)",
+                color: "#fff",
+                cursor: "pointer",
+                fontSize: 12,
+              }}
+            >
+              {topic} ×
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+<div style={{ marginTop: 16 }}>
       <ExpressSection
         expressions={expressions}
         setExpressions={setExpressions}
@@ -725,8 +819,8 @@ const avatarWrap = {
 };
 
 const avatar = {
-  width: 120,
-  height: 120,
+  width: 150,
+  height: 150,
   borderRadius: "50%",
   border: "4px solid #fff",
   objectFit: "cover",
@@ -742,6 +836,20 @@ const uploadBtn = {
   background: "#7c3aed",
   color: "#fff",
   fontSize: 12,
+  cursor: "pointer",
+  border: "none",
+};
+
+const uploadBtnBanner = {
+  position: "absolute",
+  bottom: 10,
+  right: 10,
+  marginTop: 0,
+  padding: "5px 8px",
+  borderRadius: 6,
+  background: "#333",
+  color: "#fff",
+  fontSize: 11,
   cursor: "pointer",
   border: "none",
 };
@@ -1156,6 +1264,21 @@ const mediaCount = {
   marginTop: 8,
   marginBottom: 0,
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

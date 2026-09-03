@@ -439,7 +439,7 @@ if (!user?.id) {
 
           if (message.event === "call_accepted") {
             console.log(
-              "CALL ACCEPTED REALTIME ï¿½ OPENING CALL STUDIO:",
+              "CALL ACCEPTED REALTIME - OPENING CALL STUDIO:",
               message
             );
 
@@ -554,8 +554,8 @@ console.log(
             return;
           }
 
-          // Update immediately without another database query.
-          setUnreadMessageCount((count) => count + 1);
+          // Re-read the real unread count so the badge stays accurate.
+          loadUnreadMessages();
         }
       )
       .subscribe((status) => {
@@ -1511,6 +1511,8 @@ useEffect(() => {
           setMode((m) => (m === "grid" ? "swipe" : "grid"))
         }
         onOpenPulse={() => setShowStatusModal(true)}
+        incomingCall={incomingCall}
+        outgoingCall={outgoingCall}
         onOpenCallsStudio={() => setActiveModal("callsStudio")}
       />
     )}
@@ -1628,7 +1630,7 @@ useEffect(() => {
                   fontSize: "18px",
                 }}
               >
-                ??
+                ?
               </div>
             )}
           </div>
@@ -1775,7 +1777,7 @@ useEffect(() => {
                       fontSize: "23px",
                     }}
                   >
-                    ??
+                    ?
                   </div>
                 )}
               </div>
@@ -1829,7 +1831,11 @@ useEffect(() => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {incomingCall.callerProfile?.name || "Someone"}
+                {incomingCall.callerProfile?.alias ||
+                incomingCall.callerProfile?.name ||
+                incomingCall.payload?.caller_name ||
+                incomingCall.text?.replace(/ is calling you$/, "") ||
+                "User"}
               </div>
 
               <div
@@ -3227,6 +3233,12 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
+
+
+
 
 
 

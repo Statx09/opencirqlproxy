@@ -267,6 +267,7 @@ export default function DiscoveryPage({
             aria-label="Call Studio"
             title="Call Studio"
             className="call-studio-button"
+            onClick={onOpenCallsStudio}
              style={{ ...topButton(theme), ...(incomingCall || outgoingCall ? { border: "1px solid rgba(34,197,94,.95)", boxShadow: "0 0 0 2px rgba(34,197,94,.45), 0 0 22px rgba(34,197,94,.45), 0 5px 14px rgba(0,0,0,.16)" } : {}) }}
           >
             <Video size={19} strokeWidth={2.2} />
@@ -388,6 +389,8 @@ const topButton = (theme) => ({
     "transform .18s ease, box-shadow .18s ease, background .18s ease",
   WebkitTapHighlightColor: "transparent",
 });
+
+
 
 
 

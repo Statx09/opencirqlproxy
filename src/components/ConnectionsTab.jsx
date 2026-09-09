@@ -87,7 +87,61 @@ export default function ConnectionsTab({ user, onOpenProfile }) {
         return alert("🔒 You need a confirmed connection before calling.");
       }
 
-      setActiveCall({ ...profile, callType: type });
+      const { data: hostPaymentProfile, error: hostPaymentError } =
+        await supabase
+          .from("profiles")
+          .select("payment_methods")
+          .eq("user_id", profile.user_id)
+          .maybeSingle();
+
+      if (hostPaymentError) {
+        console.error("CALL: payment settings load error:", hostPaymentError);
+        return alert("Failed to load call rate");
+      }
+
+      const paymentSettings =
+        hostPaymentProfile?.payment_methods &&
+        !Array.isArray(hostPaymentProfile.payment_methods)
+          ? hostPaymentProfile.payment_methods
+          : {};
+
+      const callRate =
+        Number(
+          paymentSettings?.[type]?.ratePerMinute ??
+          paymentSettings?.video?.ratePerMinute ??
+          paymentSettings?.voice?.ratePerMinute ??
+          0.60
+        ) || 0.60;
+
+      const callCurrency = paymentSettings?.currency || "USD";
+
+      const { data: callData, error: callError } = await supabase
+        .from("calls")
+        .insert({
+          caller_id: user.id,
+          host_id: profile.user_id,
+          start_time: new Date().toISOString(),
+          end_time: null,
+          rate: callRate,
+          currency: callCurrency,
+          max_amount: null,
+          actual_amount: null,
+          status: "ringing",
+          created_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (callError) {
+        console.error("CALL RECORD ERROR:", callError);
+        return alert("Failed to start call");
+      }
+
+      setActiveCall({
+        ...profile,
+        callType: type,
+        callId: callData.id,
+      });
     } catch (err) {
       console.error(err);
       alert("Failed to start call");
@@ -173,6 +227,7 @@ export default function ConnectionsTab({ user, onOpenProfile }) {
         <MessagesModal
           host={activeChat}
           user={user}
+          callId={activeCall.callId}
           onClose={() => setActiveChat(null)}
         />
       )}
@@ -181,6 +236,7 @@ export default function ConnectionsTab({ user, onOpenProfile }) {
         <CallsStudioModal
           host={activeCall}
           user={user}
+          callId={activeCall.callId}
           onClose={() => setActiveCall(null)}
         />
       )}
@@ -251,4 +307,6 @@ const thanksBtn = {
   fontWeight: 800,
   cursor: "pointer",
 };
+
+
 

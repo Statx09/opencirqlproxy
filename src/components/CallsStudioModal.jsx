@@ -147,28 +147,19 @@ export default function CallsStudioModal({
           {host?.user_id === user?.id ? (
             <div>
               Earned ${Number(
-                billingState.earned ??
-                billingState.host_earned ??
-                billingState.amount_earned ??
-                0
+                billingState.host_credit ?? 0
               ).toFixed(2)}
             </div>
           ) : (
             <>
               <div>
                 Spent ${Number(
-                  billingState.spent ??
-                  billingState.charged ??
-                  billingState.amount_charged ??
-                  0
+                  billingState.caller_charge ?? 0
                 ).toFixed(2)}
               </div>
               <div>
                 Balance ${Number(
-                  billingState.balance ??
-                  billingState.remaining_balance ??
-                  billingState.new_balance ??
-                  0
+                  billingState.caller_balance ?? 0
                 ).toFixed(2)}
               </div>
             </>
@@ -520,6 +511,7 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
+
 
 
 

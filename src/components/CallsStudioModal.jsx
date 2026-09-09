@@ -3,6 +3,7 @@ import DailyRoom from "./daily/DailyRoom";
 import ConnectionRequests from "./ConnectionRequests";
 import SayThanksModal from "./SayThanksModal";
 import { getConnectionStatus } from "../api/getConnectionStatus";
+import { supabase } from "../lib/supabaseClient";
 import {
   Users,
   DollarSign,
@@ -12,12 +13,14 @@ import {
 export default function CallsStudioModal({
   user,
   host,
+  callId,
   onClose,
 }) {
   const [activePanel, setActivePanel] = useState(null);
   const [showThanks, setShowThanks] = useState(false);
   const [connection, setConnection] = useState(null);
   const [checkingConnection, setCheckingConnection] = useState(false);
+  const [billingState, setBillingState] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,6 +66,44 @@ export default function CallsStudioModal({
     };
   }, [user?.id, host?.user_id]);
 
+  useEffect(() => {
+    if (!callId || !user?.id) return;
+
+    let cancelled = false;
+
+    const billCall = async () => {
+      const { data, error } = await supabase.rpc(
+        "bill_call_interval",
+        { p_call_id: callId }
+      );
+
+      if (cancelled) return;
+
+      if (error) {
+        console.error("CALL BILLING ERROR:", error);
+
+        if (error.message?.includes("INSUFFICIENT_BALANCE")) {
+          console.warn("CALL BILLING STOPPED: insufficient balance.");
+          onClose();
+        }
+
+        return;
+      }
+
+      setBillingState(data);
+      console.log("CALL BILLING:", JSON.stringify(data, null, 2));
+    };
+
+    billCall();
+
+    const interval = setInterval(billCall, 10000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [callId, user?.id, onClose]);
+
   if (!user?.id) return null;
 
   const togglePanel = (panelName) => {
@@ -85,6 +126,55 @@ export default function CallsStudioModal({
   onLeave={onClose}
 /> 
       </div>
+
+      {/* FINANCIAL HUD */}
+      {billingState && (
+        <div
+          style={{
+            position: "absolute",
+            top: 16,
+            left: 16,
+            zIndex: 20,
+            padding: "8px 12px",
+            borderRadius: 10,
+            background: "rgba(0,0,0,0.65)",
+            color: "#fff",
+            fontSize: 13,
+            lineHeight: 1.4,
+            pointerEvents: "none",
+          }}
+        >
+          {host?.user_id === user?.id ? (
+            <div>
+              Earned ${Number(
+                billingState.earned ??
+                billingState.host_earned ??
+                billingState.amount_earned ??
+                0
+              ).toFixed(2)}
+            </div>
+          ) : (
+            <>
+              <div>
+                Spent ${Number(
+                  billingState.spent ??
+                  billingState.charged ??
+                  billingState.amount_charged ??
+                  0
+                ).toFixed(2)}
+              </div>
+              <div>
+                Balance ${Number(
+                  billingState.balance ??
+                  billingState.remaining_balance ??
+                  billingState.new_balance ??
+                  0
+                ).toFixed(2)}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* HOST STATUS */}
       {host && (
@@ -430,3 +520,7 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
+
+
+
+

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import DailyRoom from "./daily/DailyRoom";
 import ConnectionRequests from "./ConnectionRequests";
 import SayThanksModal from "./SayThanksModal";
@@ -21,6 +21,12 @@ export default function CallsStudioModal({
   const [connection, setConnection] = useState(null);
   const [checkingConnection, setCheckingConnection] = useState(false);
   const [billingState, setBillingState] = useState(null);
+  const [isCallHost, setIsCallHost] = useState(null);
+  const [liveBilling, setLiveBilling] = useState(null);
+  const callerRateRef = useRef(0);
+  const hostRateRef = useRef(0);
+  const callerStartingBalanceRef = useRef(null);
+  const previousBillingRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +77,27 @@ export default function CallsStudioModal({
 
     let cancelled = false;
 
+    const loadCallRole = async () => {
+      const { data, error } = await supabase
+        .from("calls")
+        .select("host_id, rate")
+        .eq("id", callId)
+        .single();
+
+      if (cancelled) return;
+
+      if (error) {
+        console.error("CALL ROLE ERROR:", error);
+        return;
+      }
+
+      setIsCallHost(data?.host_id === user.id);
+
+      if (data?.rate != null) {
+        callerRateRef.current = Number(data.rate) / 60;
+      }
+    };
+
     const billCall = async () => {
       const { data, error } = await supabase.rpc(
         "bill_call_interval",
@@ -90,10 +117,56 @@ export default function CallsStudioModal({
         return;
       }
 
+      const currentDuration = Number(data?.duration_seconds ?? 0);
+      const currentHostCredit = Number(data?.host_credit ?? 0);
+      const callerBalance = Number(data?.caller_balance ?? 0);
+      const callerCharge = Number(data?.caller_charge ?? 0);
+
+      if (callerStartingBalanceRef.current === null) {
+        callerStartingBalanceRef.current =
+          callerBalance + callerCharge;
+      }
+
+      const callerSpent = Math.max(
+        0,
+        callerStartingBalanceRef.current - callerBalance
+      );
+
+      const previous = previousBillingRef.current;
+
+      if (previous && currentDuration > previous.duration) {
+        const durationDelta =
+          currentDuration - previous.duration;
+
+        const hostDelta =
+          currentHostCredit - previous.host_credit;
+
+        if (hostDelta >= 0 && durationDelta > 0) {
+          hostRateRef.current =
+            hostDelta / durationDelta;
+        }
+      }
+
+      previousBillingRef.current = {
+        duration: currentDuration,
+        host_credit: currentHostCredit,
+      };
+
       setBillingState(data);
-      console.log("CALL BILLING:", JSON.stringify(data, null, 2));
+
+      setLiveBilling({
+        host_credit: currentHostCredit,
+        caller_spent: callerSpent,
+        caller_balance: callerBalance,
+      });
+
+      console.log(
+        "CALL BILLING:",
+        JSON.stringify(data, null, 2)
+      );
     };
 
+    loadCallRole();
     billCall();
 
     const interval = setInterval(billCall, 10000);
@@ -103,6 +176,44 @@ export default function CallsStudioModal({
       clearInterval(interval);
     };
   }, [callId, user?.id, onClose]);
+
+  useEffect(() => {
+    if (!liveBilling || isCallHost === null) return;
+
+    const ticker = setInterval(() => {
+      setLiveBilling((current) => {
+        if (!current) return current;
+
+        if (isCallHost) {
+          const rate = hostRateRef.current;
+
+          if (!rate) return current;
+
+          return {
+            ...current,
+            host_credit:
+              Number(current.host_credit ?? 0) + rate,
+          };
+        }
+
+        const rate = callerRateRef.current;
+
+        if (!rate) return current;
+
+        return {
+          ...current,
+          caller_spent:
+            Number(current.caller_spent ?? 0) + rate,
+          caller_balance: Math.max(
+            0,
+            Number(current.caller_balance ?? 0) - rate
+          ),
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(ticker);
+  }, [liveBilling !== null, isCallHost]);
 
   if (!user?.id) return null;
 
@@ -118,17 +229,8 @@ export default function CallsStudioModal({
   return (
     <div style={overlay}>
 
-      {/* VIDEO */}
-      <div style={videoArea}>
-       <DailyRoom
-  roomUrl="https://cirqll.daily.co/cirqll"
-  displayName={user.email || "Guest"}
-  onLeave={onClose}
-/> 
-      </div>
-
       {/* FINANCIAL HUD */}
-      {billingState && (
+      {liveBilling && isCallHost !== null && (
         <div
           style={{
             position: "absolute",
@@ -140,32 +242,41 @@ export default function CallsStudioModal({
             background: "rgba(0,0,0,0.65)",
             color: "#fff",
             fontSize: 13,
-            lineHeight: 1.4,
+            lineHeight: 1.5,
             pointerEvents: "none",
           }}
         >
-          {host?.user_id === user?.id ? (
+          {isCallHost ? (
             <div>
               Earned ${Number(
-                billingState.host_credit ?? 0
+                liveBilling.host_credit ?? 0
               ).toFixed(2)}
             </div>
           ) : (
             <>
               <div>
                 Spent ${Number(
-                  billingState.caller_charge ?? 0
+                  liveBilling.caller_spent ?? 0
                 ).toFixed(2)}
               </div>
               <div>
                 Balance ${Number(
-                  billingState.caller_balance ?? 0
+                  liveBilling.caller_balance ?? 0
                 ).toFixed(2)}
               </div>
             </>
           )}
         </div>
       )}
+
+      {/* VIDEO */}
+      <div style={videoArea}>
+       <DailyRoom
+  roomUrl="https://cirqll.daily.co/cirqll"
+  displayName={user.email || "Guest"}
+  onLeave={onClose}
+/>
+      </div>
 
       {/* HOST STATUS */}
       {host && (
@@ -511,8 +622,4 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
-
-
-
-
 

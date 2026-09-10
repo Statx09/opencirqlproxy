@@ -99,6 +99,58 @@ export default function CallsStudioModal({
     };
 
     const billCall = async () => {
+      if (isCallHost === null) return;
+
+      if (isCallHost === true) {
+        const { data, error } = await supabase
+          .from("call_earnings")
+          .select("duration_seconds, host_amount, status")
+          .eq("call_id", callId)
+          .maybeSingle();
+
+        if (cancelled) return;
+
+        if (error) {
+          console.error("HOST EARNINGS ERROR:", error);
+          return;
+        }
+
+        if (!data) return;
+
+        const currentHostAmount = Number(
+          data.host_amount ?? 0
+        );
+
+        const hostDuration = Number(
+          data.duration_seconds ?? 0
+        );
+
+        if (hostDuration > 0) {
+          hostRateRef.current =
+            currentHostAmount / hostDuration;
+        }
+
+        setBillingState(data);
+
+        setLiveBilling((current) => ({
+          ...(current || {}),
+          host_credit: currentHostAmount,
+          caller_spent: Number(
+            current?.caller_spent ?? 0
+          ),
+          caller_balance: Number(
+            current?.caller_balance ?? 0
+          ),
+        }));
+
+        console.log(
+          "HOST EARNINGS:",
+          JSON.stringify(data, null, 2)
+        );
+
+        return;
+      }
+
       const { data, error } = await supabase.rpc(
         "bill_call_interval",
         { p_call_id: callId }
@@ -175,7 +227,7 @@ export default function CallsStudioModal({
       cancelled = true;
       clearInterval(interval);
     };
-  }, [callId, user?.id, onClose]);
+  }, [callId, user?.id, onClose, isCallHost]);
 
   useEffect(() => {
     if (!liveBilling || isCallHost === null) return;
@@ -622,4 +674,9 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
+
+
+
+
+
 

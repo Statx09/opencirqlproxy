@@ -247,6 +247,10 @@ export default function DiscoveryPage({
           border: 1px solid rgba(34,197,94,.8) !important;
           animation: callStudioGlow 3s ease-in-out infinite;
         }
+
+        .call-studio-button.call-studio-active {
+          animation: callStudioGlow 0.8s ease-in-out infinite;
+        }
       `}</style>
       <div style={header}>
 
@@ -266,7 +270,7 @@ export default function DiscoveryPage({
             type="button"
             aria-label="Call Studio"
             title="Call Studio"
-            className="call-studio-button"
+            className={`call-studio-button${incomingCall || outgoingCall ? " call-studio-active" : ""}`}
             onClick={onOpenCallsStudio}
              style={{ ...topButton(theme), ...(incomingCall || outgoingCall ? { border: "1px solid rgba(34,197,94,.95)", boxShadow: "0 0 0 2px rgba(34,197,94,.45), 0 0 22px rgba(34,197,94,.45), 0 5px 14px rgba(0,0,0,.16)" } : {}) }}
           >
@@ -389,6 +393,10 @@ const topButton = (theme) => ({
     "transform .18s ease, box-shadow .18s ease, background .18s ease",
   WebkitTapHighlightColor: "transparent",
 });
+
+
+
+
 
 
 

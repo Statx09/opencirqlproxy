@@ -4,7 +4,7 @@ import { supabase } from "../lib/supabaseClient";
 
 import MessagesModal from "./MessagesModal";
 import CallsStudioModal from "./CallsStudioModal";
-import TipHostButton from "./TipHostButton";
+import SayThanksModal from "./SayThanksModal";
 import ImageModal from "./ImageModal";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 
@@ -432,6 +432,16 @@ console.log("error =", error);
           <button
             type="button"
             style={glassActionButton}
+            onClick={() => setShowTipModal(true)}
+            title="Tip"
+            aria-label="Tip"
+          >
+            <span style={{ fontSize: 18 }}>💛</span>
+          </button>
+
+          <button
+            type="button"
+            style={glassActionButton}
             onClick={() => handleCall("voice")}
             title="Voice Call"
             aria-label="Voice Call"
@@ -467,8 +477,8 @@ console.log("error =", error);
         )}
 
         {showTipModal && (
-          <TipHostButton
-            host={host}
+          <SayThanksModal
+            host={profile || host || null}
             onClose={() => setShowTipModal(false)}
           />
         )}
@@ -780,6 +790,13 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -9,7 +9,6 @@ import CallsStudioModal from "./components/CallsStudioModal";
 import { useTheme } from "./context/ThemeContext";
 import { ArrowLeft, Sun, Moon, Settings, Wallet } from "lucide-react";
 import { useUser } from "./hooks/useUser";
-
 
 import ChatsTab from "./components/ChatsTab";
 import MessagesModal from "./components/MessagesModal";
@@ -23,7 +22,6 @@ import { fetchHosts } from "./api/fetchHosts";
 import { useSwipe } from "./hooks/useSwipe";
 import useStatusFeed from "./hooks/useStatusFeed";
 import { supabase } from "./lib/supabaseClient";
-
 
 export default function LandingPage({ user }) {
 
@@ -40,6 +38,7 @@ export default function LandingPage({ user }) {
   const [showNetwork, setShowNetwork] = useState(false);
 const [showSettings, setShowSettings] = useState(false);
 const [walletBalance, setWalletBalance] = useState(0);
+const [activeCallId, setActiveCallId] = useState(null);
 const [showPaymentOverlay, setShowPaymentOverlay] = useState(false);
 const [paymentAmount, setPaymentAmount] = useState(100);
 
@@ -133,7 +132,6 @@ const loadWalletActivity = useCallback(async () => {
 useEffect(() => {
   loadWalletActivity();
 }, [loadWalletActivity]);
-
 
 const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 const [notificationSettings, setNotificationSettings] = useState({
@@ -445,6 +443,7 @@ if (!user?.id) {
 
             setOutgoingCall(null);
             setSelectedProfile(null);
+            setActiveCallId(message.payload?.call_id || null);
             setActiveModal("callsStudio");
 
             return;
@@ -613,7 +612,6 @@ const [networkView, setNetworkView] = useState("main");
     },
     [user?.id, loadUnreadMessages]
   );
-
 
   const [activeModal, setActiveModal] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -863,6 +861,35 @@ useEffect(() => {
             user?.email ||
             "Someone";
 
+          const { data: hostPaymentProfile, error: hostPaymentError } =
+            await supabase
+              .from("profiles")
+              .select("payment_methods")
+              .eq("user_id", callTarget.user_id)
+              .maybeSingle();
+
+          if (hostPaymentError) {
+            console.error("CALL: payment settings load error:", hostPaymentError);
+            return;
+          }
+
+          const paymentSettings =
+            hostPaymentProfile?.payment_methods &&
+            !Array.isArray(hostPaymentProfile.payment_methods)
+              ? hostPaymentProfile.payment_methods
+              : {};
+
+          const callType = callTarget.callType || "video";
+
+          const callRate =
+            Number(
+              paymentSettings?.[callType]?.ratePerMinute ??
+              paymentSettings?.video?.ratePerMinute ??
+              paymentSettings?.voice?.ratePerMinute ??
+              0.60
+            ) || 0.60;
+
+          const callCurrency = paymentSettings?.currency || "USD";
           console.log("CALL: creating call record", {
             caller_id: user.id,
             host_id: callTarget.user_id,
@@ -876,8 +903,8 @@ useEffect(() => {
               host_id: callTarget.user_id,
               start_time: new Date().toISOString(),
               end_time: null,
-              rate: null,
-              currency: null,
+              rate: callRate,
+              currency: callCurrency,
               max_amount: null,
               actual_amount: null,
               status: "ringing",
@@ -1580,9 +1607,8 @@ useEffect(() => {
         <div
           style={{
             position: "fixed",
-            left: "50%",
-            bottom: "28px",
-            transform: "translateX(-50%)",
+            top: "68px",
+            right: "18px",
             zIndex: 100009,
             display: "flex",
             alignItems: "center",
@@ -1630,7 +1656,7 @@ useEffect(() => {
                   fontSize: "18px",
                 }}
               >
-                ?
+
               </div>
             )}
           </div>
@@ -1646,18 +1672,9 @@ useEffect(() => {
                 maxWidth: "180px",
               }}
             >
-              Calling {outgoingCall.name || "Host"}
+              {outgoingCall.alias || outgoingCall.name || "Host"}
             </div>
 
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#22c55e",
-                marginTop: "2px",
-              }}
-            >
-              Waiting for answer...
-            </div>
           </div>
 
           <button
@@ -1680,7 +1697,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ï¿½
+            ×
           </button>
         </div>
       )}
@@ -1689,10 +1706,10 @@ useEffect(() => {
         <div
           style={{
             position: "fixed",
-            right: "20px",
-            bottom: "20px",
+            top: "68px",
+            right: "18px",
             zIndex: 100010,
-            width: "min(380px, calc(100vw - 32px))",
+            width: "min(340px, calc(100vw - 32px))",
             padding: "14px",
             borderRadius: "18px",
             background: "rgba(15,23,42,.96)",
@@ -1777,7 +1794,6 @@ useEffect(() => {
                       fontSize: "23px",
                     }}
                   >
-                    ?
                   </div>
                 )}
               </div>
@@ -1944,6 +1960,7 @@ useEffect(() => {
                 setSelectedHost(
                   incomingCall.callerProfile || null
                 );
+                setActiveCallId(incomingCall.payload?.call_id || null);
                 setIncomingCall(null);
                 setActiveModal("callsStudio");
               }}
@@ -2451,6 +2468,7 @@ useEffect(() => {
   <CallsStudioModal
     user={user}
     host={selectedHost}
+    callId={activeCallId}
     onClose={closeModal}
   />
 )}
@@ -2468,7 +2486,6 @@ useEffect(() => {
 }
 
 /* ================= STYLES ================= */
-
 
 const walletBalanceText = (theme) => ({
   fontSize: 11,
@@ -2778,7 +2795,6 @@ const networkDivider = {
   background: "rgba(148,163,184,.12)",
 };
 
-
 const networkSupportIntro = {
   display: "flex",
   flexDirection: "column",
@@ -3038,121 +3054,6 @@ const headerActions = {
   gap: 8,
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const networkBetaBadge = {
   padding: "3px 6px",
   borderRadius: 5,
@@ -3233,109 +3134,4 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

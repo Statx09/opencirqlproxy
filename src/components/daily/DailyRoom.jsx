@@ -5,6 +5,7 @@ export default function DailyRoom({
   roomUrl = "https://cirqll.daily.co/cirqll",
   displayName = "OpenCall User",
   onLeave,
+  onJoined,
 }) {
   const containerRef = useRef(null);
   const callRef = useRef(null);
@@ -54,6 +55,10 @@ export default function DailyRoom({
           url: roomUrl,
           userName: displayName,
         });
+
+        if (!cancelled && onJoined) {
+          onJoined();
+        }
 
         if (cancelled) {
           try {
@@ -106,4 +111,6 @@ export default function DailyRoom({
     />
   );
 }
+
+
 

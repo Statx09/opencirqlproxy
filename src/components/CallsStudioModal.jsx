@@ -27,6 +27,7 @@ export default function CallsStudioModal({
   const hostRateRef = useRef(0);
   const callerStartingBalanceRef = useRef(null);
   const previousBillingRef = useRef(null);
+  const billingStartedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +73,42 @@ export default function CallsStudioModal({
     };
   }, [user?.id, host?.user_id]);
 
+  const handleDailyJoined = async () => {
+    if (!callId || !user?.id) return;
+    if (billingStartedRef.current) return;
+
+    const { data, error } = await supabase
+      .from("calls")
+      .select("caller_id")
+      .eq("id", callId)
+      .single();
+
+    if (error) {
+      console.error("CALL BILLING START ROLE ERROR:", error);
+      return;
+    }
+
+    if (data?.caller_id !== user.id) return;
+
+    const { error: updateError } = await supabase
+      .from("calls")
+      .update({
+        start_time: new Date().toISOString(),
+        status: "active",
+      })
+      .eq("id", callId)
+      .eq("caller_id", user.id);
+
+    if (updateError) {
+      console.error("CALL BILLING START ERROR:", updateError);
+      return;
+    }
+
+    billingStartedRef.current = true;
+
+    console.log("CALL BILLING STARTED:", callId);
+  };
+
   useEffect(() => {
     if (!callId || !user?.id) return;
 
@@ -100,6 +137,7 @@ export default function CallsStudioModal({
 
     const billCall = async () => {
       if (isCallHost === null) return;
+      if (isCallHost === false && !billingStartedRef.current) return;
 
       if (isCallHost === true) {
         const { data, error } = await supabase
@@ -327,6 +365,7 @@ export default function CallsStudioModal({
   roomUrl="https://cirqll.daily.co/cirqll"
   displayName={user.email || "Guest"}
   onLeave={onClose}
+          onJoined={handleDailyJoined}
 />
       </div>
 
@@ -674,6 +713,11 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
+
+
+
+
+
 
 
 

@@ -861,6 +861,23 @@ useEffect(() => {
             user?.email ||
             "Someone";
 
+          const { data: connection, error: connectionError } = await supabase
+            .from("connections")
+            .select("id, status")
+            .or(
+              `and(user_a.eq.${user.id},user_b.eq.${callTarget.user_id}),and(user_a.eq.${callTarget.user_id},user_b.eq.${user.id})`
+            )
+            .maybeSingle();
+
+          if (connectionError) {
+            console.error("CALL: connection check failed:", connectionError);
+            return;
+          }
+
+          if (connection?.status !== "accepted") {
+            alert("🔒 You need a confirmed connection before calling.");
+            return;
+          }
           const { data: hostPaymentProfile, error: hostPaymentError } =
             await supabase
               .from("profiles")
@@ -3134,4 +3151,5 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
 

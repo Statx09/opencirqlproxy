@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useCallback, useEffect, useRef, useState } from "react";
 import DailyRoom from "./daily/DailyRoom";
 import ConnectionRequests from "./ConnectionRequests";
 import SayThanksModal from "./SayThanksModal";
@@ -109,7 +109,7 @@ export default function CallsStudioModal({
     console.log("CALL BILLING STARTED:", callId);
   };
 
-  const handleDailyLeave = async () => {
+  const handleDailyLeave = useCallback(async () => {
     if (callId) {
       const { error } = await supabase.rpc("settle_call", {
         p_call_id: callId,
@@ -123,7 +123,7 @@ export default function CallsStudioModal({
     }
 
     onClose?.();
-  };
+  }, [callId, onClose]);
 
   useEffect(() => {
     if (!callId || !user?.id) return;

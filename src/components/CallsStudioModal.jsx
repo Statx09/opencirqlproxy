@@ -109,6 +109,22 @@ export default function CallsStudioModal({
     console.log("CALL BILLING STARTED:", callId);
   };
 
+  const handleDailyLeave = async () => {
+    if (callId) {
+      const { error } = await supabase.rpc("settle_call", {
+        p_call_id: callId,
+      });
+
+      if (error) {
+        console.error("CALL SETTLE FAILED:", error);
+      } else {
+        console.log("CALL SETTLED:", callId);
+      }
+    }
+
+    onClose?.();
+  };
+
   useEffect(() => {
     if (!callId || !user?.id) return;
 
@@ -364,7 +380,7 @@ export default function CallsStudioModal({
        <DailyRoom
   roomUrl="https://cirqll.daily.co/cirqll"
   displayName={user.email || "Guest"}
-  onLeave={onClose}
+  onLeave={handleDailyLeave}
           onJoined={handleDailyJoined}
 />
       </div>

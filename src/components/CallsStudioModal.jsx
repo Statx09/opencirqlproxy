@@ -126,6 +126,92 @@ export default function CallsStudioModal({
   }, [callId, onClose]);
 
   useEffect(() => {
+    if (!callId) return;
+
+    let cancelled = false;
+
+    const checkCallStatus = async () => {
+      const { data, error } = await supabase
+        .from("calls")
+        .select("status")
+        .eq("id", callId)
+        .single();
+
+      if (error) {
+        console.error("CALL STATUS CHECK FAILED:", error);
+        return;
+      }
+
+      if (cancelled) return;
+
+      console.log(
+        "CALL STATUS POLL:",
+        callId,
+        data?.status
+      );
+
+      if (data?.status === "completed") {
+        console.log(
+          "CALL ENDED BY OTHER PARTICIPANT:",
+          callId
+        );
+
+        onClose?.();
+      }
+    };
+
+    checkCallStatus();
+
+    const interval = setInterval(checkCallStatus, 2000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [callId, onClose]);
+
+  useEffect(() => {
+    if (!callId) return;
+
+    const channel = supabase
+      .channel(`call-status-${callId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "calls",
+          filter: `id=eq.${callId}`,
+        },
+        (payload) => {
+          const newStatus = payload.new?.status;
+
+          console.log(
+            "CALL STATUS UPDATE:",
+            callId,
+            newStatus
+          );
+
+          if (newStatus === "completed") {
+            console.log(
+              "CALL ENDED REMOTELY:",
+              callId
+            );
+
+            onClose?.();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("CALL REALTIME STATUS:", callId, status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [callId, onClose]);
+
+  useEffect(() => {
     if (!callId || !user?.id) return;
 
     let cancelled = false;
@@ -729,6 +815,9 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
+
+
+
 
 
 

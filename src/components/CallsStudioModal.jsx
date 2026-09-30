@@ -23,6 +23,7 @@ export default function CallsStudioModal({
   const [billingState, setBillingState] = useState(null);
   const [isCallHost, setIsCallHost] = useState(null);
   const [liveBilling, setLiveBilling] = useState(null);
+  const [callEnded, setCallEnded] = useState(false);
   const callerRateRef = useRef(0);
   const hostRateRef = useRef(0);
   const callerStartingBalanceRef = useRef(null);
@@ -110,6 +111,8 @@ export default function CallsStudioModal({
   };
 
   const handleDailyLeave = useCallback(async () => {
+    setCallEnded(true);
+
     if (callId) {
       const { error } = await supabase.rpc("settle_call", {
         p_call_id: callId,
@@ -151,9 +154,18 @@ export default function CallsStudioModal({
       );
 
       if (data?.status === "completed") {
+        setCallEnded(true);
+
         console.log(
           "CALL ENDED BY OTHER PARTICIPANT:",
           callId
+        );
+
+        console.log(
+          "CALL POLL CLOSING MODAL:",
+          callId,
+          "onClose exists:",
+          typeof onClose
         );
 
         onClose?.();
@@ -193,6 +205,7 @@ export default function CallsStudioModal({
           );
 
           if (newStatus === "completed") {
+             setCallEnded(true);
             console.log(
               "CALL ENDED REMOTELY:",
               callId
@@ -376,16 +389,10 @@ export default function CallsStudioModal({
       setLiveBilling((current) => {
         if (!current) return current;
 
+        // Host earnings come from call_earnings.
+        // Do not locally invent additional host earnings.
         if (isCallHost) {
-          const rate = hostRateRef.current;
-
-          if (!rate) return current;
-
-          return {
-            ...current,
-            host_credit:
-              Number(current.host_credit ?? 0) + rate,
-          };
+          return current;
         }
 
         const rate = callerRateRef.current;
@@ -463,12 +470,14 @@ export default function CallsStudioModal({
 
       {/* VIDEO */}
       <div style={videoArea}>
-       <DailyRoom
-  roomUrl="https://cirqll.daily.co/cirqll"
-  displayName={user.email || "Guest"}
-  onLeave={handleDailyLeave}
-          onJoined={handleDailyJoined}
-/>
+       {!callEnded && (
+         <DailyRoom
+           roomUrl="https://cirqll.daily.co/cirqll"
+           displayName={user.email || "Guest"}
+           onLeave={handleDailyLeave}
+           onJoined={handleDailyJoined}
+         />
+       )}
       </div>
 
       {/* HOST STATUS */}
@@ -815,17 +824,4 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
 

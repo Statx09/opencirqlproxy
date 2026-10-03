@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import DailyRoom from "./daily/DailyRoom";
 import ConnectionRequests from "./ConnectionRequests";
 import SayThanksModal from "./SayThanksModal";
@@ -383,7 +383,7 @@ export default function CallsStudioModal({
   }, [callId, user?.id, onClose, isCallHost]);
 
   useEffect(() => {
-    if (!liveBilling || isCallHost === null) return;
+    if (callEnded || callEnded || !liveBilling || isCallHost === null) return;
 
     const ticker = setInterval(() => {
       setLiveBilling((current) => {
@@ -412,7 +412,7 @@ export default function CallsStudioModal({
     }, 1000);
 
     return () => clearInterval(ticker);
-  }, [liveBilling !== null, isCallHost]);
+  }, [liveBilling !== null, isCallHost, callEnded]);
 
   if (!user?.id) return null;
 
@@ -498,7 +498,7 @@ export default function CallsStudioModal({
                 color: "#22c55e",
               }}
             >
-              ✓ Connected
+              ? Connected
             </div>
           ) : (
             <div
@@ -561,14 +561,14 @@ export default function CallsStudioModal({
         style={randomCallButton}
         onClick={() => {
           console.log(
-            "RANDOM CALL — MATCHING SYSTEM COMING SOON"
+            "RANDOM CALL � MATCHING SYSTEM COMING SOON"
           );
         }}
         aria-label="Random Call"
         title="Random Call"
       >
         <span style={randomCallIcon}>
-          ⤨
+          ?
         </span>
 
         <span>
@@ -824,4 +824,7 @@ const panelClose = {
 const panelBody = {
   padding: 12,
 };
+
+
+
 

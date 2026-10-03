@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -142,6 +142,7 @@ const [notificationSettings, setNotificationSettings] = useState({
 });
 const [notifications, setNotifications] = useState([]);
 const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+const [tipPopup, setTipPopup] = useState(null);
 const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState(0);
 
@@ -175,7 +176,8 @@ const [outgoingCall, setOutgoingCall] = useState(null);
       (item) =>
         item.event === "wave" ||
         item.event === "like" ||
-        item.event === "status_like"
+        item.event === "status_like" ||
+        item.event === "tip_received"
     );
 
     const senderIds = [
@@ -315,7 +317,8 @@ useEffect(() => {
           if (
             notification.event !== "wave" &&
             notification.event !== "like" &&
-            notification.event !== "status_like"
+            notification.event !== "status_like" &&
+             notification.event !== "tip_received"
           ) {
             return;
           }
@@ -341,7 +344,9 @@ useEffect(() => {
             }
           }
 
-          const enrichedNotification = {
+          if (notification.event === 'tip_received') { setTipPopup('💛 You’ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
+
+const enrichedNotification = {
             ...notification,
             sender_profile: senderProfile,
           };
@@ -875,7 +880,7 @@ useEffect(() => {
           }
 
           if (connection?.status !== "accepted") {
-            alert("🔒 You need a confirmed connection before calling.");
+            alert("ðŸ”’ You need a confirmed connection before calling.");
             return;
           }
           const { data: hostPaymentProfile, error: hostPaymentError } =
@@ -1126,7 +1131,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION Ã¯Â¿Â½ INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1234,7 +1239,7 @@ useEffect(() => {
   }
 
   return (
-  <div style={page(theme)}>
+  <div style={page(theme)}>{tipPopup && <div style={{position:"fixed",top:20,right:20,zIndex:99999,padding:"14px 18px",borderRadius:12,background:"#111",color:"#fff",boxShadow:"0 8px 30px rgba(0,0,0,.25)",fontWeight:600}}>{tipPopup}</div>}
 
 {mode === "grid" && (
   <div style={header(theme)}>
@@ -1714,7 +1719,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ×
+            Ã—
           </button>
         </div>
       )}
@@ -2104,7 +2109,7 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          ×
+          Ã—
         </button>
       </div>
 
@@ -2234,7 +2239,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() =>
-            console.log("WITHDRAW USDC — payout integration pending")
+            console.log("WITHDRAW USDC â€” payout integration pending")
           }
           style={{
             marginTop: 10,
@@ -3151,5 +3156,15 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
+
+
+
+
+
+
+
 
 

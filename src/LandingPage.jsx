@@ -178,6 +178,7 @@ const [outgoingCall, setOutgoingCall] = useState(null);
         item.event === "like" ||
         item.event === "status_like" ||
         item.event === "tip_received"
+        item.event === "tip_received"
     );
 
     const senderIds = [
@@ -318,6 +319,7 @@ useEffect(() => {
             notification.event !== "wave" &&
             notification.event !== "like" &&
             notification.event !== "status_like" &&
+            notification.event !== "tip_received" &&
              notification.event !== "tip_received"
           ) {
             return;

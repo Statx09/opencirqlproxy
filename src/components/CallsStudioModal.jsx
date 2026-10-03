@@ -392,7 +392,14 @@ export default function CallsStudioModal({
         // Host earnings come from call_earnings.
         // Do not locally invent additional host earnings.
         if (isCallHost) {
-          return current;
+          const rate = hostRateRef.current;
+          if (!rate) return current;
+
+          return {
+            ...current,
+            host_credit:
+              Number(current.host_credit ?? 0) + rate,
+          };
         }
 
         const rate = callerRateRef.current;
@@ -433,8 +440,8 @@ export default function CallsStudioModal({
         <div
           style={{
             position: "absolute",
-            top: 16,
-            left: 16,
+            top: 145,
+            right: 16,
             zIndex: 20,
             padding: "8px 12px",
             borderRadius: 10,
@@ -561,7 +568,7 @@ export default function CallsStudioModal({
         style={randomCallButton}
         onClick={() => {
           console.log(
-            "RANDOM CALL — MATCHING SYSTEM COMING SOON"
+            "RANDOM CALL Ã¹ MATCHING SYSTEM COMING SOON"
           );
         }}
         aria-label="Random Call"

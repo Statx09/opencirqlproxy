@@ -427,6 +427,74 @@ console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBE
       supabase.removeChannel(channel);
     };
   }, [user?.id]);
+  /* ================= TIP REALTIME ================= */
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`tip-realtime-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "wallet_transactions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        async (payload) => {
+          const transaction = payload.new;
+
+          if (
+            transaction.type !== "tip_received" ||
+            transaction.status !== "completed"
+          ) {
+            return;
+          }
+
+          const amount = Number(transaction.amount || 0);
+
+          setWalletBalance((current) => Number(current || 0) + amount);
+          setWalletAvailableEarnings((current) => Number(current || 0) + amount);
+
+          let senderName = "Someone";
+
+          if (transaction.reference_id) {
+            const { data } = await supabase
+              .from("profiles")
+              .select("name, alias")
+              .eq("user_id", transaction.reference_id)
+              .maybeSingle();
+
+            senderName =
+              data?.alias ||
+              data?.name ||
+              "Someone";
+          }
+
+          setTipPopup(
+            `💚 +$${amount.toFixed(2)} tip from ${senderName} 🎉`
+          );
+
+          setTimeout(() => setTipPopup(null), 5000);
+
+          loadWalletActivity();
+          loadWalletBalance();
+
+          console.log(
+            "TIP REALTIME RECEIVED:",
+            JSON.stringify(transaction, null, 2)
+          );
+        }
+      )
+      .subscribe((status) => {
+        console.log("TIP REALTIME STATUS:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, loadWalletActivity, loadWalletBalance]);
   /* ================= CONNECTION REQUEST REALTIME ================= */
 
 useEffect(() => {

@@ -247,6 +247,7 @@ export default function CallsStudioModal({
 
       if (data?.rate != null) {
         callerRateRef.current = Number(data.rate) / 60;
+        hostRateRef.current = Number(data.rate) / 60;
       }
     };
 
@@ -287,7 +288,7 @@ export default function CallsStudioModal({
 
         setLiveBilling((current) => ({
           ...(current || {}),
-          host_credit: currentHostAmount,
+          host_credit: Math.max(Number(current?.host_credit ?? 0), currentHostAmount),
           caller_spent: Number(
             current?.caller_spent ?? 0
           ),

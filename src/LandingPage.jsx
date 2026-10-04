@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -420,7 +420,7 @@ const enrichedNotification = {
         }
       )
       .subscribe((status) => {
-console.log("NOTIFICATIONS REALTIME:", status);
+console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBED") console.log("TIP LISTENER READY FOR USER:", user.id);
       });
 
     return () => {

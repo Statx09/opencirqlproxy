@@ -133,6 +133,57 @@ useEffect(() => {
   loadWalletActivity();
 }, [loadWalletActivity]);
 
+useEffect(() => {
+  if (!user?.id) return;
+
+  const channel = supabase
+    .channel(`wallet-realtime-${user.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "profiles",
+        filter: `user_id=eq.${user.id}`,
+      },
+      (payload) => {
+        setWalletBalance(Number(payload.new?.balance || 0));
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "wallet_transactions",
+        filter: `user_id=eq.${user.id}`,
+      },
+      () => {
+        loadWalletActivity();
+        loadWalletBalance();
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "call_earnings",
+        filter: `host_id=eq.${user.id}`,
+      },
+      () => {
+        loadWalletActivity();
+      }
+    )
+    .subscribe((status) => {
+      console.log("WALLET REALTIME:", status);
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [user?.id, loadWalletActivity, loadWalletBalance]);
+
 const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 const [notificationSettings, setNotificationSettings] = useState({
   messages: true,

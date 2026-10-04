@@ -488,7 +488,7 @@ console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBE
         }
       )
       .subscribe((status) => {
-        console.log("TIP REALTIME STATUS:", status);
+        console.log("TIP REALTIME STATUS:", status); if (status === "SUBSCRIBED") setTipPopup("🟢 Tip realtime connected"); else if (status === "CHANNEL_ERROR") setTipPopup("🔴 Tip realtime error"); else if (status === "TIMED_OUT") setTipPopup("🟠 Tip realtime timeout");
       });
 
     return () => {

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import DailyIframe from "@daily-co/daily-js";
 
 export default function DailyRoom({
@@ -51,10 +51,14 @@ export default function DailyRoom({
           }
         });
 
+        console.log("DAILY JOIN START:", new Date().toISOString());
+
         await call.join({
           url: roomUrl,
           userName: displayName,
         });
+
+        console.log("DAILY JOIN COMPLETE:", new Date().toISOString());
 
         if (!cancelled && onJoined) {
           onJoined();

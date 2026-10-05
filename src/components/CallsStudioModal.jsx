@@ -22,9 +22,10 @@ export default function CallsStudioModal({
   const [checkingConnection, setCheckingConnection] = useState(false);
   const [billingState, setBillingState] = useState(null);
   const [isCallHost, setIsCallHost] = useState(null);
-  const [liveBilling, setLiveBilling] = useState(null);
+  const [liveBilling, setLiveBilling] = useState({ host_credit: 0, caller_spent: 0, caller_balance: 0 });
   const [tipEarned, setTipEarned] = useState(0);
   const [callEnded, setCallEnded] = useState(false);
+  const [dailyConnected, setDailyConnected] = useState(false);
   const callerRateRef = useRef(0);
   const hostRateRef = useRef(0);
   const callerStartingBalanceRef = useRef(null);
@@ -76,6 +77,7 @@ export default function CallsStudioModal({
   }, [user?.id, host?.user_id]);
 
   const handleDailyJoined = async () => {
+    setDailyConnected(true);
     if (!callId || !user?.id) return;
     if (billingStartedRef.current) return;
 
@@ -478,11 +480,11 @@ export default function CallsStudioModal({
     <div style={overlay}>
 
       {/* FINANCIAL HUD */}
-      {liveBilling && isCallHost !== null && (
+      {isCallHost !== null && liveBilling && (
         <div
           style={{
             position: "absolute",
-            top: 145,
+            top: 115,
             right: 16,
             zIndex: 20,
             padding: "8px 12px",
@@ -540,21 +542,21 @@ export default function CallsStudioModal({
       {host && (
         <div style={hostStatus}>
           <div style={hostName}>
-            Calling {host.name || "Host"}
+            Calling
           </div>
 
           {checkingConnection ? (
             <div style={connectionStatus}>
               Checking connection...
             </div>
-          ) : isConnected ? (
+          ) : dailyConnected ? (
             <div
               style={{
                 ...connectionStatus,
                 color: "#22c55e",
               }}
             >
-              ? Connected
+              Connected
             </div>
           ) : (
             <div

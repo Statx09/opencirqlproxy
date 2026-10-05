@@ -175,7 +175,7 @@ const sendMessage = async () => {
     if (error) {
       console.error("MESSAGE INSERT ERROR:", error);
       setMessage(text);
-      setSendError(error.message?.includes("INSUFFICIENT_BALANCE") ? "You need enough balance to send this paid message." : "Message could not be sent.");
+      setSendError(error.message || "Message could not be sent.");
       return;
     }
 

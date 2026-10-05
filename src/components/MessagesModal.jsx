@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+﻿import React, { useEffect, useRef, useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabaseClient";
@@ -245,9 +245,28 @@ const sendMessage = async () => {
                   }}
                 >
                   <div
-                    className={mine ? "" : "messages-modal-incoming"} style={{ ...bubble, background: mine ? "#7c3aed" : theme.surface, color: mine ? "#fff" : theme.text }}
+                    className={mine ? "" : "messages-modal-incoming"}
+                    style={{
+                      ...bubble,
+                      background: mine ? "#7c3aed" : theme.surface,
+                      color: mine ? "#fff" : theme.text,
+                    }}
                   >
                     {msg.text}
+
+                    {msg.payload?.charge > 0 && (
+                      <div
+                        style={{
+                          fontSize: 11,
+                          marginTop: 5,
+                          opacity: 0.75,
+                        }}
+                      >
+                        {mine
+                          ? `💸 Spent ${Number(msg.payload.charge).toFixed(2)}`
+                          : `💰 Earned ${Number(msg.payload.charge).toFixed(2)}`}
+                      </div>
+                    )}
                   </div>
                 </div>
               );
@@ -386,6 +405,7 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
+
 
 
 

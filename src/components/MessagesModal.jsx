@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabaseClient";
@@ -14,6 +14,7 @@ export default function MessagesModal({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState("");
   const { theme } = useTheme();
 
   const hostId = host?.user_id ?? host?.id;
@@ -174,6 +175,7 @@ const sendMessage = async () => {
     if (error) {
       console.error("MESSAGE INSERT ERROR:", error);
       setMessage(text);
+      setSendError(error.message?.includes("INSUFFICIENT_BALANCE") ? "You need enough balance to send this paid message." : "Message could not be sent.");
       return;
     }
 
@@ -253,10 +255,12 @@ const sendMessage = async () => {
 
         </div>
 
+        {sendError && <div style={{ color: "#ef4444", fontSize: 13, padding: "6px 12px", textAlign: "center" }}>{sendError}</div>}
+
         {/* INPUT */}
         <div className="messages-modal-input-area" style={{ ...inputArea, background: theme.surface, borderTopColor: theme.border }}>
           <input ref={inputRef} className="messages-modal-input" value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={(e) => { setMessage(e.target.value); setSendError(""); }}
             placeholder="Send a message..."
             style={{ ...input, background: theme.surface, color: theme.text, borderColor: theme.border }}
             onKeyDown={(e) => {
@@ -382,5 +386,13 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
+
+
+
+
+
+
+
+
 
 

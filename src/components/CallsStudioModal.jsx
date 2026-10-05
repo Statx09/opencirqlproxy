@@ -498,7 +498,7 @@ export default function CallsStudioModal({
             <>
               <div>
                 Earned ${Number(
-                  liveBilling.host_credit ?? 0
+                  Number(liveBilling.host_credit ?? 0) + Number(tipEarned || 0)
                 ).toFixed(2)}
               </div>
               {tipEarned > 0 && (

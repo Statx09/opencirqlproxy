@@ -57,6 +57,7 @@ const [topics, setTopics] = useState([]);
     requestPayment: false,
     voice: { enabled: false, ratePerMinute: 0.60 },
     video: { enabled: false, ratePerMinute: 0.60 },
+    messages: { enabled: false, ratePerMessage: 0.10 }
   });
 
 /* ================= UPLOAD ================= */
@@ -174,6 +175,7 @@ setTopics(profile.topics || []);
     voice: { enabled: savedPayments.voice?.enabled ?? false, ratePerMinute: savedPayments.voice?.ratePerMinute ?? savedPayments.voice?.price ?? 0.60 },
 
     video: { enabled: savedPayments.video?.enabled ?? false, ratePerMinute: savedPayments.video?.ratePerMinute ?? savedPayments.video?.price ?? 0.60 },
+    messages: { enabled: savedPayments.messages?.enabled ?? false, ratePerMessage: savedPayments.messages?.ratePerMessage ?? savedPayments.messages?.price ?? 0.10 },
   });
 }, [profile]);
 
@@ -233,6 +235,11 @@ expression_badges: expressions,
 
     video: {
       enabled: paymentSettings.video?.enabled ?? false,      ratePerMinute: paymentSettings.video?.ratePerMinute ?? 0.60,
+    },
+
+    messages: {
+      enabled: paymentSettings.messages?.enabled ?? false,
+      ratePerMessage: paymentSettings.messages?.ratePerMessage ?? 0.10,
     },
 
     enabled: [
@@ -732,6 +739,75 @@ if (url) setAvatarUrl(url);
                       Callers are charged based on the actual duration of the call.
                     </div>
 
+                  </div>
+                )}
+              </div>
+              {/* MESSAGES */}
+              <div style={rateCard}>
+                <div style={rateHeader}>
+                  <div>
+                    <div style={paymentName}>Messages</div>
+                    <div style={mutedText}>
+                      Allow people to send paid messages. Free when OFF.
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPaymentSettings(prev => ({
+                        ...prev,
+                        messages: {
+                          ...prev.messages,
+                          enabled: !prev.messages?.enabled,
+                        },
+                      }))
+                    }
+                    style={toggleBtn(paymentSettings.messages?.enabled)}
+                  >
+                    {paymentSettings.messages?.enabled ? "ON" : "OFF"}
+                  </button>
+                </div>
+
+                {paymentSettings.messages?.enabled && (
+                  <div style={sliderGroup}>
+                    <div style={sliderHeader}>
+                      <span style={fieldLabel}>Rate per message</span>
+                      <strong style={sliderValue}>
+                        {paymentSettings.currency}{" "}
+                        {(paymentSettings.messages?.ratePerMessage ?? 0.10).toFixed(2)}
+                      </strong>
+                    </div>
+
+                    <input
+                      type="range"
+                      min="0.05"
+                      max="1.00"
+                      step="0.05"
+                      value={paymentSettings.messages?.ratePerMessage ?? 0.10}
+                      onChange={e =>
+                        setPaymentSettings(prev => ({
+                          ...prev,
+                          messages: {
+                            ...prev.messages,
+                            ratePerMessage: Number(e.target.value),
+                          },
+                        }))
+                      }
+                      style={paymentSlider}
+                    />
+
+                    <div style={sliderScale}>
+                      <span>{paymentSettings.currency} 0.05</span>
+                      <span>{paymentSettings.currency} 0.25</span>
+                      <span>{paymentSettings.currency} 0.50</span>
+                      <span>{paymentSettings.currency} 0.75</span>
+                      <span>{paymentSettings.currency} 1.00</span>
+                    </div>
+
+                    <div style={paymentRateHelp}>
+                      Each new message is charged at this rate.
+                    </div>
                   </div>
                 )}
               </div>
@@ -1264,6 +1340,15 @@ const mediaCount = {
   marginTop: 8,
   marginBottom: 0,
 };
+
+
+
+
+
+
+
+
+
 
 
 

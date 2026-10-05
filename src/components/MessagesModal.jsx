@@ -163,15 +163,13 @@ const sendMessage = async () => {
   setSending(true);
 
   try {
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({
-        sender_id: user.id,
-        receiver_id: hostId,
-        text,
-      })
-      .select("*")
-      .single();
+    const { data: rpcData, error } = await supabase
+      .rpc("send_message", {
+        p_receiver_id: hostId,
+        p_text: text,
+      });
+
+    const data = rpcData ? { id: rpcData.message_id, sender_id: user.id, receiver_id: hostId, text } : null;
 
     if (error) {
       console.error("MESSAGE INSERT ERROR:", error);
@@ -384,4 +382,5 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
+
 

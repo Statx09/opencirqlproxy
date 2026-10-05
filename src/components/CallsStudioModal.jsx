@@ -23,6 +23,7 @@ export default function CallsStudioModal({
   const [billingState, setBillingState] = useState(null);
   const [isCallHost, setIsCallHost] = useState(null);
   const [liveBilling, setLiveBilling] = useState(null);
+  const [tipEarned, setTipEarned] = useState(0);
   const [callEnded, setCallEnded] = useState(false);
   const callerRateRef = useRef(0);
   const hostRateRef = useRef(0);
@@ -224,6 +225,46 @@ export default function CallsStudioModal({
     };
   }, [callId, onClose]);
 
+  useEffect(() => {
+    if (!callId || !user?.id || !isCallHost) return;
+
+    const channel = supabase
+      .channel(`call-tip-${callId}-${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "wallet_transactions",
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const transaction = payload.new;
+
+          if (
+            transaction?.type !== "tip_received" ||
+            transaction?.status !== "completed"
+          ) {
+            return;
+          }
+
+          const amount = Number(transaction.amount || 0);
+
+          if (amount <= 0) return;
+
+          setTipEarned((current) => Number(current || 0) + amount);
+
+          console.log("CALL TIP REALTIME:", transaction);
+        }
+      )
+      .subscribe((status) => {
+        console.log("CALL TIP REALTIME STATUS:", callId, status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [callId, user?.id, isCallHost]);
   useEffect(() => {
     if (!callId || !user?.id) return;
 
@@ -454,11 +495,18 @@ export default function CallsStudioModal({
           }}
         >
           {isCallHost ? (
-            <div>
-              Earned ${Number(
-                liveBilling.host_credit ?? 0
-              ).toFixed(2)}
-            </div>
+            <>
+              <div>
+                Earned ${Number(
+                  liveBilling.host_credit ?? 0
+                ).toFixed(2)}
+              </div>
+              {tipEarned > 0 && (
+                <div style={{ color: "#22c55e", fontWeight: 700 }}>
+                  +${Number(tipEarned).toFixed(2)} tip 🎉
+                </div>
+              )}
+            </>
           ) : (
             <>
               <div>
@@ -619,6 +667,9 @@ export default function CallsStudioModal({
         <SayThanksModal
           host={host || null}
           user={user}
+          onTipSent={(amount) => {
+            setTipEarned((current) => Number(current || 0) + Number(amount || 0));
+          }}
           onClose={() =>
             setShowThanks(false)
           }

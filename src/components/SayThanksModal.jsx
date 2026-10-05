@@ -1,7 +1,7 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-export default function SayThanksModal({ host, onClose }) {
+export default function SayThanksModal({ host, onClose, onTipSent }) {
   const [amount, setAmount] = useState(3);
   const [balance, setBalance] = useState(null);
   const [loadingBalance, setLoadingBalance] = useState(true);
@@ -110,6 +110,10 @@ export default function SayThanksModal({ host, onClose }) {
     }
 
     console.log("TIP SUCCESS", data);
+
+    if (onTipSent) {
+      onTipSent(Number(amount));
+    }
 
     setBalance(Number(data?.caller_balance ?? remainingBalance ?? 0));
     setSuccess(true);

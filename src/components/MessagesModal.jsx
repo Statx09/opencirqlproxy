@@ -170,7 +170,7 @@ const sendMessage = async () => {
         p_text: text,
       });
 
-    const data = rpcData ? { id: rpcData.message_id, sender_id: user.id, receiver_id: hostId, text } : null;
+    const data = rpcData ? { id: rpcData.message_id, sender_id: user.id, receiver_id: hostId, text, payload: rpcData.charged > 0 ? { charge: rpcData.charged, payment_type: "message" } : null } : null;
 
     if (error) {
       console.error("MESSAGE INSERT ERROR:", error);
@@ -259,12 +259,13 @@ const sendMessage = async () => {
                         style={{
                           fontSize: 11,
                           marginTop: 5,
-                          opacity: 0.75,
+                          color: mine ? "#ef4444" : "#22c55e",
+                          fontWeight: 600,
                         }}
                       >
                         {mine
-                          ? `💸 Spent ${Number(msg.payload.charge).toFixed(2)}`
-                          : `💰 Earned ${Number(msg.payload.charge).toFixed(2)}`}
+                          ? `− $${Number(msg.payload.charge).toFixed(2)}`
+                          : `+ $${Number(msg.payload.charge).toFixed(2)}`}
                       </div>
                     )}
                   </div>
@@ -405,14 +406,4 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
-
-
-
-
-
-
-
-
-
-
 

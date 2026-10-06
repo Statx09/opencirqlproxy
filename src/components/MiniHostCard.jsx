@@ -401,7 +401,7 @@ const headline = {
 
 /* TAGS */
 const topInfoRow = { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, minWidth: 0, width: "100%", paddingRight: 70, boxSizing: "border-box" };
-const rateColumn = { position: "absolute", right: 42, top: 2, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 };
+const rateColumn = { position: "absolute", right: 8, top: 2, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 };
 const interactionHint = { position: "absolute", top: 8, right: 10, display: "flex", alignItems: "center", gap: 5, zIndex: 2, opacity: 0.95 };
 const gestureArrows = { fontSize: 19, fontWeight: 800, lineHeight: 1, color: "#22c55e", textShadow: "0 0 6px rgba(34,197,94,.9), 0 0 14px rgba(34,197,94,.45)" };
 
@@ -559,6 +559,7 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
 
 
 

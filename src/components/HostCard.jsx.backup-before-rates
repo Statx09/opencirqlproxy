@@ -1,5 +1,5 @@
 ﻿import React, { memo, useMemo, useCallback, useState } from "react";
-import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video } from "lucide-react";
+import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign } from "lucide-react";
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 
@@ -16,13 +16,6 @@ function HostCard({ host, onAction, onNext, onPrev, variant = "swipe" }) {
 
   const displayName = name || alias || "Unnamed";
   const avatarSrc = avatar || "";
-
-  const payment = host?.payment_methods || {};
-  const messageRate = payment.messages?.enabled ? Number(payment.messages?.ratePerMessage ?? 0) : 0;
-  const pictureRate = payment.pictures?.enabled ? Number(payment.pictures?.ratePerPicture ?? 0) : 0;
-  const voiceNoteRate = payment.voiceNotes?.enabled ? Number(payment.voiceNotes?.ratePerNote ?? 0) : 0;
-  const voiceRate = payment.voice?.enabled ? Number(payment.voice?.ratePerMinute ?? 0) : 0;
-  const videoRate = payment.video?.enabled ? Number(payment.video?.ratePerMinute ?? 0) : 0;
 
   const flags = normalizeArray(host?.flags);
   const expressions = normalizeArray(
@@ -114,17 +107,7 @@ console.log("HOSTCARD normalized", expressions);
       {/* CONTENT */}
       <div style={content}>
 
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, width: "100%", boxSizing: "border-box" }}>
-          <img src={avatarSrc} style={avatarStyle} />
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 9, paddingTop: 12, marginLeft: "auto", paddingRight: 55 }}>
-            {messageRate > 0 && <span style={rateItem}><MessageCircle size={22} strokeWidth={2.2} />${messageRate.toFixed(2)}</span>}
-            {pictureRate > 0 && <span style={rateItem}><Image size={22} strokeWidth={2.2} />${pictureRate.toFixed(2)}</span>}
-            {voiceNoteRate > 0 && <span style={rateItem}><Mic size={22} strokeWidth={2.2} />${voiceNoteRate.toFixed(2)}</span>}
-            {voiceRate > 0 && <span style={rateItem}><Phone size={22} strokeWidth={2.2} />${voiceRate.toFixed(2)}/min</span>}
-            {videoRate > 0 && <span style={rateItem}><Video size={22} strokeWidth={2.2} />${videoRate.toFixed(2)}/min</span>}
-          </div>
-        </div>
+        <img src={avatarSrc} style={avatarStyle} />
 
         <div style={nameStyle}>{displayName}</div>
 
@@ -565,17 +548,6 @@ const expressionChip = {
   display: "inline-block",
 };
 
-const rateItem = {
-  color: "rgba(255,255,255,0.95)",
-  fontSize: 16,
-  fontWeight: 800,
-  whiteSpace: "nowrap",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "flex-end",
-  gap: 7,
-};
-
 const identityRow = {
   display: "flex",
   alignItems: "center",
@@ -600,14 +572,6 @@ const flagBubble = {
 
   color: "#fff",
 };
-
-
-
-
-
-
-
-
 
 
 

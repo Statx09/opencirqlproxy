@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
-import { X, MessageCircle, Handshake, Phone, Video, CircleDollarSign } from "lucide-react";
+import { X, MessageCircle, Handshake, Phone, Video, Image, Mic, CircleDollarSign } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
 import MessagesModal from "./MessagesModal";
@@ -129,6 +129,11 @@ console.log("error =", error);
   const messageEnabled = paymentSettings.messages?.enabled ?? false;
   const messageRate = paymentSettings.messages?.ratePerMessage ?? 0;
 
+  const pictureEnabled = paymentSettings.pictures?.enabled ?? false;
+  const pictureRate = paymentSettings.pictures?.ratePerPicture ?? 0;
+  const voiceNoteEnabled = paymentSettings.voiceNotes?.enabled ?? false;
+  const voiceNoteRate = paymentSettings.voiceNotes?.ratePerNote ?? 0;
+
   const paymentCurrency =
     paymentSettings.currency || "USD";
 
@@ -140,7 +145,7 @@ console.log("error =", error);
     paymentSettings.usdcNetwork ||
     "Solana";
 
-  const hasCallRates = voiceEnabled || videoEnabled || (messageEnabled && messageRate > 0);
+  const hasCallRates = (messageEnabled && messageRate > 0) || (pictureEnabled && pictureRate > 0) || (voiceNoteEnabled && voiceNoteRate > 0) || (voiceEnabled && voiceRatePerMinute > 0) || (videoEnabled && videoRatePerMinute > 0);
 
   const hasSupportOptions =
     freeEnabled ||
@@ -192,6 +197,14 @@ console.log("error =", error);
             src={profile.banner_url || "https://placehold.co/600x200"}
             style={bannerImg}
           />
+
+          <div style={bannerRateColumn}>
+            {messageEnabled && messageRate > 0 && <span style={bannerRateItem}><MessageCircle size={22} strokeWidth={2.2} />${Number(messageRate).toFixed(2)}</span>}
+            {pictureEnabled && pictureRate > 0 && <span style={bannerRateItem}><Image size={22} strokeWidth={2.2} />${Number(pictureRate).toFixed(2)}</span>}
+            {voiceNoteEnabled && voiceNoteRate > 0 && <span style={bannerRateItem}><Mic size={22} strokeWidth={2.2} />${Number(voiceNoteRate).toFixed(2)}</span>}
+            {voiceEnabled && voiceRatePerMinute > 0 && <span style={bannerRateItem}><Phone size={22} strokeWidth={2.2} />${Number(voiceRatePerMinute).toFixed(2)}/min</span>}
+            {videoEnabled && videoRatePerMinute > 0 && <span style={bannerRateItem}><Video size={22} strokeWidth={2.2} />${Number(videoRatePerMinute).toFixed(2)}/min</span>}
+          </div>
         </div>
 
         {/* HEADER */}
@@ -275,59 +288,6 @@ console.log("error =", error);
           )}
         </div>
 
-        {/* ================= CALL RATES ================= */}
-
-        {hasCallRates && (
-          <div style={paymentDisplayCard}>
-
-            <div style={paymentDisplayRows}>
-
-              {messageEnabled && messageRate > 0 && (
-                <div style={paymentDisplayRow}>
-                  <div style={paymentDisplayLabel}>
-                    <MessageCircle size={15} strokeWidth={1.8} />
-                    <span>Message</span>
-                  </div>
-                  <div style={paymentDisplayValue}>
-                    {paymentCurrency} {Number(messageRate).toFixed(2)}
-                  </div>
-                </div>
-              )}
-
-              {voiceEnabled && (
-                <div style={paymentDisplayRow}>
-                  <div style={paymentDisplayLabel}>
-                    <Phone size={15} strokeWidth={1.8} />
-                    <span>Voice</span>
-                  </div>
-
-                  <div style={paymentDisplayValue}>
-                    {voiceRatePerMinute > 0
-                      ? `${paymentCurrency} ${voiceRatePerMinute.toFixed(2)} / min`
-                      : "Free"}
-                  </div>
-                </div>
-              )}
-
-              {videoEnabled && (
-                <div style={paymentDisplayRow}>
-                  <div style={paymentDisplayLabel}>
-                    <Video size={15} strokeWidth={1.8} />
-                    <span>Video</span>
-                  </div>
-
-                  <div style={paymentDisplayValue}>
-                    {videoRatePerMinute > 0
-                      ? `${paymentCurrency} ${videoRatePerMinute.toFixed(2)} / min`
-                      : "Free"}
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-          </div>
-        )}
         {/* SOCIAL / LINKS */}
         {profile.social_links?.[0] &&
           Object.values(profile.social_links[0]).some(Boolean) && (
@@ -502,20 +462,25 @@ console.log("error =", error);
   );
 }
 
-const bannerWrap = { width: "100%", height: 140, overflow: "hidden" };
+const bannerRateColumn = { position: "absolute", top: 10, right: 48, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 9, zIndex: 2 };
+const bannerRateItem = { color: "rgba(255,255,255,0.95)", fontSize: 16, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7 };
+
+const bannerWrap = { width: "100%", height: 100, overflow: "visible", position: "relative" };
 const bannerImg = { width: "100%", height: "100%", objectFit: "cover" };
 
 const header = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  marginTop: -40,
+  marginTop: -55,
   paddingBottom: 10,
+  position: "relative",
+  zIndex: 5,
 };
 
 const avatarStyle = {
-  width: 90,
-  height: 90,
+  width: 110,
+  height: 110,
   borderRadius: "50%",
   border: "4px solid #111827",
   objectFit: "cover",
@@ -631,8 +596,8 @@ const imageScroll = {
 };
 
 const imageThumb = {
-  width: 90,
-  height: 90,
+  width: 110,
+  height: 110,
   borderRadius: 12,
   objectFit: "cover",
   cursor: "pointer",
@@ -691,40 +656,6 @@ const glassActionButton = {
   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.06)",
   transition: "background 0.15s ease, border-color 0.15s ease, transform 0.15s ease",
 };
-const paymentDisplayCard = {
-  margin: "8px 16px 2px",
-  padding: "4px 0",
-};
-const paymentDisplayRows = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 14,
-  marginBottom: 2,
-};
-
-const paymentDisplayRow = {
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-};
-
-const paymentDisplayLabel = {
-  display: "flex",
-  alignItems: "center",
-  gap: 5,
-  color: "rgba(255,255,255,0.78)",
-  fontSize: 12,
-  fontWeight: 600,
-};
-
-const paymentDisplayValue = {
-  color: "rgba(255,255,255,0.95)",
-  fontSize: 12,
-  fontWeight: 700,
-  textAlign: "right",
-};
-
 const paymentPill = {
   display: "inline-flex",
   alignItems: "center",
@@ -770,6 +701,24 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

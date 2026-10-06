@@ -57,9 +57,6 @@ const [topics, setTopics] = useState([]);
     requestPayment: false,
     voice: { enabled: false, ratePerMinute: 0.60 },
     video: { enabled: false, ratePerMinute: 0.60 },
-    messages: { enabled: false, ratePerMessage: 0.10 },
-    pictures: { enabled: false, ratePerPicture: 0.50 },
-    voiceNotes: { enabled: false, ratePerNote: 0.50 }
   });
 
 /* ================= UPLOAD ================= */
@@ -177,10 +174,7 @@ setTopics(profile.topics || []);
     voice: { enabled: savedPayments.voice?.enabled ?? false, ratePerMinute: savedPayments.voice?.ratePerMinute ?? savedPayments.voice?.price ?? 0.60 },
 
     video: { enabled: savedPayments.video?.enabled ?? false, ratePerMinute: savedPayments.video?.ratePerMinute ?? savedPayments.video?.price ?? 0.60 },
-    messages: { enabled: savedPayments.messages?.enabled ?? false, ratePerMessage: savedPayments.messages?.ratePerMessage ?? savedPayments.messages?.price ?? 0.10 },
-
-      pictures: { enabled: savedPayments.pictures?.enabled ?? false, ratePerPicture: savedPayments.pictures?.ratePerPicture ?? 0.50 },
-      voiceNotes: { enabled: savedPayments.voiceNotes?.enabled ?? false, ratePerNote: savedPayments.voiceNotes?.ratePerNote ?? 0.50 },  });
+  });
 }, [profile]);
 
   /* ================= SAVE ================= */
@@ -241,19 +235,6 @@ expression_badges: expressions,
       enabled: paymentSettings.video?.enabled ?? false,      ratePerMinute: paymentSettings.video?.ratePerMinute ?? 0.60,
     },
 
-    messages: {
-      enabled: paymentSettings.messages?.enabled ?? false,
-      ratePerMessage: paymentSettings.messages?.ratePerMessage ?? 0.10,
-        pictures: {
-          enabled: paymentSettings.pictures?.enabled ?? false,
-          ratePerPicture: paymentSettings.pictures?.ratePerPicture ?? 0.50,
-        },
-        voiceNotes: {
-          enabled: paymentSettings.voiceNotes?.enabled ?? false,
-          ratePerNote: paymentSettings.voiceNotes?.ratePerNote ?? 0.50,
-        },
-    },
-
     enabled: [
       ...(paypal.trim() ? ["paypal"] : []),
       ...(kofi.trim() ? ["kofi"] : []),
@@ -309,7 +290,7 @@ console.log("PROFILE UPSERT RESULT:", JSON.stringify({ data, error }, null, 2));
       }}
     />
 
-    <label htmlFor="bannerUpload" style={uploadBtnBanner}>
+    <label htmlFor="bannerUpload" style={uploadBtn}>
       Upload Banner
     </label>
   </div>
@@ -319,7 +300,12 @@ console.log("PROFILE UPSERT RESULT:", JSON.stringify({ data, error }, null, 2));
           <button
             type="button"
             onClick={onViewCard}
-            style={uploadBtnSmall}
+            style={{
+              ...logoutTopBtn,
+              border: "1px solid rgba(124,58,237,0.6)",
+              background: "rgba(124,58,237,0.14)",
+              color: "#c4b5fd",
+            }}
           >
             View My Card
           </button>
@@ -362,7 +348,7 @@ if (url) setAvatarUrl(url);
               background: tab === t ? "#7c3aed" : "#222",
             }}
           >
-            {t === "payments" ? "Call Rates" : t.charAt(0).toUpperCase() + t.slice(1)}
+            {t}
           </button>
         ))}
       </div>
@@ -754,214 +740,6 @@ if (url) setAvatarUrl(url);
                   </div>
                 )}
               </div>
-              {/* MESSAGES */}
-              <div style={rateCard}>
-                <div style={rateHeader}>
-                  <div>
-                    <div style={paymentName}>Messages</div>
-                    <div style={mutedText}>
-                      Allow people to send paid messages. Free when OFF.
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPaymentSettings(prev => ({
-                        ...prev,
-                        messages: {
-                          ...prev.messages,
-                          enabled: !prev.messages?.enabled,
-                        },
-                      }))
-                    }
-                    style={toggleBtn(paymentSettings.messages?.enabled)}
-                  >
-                    {paymentSettings.messages?.enabled ? "ON" : "OFF"}
-                  </button>
-                </div>
-
-                {paymentSettings.messages?.enabled && (
-                  <div style={sliderGroup}>
-                    <div style={sliderHeader}>
-                      <span style={fieldLabel}>Rate per message</span>
-                      <strong style={sliderValue}>
-                        {paymentSettings.currency}{" "}
-                        {(paymentSettings.messages?.ratePerMessage ?? 0.10).toFixed(2)}
-                      </strong>
-                    </div>
-
-                    <input
-                      type="range"
-                      min="0.05"
-                      max="1.00"
-                      step="0.05"
-                      value={paymentSettings.messages?.ratePerMessage ?? 0.10}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          messages: {
-                            ...prev.messages,
-                            ratePerMessage: Number(e.target.value),
-                          },
-                        }))
-                      }
-                      style={paymentSlider}
-                    />
-
-                    <div style={sliderScale}>
-                      <span>{paymentSettings.currency} 0.05</span>
-                      <span>{paymentSettings.currency} 0.25</span>
-                      <span>{paymentSettings.currency} 0.50</span>
-                      <span>{paymentSettings.currency} 0.75</span>
-                      <span>{paymentSettings.currency} 1.00</span>
-                    </div>
-
-                    <div style={paymentRateHelp}>
-                      Each new message is charged at this rate.
-                    </div>
-                  </div>
-                )}
-              </div>
-              {/* PICTURES */}
-              <div style={rateCard}>
-                <div style={rateHeader}>
-                  <div>
-                    <div style={paymentName}>Pictures</div>
-                    <div style={mutedText}>
-                      Allow people to send paid pictures. Free when OFF.
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPaymentSettings(prev => ({
-                        ...prev,
-                        pictures: {
-                          ...prev.pictures,
-                          enabled: !prev.pictures?.enabled,
-                        },
-                      }))
-                    }
-                    style={toggleBtn(paymentSettings.pictures?.enabled)}
-                  >
-                    {paymentSettings.pictures?.enabled ? "ON" : "OFF"}
-                  </button>
-                </div>
-
-                {paymentSettings.pictures?.enabled && (
-                  <div style={sliderGroup}>
-                    <div style={sliderHeader}>
-                      <span style={fieldLabel}>Rate per picture</span>
-                      <strong style={sliderValue}>
-                        {paymentSettings.currency}{" "}
-                        {(paymentSettings.pictures?.ratePerPicture ?? 0.50).toFixed(2)}
-                      </strong>
-                    </div>
-
-                    <input
-                      type="range"
-                      min="0.05"
-                      max="5.00"
-                      step="0.05"
-                      value={paymentSettings.pictures?.ratePerPicture ?? 0.50}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          pictures: {
-                            ...prev.pictures,
-                            ratePerPicture: Number(e.target.value),
-                          },
-                        }))
-                      }
-                      style={paymentSlider}
-                    />
-
-                    <div style={sliderScale}>
-                      <span>{paymentSettings.currency} 0.05</span>
-                      <span>{paymentSettings.currency} 0.50</span>
-                      <span>{paymentSettings.currency} 1.00</span>
-                      <span>{paymentSettings.currency} 2.50</span>
-                      <span>{paymentSettings.currency} 5.00</span>
-                    </div>
-
-                    <div style={paymentRateHelp}>
-                      Each picture is charged at this rate.
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* VOICE NOTES */}
-              <div style={rateCard}>
-                <div style={rateHeader}>
-                  <div>
-                    <div style={paymentName}>Voice Notes</div>
-                    <div style={mutedText}>
-                      Allow people to send paid voice notes. Free when OFF.
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setPaymentSettings(prev => ({
-                        ...prev,
-                        voiceNotes: {
-                          ...prev.voiceNotes,
-                          enabled: !prev.voiceNotes?.enabled,
-                        },
-                      }))
-                    }
-                    style={toggleBtn(paymentSettings.voiceNotes?.enabled)}
-                  >
-                    {paymentSettings.voiceNotes?.enabled ? "ON" : "OFF"}
-                  </button>
-                </div>
-
-                {paymentSettings.voiceNotes?.enabled && (
-                  <div style={sliderGroup}>
-                    <div style={sliderHeader}>
-                      <span style={fieldLabel}>Rate per voice note</span>
-                      <strong style={sliderValue}>
-                        {paymentSettings.currency}{" "}
-                        {(paymentSettings.voiceNotes?.ratePerNote ?? 0.50).toFixed(2)}
-                      </strong>
-                    </div>
-
-                    <input
-                      type="range"
-                      min="0.05"
-                      max="5.00"
-                      step="0.05"
-                      value={paymentSettings.voiceNotes?.ratePerNote ?? 0.50}
-                      onChange={e =>
-                        setPaymentSettings(prev => ({
-                          ...prev,
-                          voiceNotes: {
-                            ...prev.voiceNotes,
-                            ratePerNote: Number(e.target.value),
-                          },
-                        }))
-                      }
-                      style={paymentSlider}
-                    />
-
-                    <div style={sliderScale}>
-                      <span>{paymentSettings.currency} 0.05</span>
-                      <span>{paymentSettings.currency} 0.50</span>
-                      <span>{paymentSettings.currency} 1.00</span>
-                      <span>{paymentSettings.currency} 2.50</span>
-                      <span>{paymentSettings.currency} 5.00</span>
-                    </div>
-
-                    <div style={paymentRateHelp}>
-                      Each voice note is charged at this rate.
-                    </div>
-                  </div>
-                )}
-              </div>
               {/* USDC */}
               <div style={{
                 ...paymentRow,
@@ -1046,8 +824,8 @@ const avatarWrap = {
 };
 
 const avatar = {
-  width: 150,
-  height: 150,
+  width: 120,
+  height: 120,
   borderRadius: "50%",
   border: "4px solid #fff",
   objectFit: "cover",
@@ -1063,20 +841,6 @@ const uploadBtn = {
   background: "#7c3aed",
   color: "#fff",
   fontSize: 12,
-  cursor: "pointer",
-  border: "none",
-};
-
-const uploadBtnBanner = {
-  position: "absolute",
-  bottom: 10,
-  right: 10,
-  marginTop: 0,
-  padding: "5px 8px",
-  borderRadius: 6,
-  background: "#333",
-  color: "#fff",
-  fontSize: 11,
   cursor: "pointer",
   border: "none",
 };
@@ -1491,30 +1255,6 @@ const mediaCount = {
   marginTop: 8,
   marginBottom: 0,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

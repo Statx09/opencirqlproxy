@@ -1,0 +1,987 @@
+﻿export const expressions = [
+  {
+    id: "inspirational_quote",
+    label: "Inspirational Quote",
+    category: "Creative",
+    svg: "inspirational_quote",
+    color: "#8B5CF6",
+    keywords: ["inspirational", "inspiration", "quote", "motivation", "positive"],
+  },
+{
+    id: "youtube",
+    label: "YouTube",
+    category: "Creative",
+    svg: "youtube",
+    color: "#FF0000",
+    keywords: ["youtube", "video", "videos", "creator", "content creator"],
+  },
+
+{
+  id: "peace_for_palestine",
+  label: "Peace for Palestine",
+  category: "Identity",
+  svg: "peace_for_palestine",
+  color: "#22C55E",
+  keywords: [
+    "peace",
+    "palestine",
+    "peace for palestine",
+  ],
+},
+
+{
+  id: "night_owl",
+  label: "Night Owl",
+  category: "Personality",
+  svg: "night_owl",
+  color: "#6366F1",
+  keywords: [
+    "night owl",
+    "night",
+    "late night",
+    "owl",
+    "personality",
+  ],
+},
+
+{
+  id: "gauntlet",
+  label: "Gauntlet",
+  category: "Identity",
+  svg: "gauntlet",
+  color: "#F59E0B",
+  keywords: [
+    "gauntlet",
+    "challenge",
+    "fighter",
+    "strength",
+    "gaming",
+  ],
+},
+{
+  id: "manchester_united",
+  label: "Manchester United",
+  category: "Sports",
+  svg: "manchester_united",
+  color: "#DA291C",
+  keywords: [
+    "manchester united",
+    "man united",
+    "man utd",
+    "mufc",
+    "united",
+    "football",
+    "soccer",
+    "premier league",
+  ],
+},
+
+{
+  id: "liverpool",
+  label: "Liverpool",
+  category: "Sports",
+  svg: "liverpool",
+  color: "#C8102E",
+  keywords: [
+    "liverpool",
+    "liverpool fc",
+    "lfc",
+    "reds",
+    "football",
+    "soccer",
+    "premier league",
+  ],
+},
+
+{
+  id: "arsenal",
+  label: "Arsenal",
+  category: "Sports",
+  svg: "arsenal",
+  color: "#EF0107",
+  keywords: [
+    "arsenal",
+    "arsenal fc",
+    "gunners",
+    "football",
+    "soccer",
+    "premier league",
+  ],
+},
+
+{
+  id: "chelsea",
+  label: "Chelsea",
+  category: "Sports",
+  svg: "chelsea",
+  color: "#034694",
+  keywords: [
+    "chelsea",
+    "chelsea fc",
+    "blues",
+    "football",
+    "soccer",
+    "premier league",
+  ],
+},
+
+{
+  id: "manchester_city",
+  label: "Manchester City",
+  category: "Sports",
+  svg: "manchester_city",
+  color: "#6CABDD",
+  keywords: [
+    "manchester city",
+    "man city",
+    "mancity",
+    "football",
+    "soccer",
+    "premier league",
+  ],
+},
+
+{
+  id: "real_madrid",
+  label: "Real Madrid",
+  category: "Sports",
+  svg: "real_madrid",
+  color: "#FFFFFF",
+  keywords: [
+    "real madrid",
+    "realmadrid",
+    "los blancos",
+    "football",
+    "soccer",
+    "laliga",
+  ],
+},
+
+{
+  id: "barcelona",
+  label: "Barcelona",
+  category: "Sports",
+  svg: "barcelona",
+  color: "#A50044",
+  keywords: [
+    "barcelona",
+    "fc barcelona",
+    "barca",
+    "football",
+    "soccer",
+    "laliga",
+  ],
+},
+
+  // ================= FREE SVG / IMAGE EXPRESSIONS =================
+
+  {
+    id: "american_trump",
+    label: "American Trump",
+    category: "Politics",
+    svg: "american_trump",
+    color: "#3B82F6",
+    keywords: ["trump", "donald trump", "america", "usa"],
+  },
+
+  {
+    id: "avatar_the_last_airbender_lunch_in_republic_city",
+    label: "Avatar: Lunch in Republic City",
+    category: "Entertainment",
+    svg: "avatar_the_last_airbender_lunch_in_republic_city",
+    color: "#F59E0B",
+    keywords: ["avatar", "last airbender", "republic city"],
+  },
+
+  {
+    id: "heart_cats",
+    label: "Heart Cats",
+    category: "Lifestyle",
+    svg: "heart_cats",
+    color: "#EF4444",
+    keywords: ["heart", "cats", "love", "cute"],
+  },
+
+  {
+    id: "i_will_always_be_with_you",
+    label: "I Will Always Be With You",
+    category: "Relationships",
+    svg: "i_will_always_be_with_you",
+    color: "#EC4899",
+    keywords: ["love", "relationship", "together", "romantic"],
+  },
+
+  {
+    id: "jamaican_flag_patriotic_symbol",
+    label: "Jamaican Flag",
+    category: "Identity",
+    svg: "jamaican_flag_patriotic_symbol",
+    color: "#22C55E",
+    keywords: ["jamaica", "jamaican", "flag", "caribbean"],
+  },
+
+  {
+    id: "peace_and_war",
+    label: "Peace and War",
+    category: "Politics",
+    svg: "peace_and_war",
+    color: "#64748B",
+    keywords: ["peace", "war", "conflict"],
+  },
+
+  {
+    id: "peace_for_palestine_vector_image",
+    label: "Peace for Palestine",
+    category: "Politics",
+    svg: "peace_for_palestine_vector_image",
+    color: "#22C55E",
+    keywords: ["palestine", "peace"],
+  },
+
+  {
+    id: "peace_sign_with_wordpeace",
+    label: "Peace Sign",
+    category: "Lifestyle",
+    svg: "peace_sign_with_wordpeace",
+    color: "#22C55E",
+    keywords: ["peace", "peace sign"],
+  },
+
+  {
+    id: "president_putin",
+    label: "President Putin",
+    category: "Politics",
+    svg: "president_putin",
+    color: "#64748B",
+    keywords: ["putin", "vladimir putin", "russia"],
+  },
+
+  {
+    id: "trump_question_mark",
+    label: "Trump Question Mark",
+    category: "Politics",
+    svg: "trump_question_mark",
+    color: "#F59E0B",
+    keywords: ["trump", "question", "donald trump"],
+  },
+
+  {
+    id: "vector_illustration_of_red_heart4834",
+    label: "Red Heart",
+    category: "Lifestyle",
+    svg: "vector_illustration_of_red_heart4834",
+    color: "#EF4444",
+    keywords: ["heart", "love", "romance"],
+  },
+
+  {
+    id: "vintage_poster_with_rosie_the_riveter",
+    label: "Rosie the Riveter",
+    category: "Identity",
+    svg: "vintage_poster_with_rosie_the_riveter",
+    color: "#F97316",
+    keywords: ["rosie", "riveter", "vintage", "poster"],
+  },
+
+  {
+    id: "war_kills_poster_vector_drawing",
+    label: "War Kills",
+    category: "Politics",
+    svg: "war_kills_poster_vector_drawing",
+    color: "#EF4444",
+    keywords: ["war", "peace", "anti-war"],
+  },
+
+  {
+    id: "waving_flag_of_israel",
+    label: "Israeli Flag",
+    category: "Identity",
+    svg: "waving_flag_of_israel",
+    color: "#2563EB",
+    keywords: ["israel", "israeli", "flag"],
+  },
+
+  {
+    id: "working_class_kids_against_racism_vector_image",
+    label: "Working Class Kids Against Racism",
+    category: "Community",
+    svg: "working_class_kids_against_racism_vector_image",
+    color: "#8B5CF6",
+    keywords: ["racism", "anti-racism", "equality", "community"],
+  },
+
+
+{
+id: "laughing_buddha",
+label: "Laughing Buddha",
+category: "Personality",
+svg: "laughing_buddha",
+color: "#F59E0B",
+keywords: ["laughing", "buddha", "happiness", "joy"],
+},
+
+{
+id: "laughing_out_loud",
+label: "Laughing Out Loud",
+category: "Personality",
+svg: "laughing_out_loud",
+color: "#F59E0B",
+keywords: ["laughing", "laughter", "funny", "lol"],
+},
+
+{
+id: "laughing_leprechaun",
+label: "Laughing Leprechaun",
+category: "Personality",
+svg: "laughing_leprechaun",
+color: "#22C55E",
+keywords: ["laughing", "leprechaun", "funny", "irish"],
+},
+
+{
+id: "rainbow_caticorn",
+label: "Rainbow Caticorn",
+category: "Lifestyle",
+svg: "rainbow_caticorn",
+src: "/expressions/rainbow-caticorn.svg",
+color: "#EC4899",
+keywords: ["rainbow", "cat", "caticorn", "cute", "colorful"],
+},
+
+{
+id: "rainbow_around_yinyang",
+label: "Rainbow Around Yin Yang",
+category: "Lifestyle",
+svg: "rainbow_around_yinyang",
+color: "#8B5CF6",
+keywords: ["rainbow", "yin yang", "balance", "harmony"],
+},
+
+{
+id: "colorful_rainbow_horse",
+label: "Colorful Rainbow Horse",
+category: "Lifestyle",
+svg: "colorful_rainbow_horse",
+color: "#EC4899",
+keywords: ["rainbow", "horse", "colorful", "animals"],
+},
+
+{
+id: "adventure_hat_vector_image",
+label: "Adventure Hat",
+category: "Lifestyle",
+svg: "adventure_hat_vector_image",
+color: "#F97316",
+keywords: ["adventure", "hat", "travel", "exploration"],
+},
+
+{
+id: "old_woodcut_sun_vector_image",
+label: "Old Woodcut Sun",
+category: "Lifestyle",
+svg: "old_woodcut_sun_vector_image",
+color: "#F59E0B",
+keywords: ["sun", "sunshine", "woodcut", "nature"],
+},
+
+{
+id: "bruce_lee_1973",
+label: "Bruce Lee 1973",
+category: "Entertainment",
+svg: "bruce_lee_1973",
+color: "#EF4444",
+keywords: ["bruce lee", "martial arts", "kung fu", "actor"],
+},
+
+{
+id: "vector_icon_for_coffee_shop",
+label: "Coffee Shop",
+category: "Lifestyle",
+svg: "vector_icon_for_coffee_shop",
+color: "#B45309",
+keywords: ["coffee", "coffee shop", "cafe"],
+},
+
+{
+id: "world_flags_globe",
+label: "World Flags Globe",
+category: "Identity",
+svg: "world_flags_globe",
+color: "#3B82F6",
+keywords: ["world", "flags", "countries", "globe", "travel"],
+},
+
+{
+id: "satisfaction_guaranteed_kliponius_font_as_paths",
+label: "Satisfaction Guaranteed",
+category: "Personality",
+svg: "satisfaction_guaranteed_kliponius_font_as_paths",
+color: "#22C55E",
+keywords: ["satisfaction", "guaranteed", "positive", "happy"],
+},
+{
+id: "whale_3",
+label: "Whale #3",
+category: "Animals",
+svg: "whale_3",
+color: "#22C55E",
+keywords: ["whale", "ocean", "sea", "marine"],
+},
+{
+id: "chromatic_floral_pattern_dolphin_3",
+label: "Chromatic Floral Pattern Dolphin #3",
+category: "Animals",
+svg: "chromatic_floral_pattern_dolphin_3",
+color: "#22C55E",
+keywords: ["dolphin", "ocean", "sea", "marine", "floral"],
+},
+{
+id: "bat_vector_silhouette",
+label: "Bat Vector Silhouette",
+category: "Animals",
+svg: "bat_vector_silhouette",
+color: "#22C55E",
+keywords: ["bat", "animal", "night", "wildlife"],
+},
+
+  {
+    id: "gerald_g_ice_cream_cones_ff_menu_9",
+    label: "Gerald G Ice Cream Cones Ff Menu 9",
+    category: "Lifestyle",
+    svg: "gerald_g_ice_cream_cones_ff_menu_9",
+    color: "#22C55E",
+    keywords: ["gerald g ice cream cones ff menu 9"],
+  },
+
+  {
+    id: "no_food_or_drink_sign_vector_image",
+    label: "No Food Or Drink Sign Vector Image",
+    category: "Lifestyle",
+    svg: "no_food_or_drink_sign_vector_image",
+    color: "#22C55E",
+    keywords: ["no food or drink sign vector image"],
+  },
+
+  {
+    id: "organic_food_label",
+    label: "Organic Food Label",
+    category: "Lifestyle",
+    svg: "organic_food_label",
+    src: "/expressions/organic_food_label.svg",
+    color: "#22C55E",
+    keywords: ["organic food label"],
+  },
+  {
+    id: "south_africa",
+    label: "South Africa",
+    category: "Countries",
+    svg: "south_africa",
+    color: "#8B5CF6",
+    keywords: ["south africa", "south african", "sa", "mzansi"],
+  },
+  {
+    id: "usa",
+    label: "USA",
+    category: "Countries",
+    svg: "usa",
+    color: "#8B5CF6",
+    keywords: ["usa", "united states", "america", "american"],
+  },
+{
+    id: "funny",
+    label: "Funny",
+    category: "Personality",
+    svg: "funny",
+    color: "#8B5CF6",
+    keywords: ["funny", "humor", "humour", "comedy", "jokes", "lol"],
+  },
+{
+    id: "cannabis",
+    label: "Cannabis",
+    category: "Lifestyle",
+    svg: "cannabis",
+    color: "#22C55E",
+    keywords: ["cannabis", "marijuana", "weed", "420", "smoking"],
+  },
+  {
+    id: "dope_poster",
+    label: "Dope",
+    category: "Lifestyle",
+    svg: "dope_poster",
+    color: "#8B5CF6",
+    keywords: ["dope", "420", "marijuana", "weed"],
+  },
+  {
+    id: "bong_marijuana_prismatic",
+    label: "Prismatic Cannabis",
+    category: "Lifestyle",
+    svg: "bong_marijuana_prismatic",
+    color: "#22C55E",
+    keywords: ["cannabis", "marijuana", "bong", "420", "weed"],
+  },
+  {
+    id: "cross_and_heart",
+    label: "Cross and Heart",
+    category: "Identity",
+    svg: "cross_and_heart",
+    color: "#EF4444",
+    keywords: ["cross", "heart", "faith", "love"],
+  },
+  {
+    id: "bible_vector_image",
+    label: "Bible",
+    category: "Identity",
+    svg: "bible_vector_image",
+    color: "#F59E0B",
+    keywords: ["bible", "christian", "faith", "religion"],
+  },
+  {
+    id: "jesus_surfing",
+    label: "Jesus Surfing",
+    category: "Lifestyle",
+    svg: "jesus_surfing",
+    color: "#38BDF8",
+    keywords: ["jesus", "surfing", "faith", "surf", "christian"],
+  },
+  {
+    id: "muslim_symbol",
+    label: "Muslim Symbol",
+    category: "Identity",
+    svg: "muslim_symbol",
+    color: "#22C55E",
+    keywords: ["muslim", "islam", "islamic", "faith", "religion"],
+  },
+  {
+    id: "bob_marley",
+    label: "Bob Marley",
+    category: "Entertainment",
+    svg: "bob_marley",
+    color: "#22C55E",
+    keywords: ["bob marley", "reggae", "jamaica", "music"],
+  },
+  {
+    id: "rastafarian_head",
+    label: "Rastafarian",
+    category: "Identity",
+    svg: "rastafarian_head",
+    color: "#F59E0B",
+    keywords: ["rastafarian", "rasta", "reggae", "jamaica"],
+  },
+  {
+    id: "lotus_blossom",
+    label: "Lotus Blossom",
+    category: "Lifestyle",
+    svg: "lotus_blossom",
+    color: "#EC4899",
+    keywords: ["lotus", "flower", "meditation", "peace"],
+  },
+  {
+    id: "graffiti_cats",
+    label: "Graffiti Cats",
+    category: "Animals",
+    svg: "graffiti_cats",
+    color: "#A855F7",
+    keywords: ["cats", "cat", "graffiti", "street art"],
+  },
+  {
+    id: "golden_royal_crown",
+    label: "Royal Crown",
+    category: "Identity",
+    svg: "golden_royal_crown",
+    color: "#F59E0B",
+    keywords: ["crown", "royal", "king", "queen", "gold"],
+  },
+  {
+    id: "hugs_and_kisses",
+    label: "Hugs and Kisses",
+    category: "Relationships",
+    svg: "hugs_and_kisses",
+    color: "#EC4899",
+    keywords: ["love", "hugs", "kisses", "relationship", "romance"],
+  },
+  {
+    id: "south_africa_art",
+    label: "South Africa",
+    category: "Countries",
+    svg: "south_africa",
+    color: "#22C55E",
+    keywords: ["south africa", "south african", "africa", "mzansi"],
+  },
+  {
+    id: "france",
+    label: "France",
+    category: "Countries",
+    svg: "france",
+    color: "#2563EB",
+    keywords: ["france", "french", "europe"],
+  },
+  {
+    id: "spain",
+    label: "Spain",
+    category: "Countries",
+    svg: "spain",
+    color: "#EF4444",
+    keywords: ["spain", "spanish", "europe"],
+  },
+  {
+    id: "netherlands",
+    label: "Netherlands",
+    category: "Countries",
+    svg: "netherlands",
+    color: "#EF4444",
+    keywords: ["netherlands", "dutch", "holland", "europe"],
+  },
+  {
+    id: "usa_art",
+    label: "USA",
+    category: "Countries",
+    svg: "usa",
+    color: "#2563EB",
+    keywords: ["usa", "united states", "america", "american"],
+  },
+  {
+    id: "stay_wild",
+    label: "Stay Wild",
+    category: "Lifestyle",
+    svg: "stay_wild",
+    src: "/expressions/stay_wild.svg",
+    color: "#22C55E",
+    keywords: ["stay wild", "wild", "adventure", "freedom"],
+  },
+
+  {
+    id: "organic_food_label",
+    label: "Organic Food",
+    category: "Lifestyle",
+    svg: "organic_food_label",
+    src: "/expressions/organic_food_label.svg",
+    color: "#22C55E",
+    keywords: ["organic", "food", "healthy", "natural"],
+  },
+
+  {
+    id: "ice_cream_cones",
+    label: "Ice Cream",
+    category: "Food",
+    svg: "gerald_g_ice_cream_cones_ff_menu_9",
+    src: "/expressions/gerald_g_ice_cream_cones_ff_menu_9.svg",
+    color: "#F472B6",
+    keywords: ["ice cream", "dessert", "sweet", "food"],
+  },
+
+  {
+    id: "no_food_or_drink",
+    label: "No Food or Drink",
+    category: "Lifestyle",
+    svg: "no_food_or_drink_sign_vector_image",
+    src: "/expressions/no_food_or_drink_sign_vector_image.svg",
+    color: "#EF4444",
+    keywords: ["no food", "no drink", "food", "drink", "sign"],
+  },
+
+  {
+    id: "butterfly",
+    label: "Butterfly",
+    category: "Nature",
+    svg: "prismatic_monarch_butterfly_ii",
+    src: "/expressions/prismatic_monarch_butterfly_ii.svg",
+    color: "#A855F7",
+    keywords: ["butterfly", "nature", "monarch", "colorful"],
+  },
+
+  {
+    id: "girl_dancing",
+    label: "Dancing",
+    category: "Lifestyle",
+    svg: "girl_dancing",
+    src: "/expressions/girl_dancing.svg",
+    color: "#EC4899",
+    keywords: ["dance", "dancing", "music", "fun"],
+  },
+
+  {
+    id: "bat",
+    label: "Bat",
+    category: "Nature",
+    svg: "bat_vector_silhouette",
+    src: "/expressions/bat_vector_silhouette.svg",
+    color: "#6B7280",
+    keywords: ["bat", "night", "halloween", "animal"],
+  },
+
+  {
+    id: "dolphin",
+    label: "Dolphin",
+    category: "Nature",
+    svg: "chromatic_floral_pattern_dolphin_3",
+    src: "/expressions/chromatic_floral_pattern_dolphin_3.svg",
+    color: "#06B6D4",
+    keywords: ["dolphin", "ocean", "sea", "marine"],
+  },
+
+  {
+    id: "whale",
+    label: "Whale",
+    category: "Nature",
+    svg: "whale_3",
+    src: "/expressions/whale_3.svg",
+    color: "#3B82F6",
+    keywords: ["whale", "ocean", "sea", "marine"],
+  },
+
+  {
+    id: "coffee_shop",
+    label: "Coffee Shop",
+    category: "Food",
+    svg: "vector-icon-for-coffee-shop",
+    src: "/expressions/vector-icon-for-coffee-shop.svg",
+    color: "#92400E",
+    keywords: ["coffee", "cafe", "coffee shop", "drink"],
+  },
+
+  {
+    id: "bruce_lee",
+    label: "Bruce Lee",
+    category: "Entertainment",
+    svg: "bruce-lee-1973",
+    src: "/expressions/bruce-lee-1973.svg",
+    color: "#F59E0B",
+    keywords: ["bruce lee", "martial arts", "kung fu", "movie"],
+  },
+
+  {
+    id: "sun",
+    label: "Sun",
+    category: "Nature",
+    svg: "old-woodcut-sun-vector-image",
+    src: "/expressions/old-woodcut-sun-vector-image.svg",
+    color: "#F59E0B",
+    keywords: ["sun", "summer", "nature", "warm"],
+  },
+
+  {
+    id: "rainbow_horse",
+    label: "Rainbow Horse",
+    category: "Nature",
+    svg: "colorful-rainbow-horse",
+    src: "/expressions/colorful-rainbow-horse.svg",
+    color: "#EC4899",
+    keywords: ["horse", "rainbow", "colorful", "animal"],
+  },
+
+  {
+    id: "rainbow_yinyang",
+    label: "Rainbow Yin Yang",
+    category: "Lifestyle",
+    svg: "rainbow-around-yinyang",
+    src: "/expressions/rainbow-around-yinyang.svg",
+    color: "#8B5CF6",
+    keywords: ["rainbow", "yin yang", "balance", "peace"],
+  },
+
+  {
+    id: "rainbow_caticorn",
+    label: "Rainbow Caticorn",
+    category: "Fun",
+    svg: "rainbow-caticorn",
+    src: "/expressions/rainbow-caticorn.svg",
+    color: "#EC4899",
+    keywords: ["rainbow", "cat", "unicorn", "cute", "fun"],
+  },
+  {
+    id: "sassy_since_birth",
+    label: "Sassy Since Birth",
+    category: "Fun",
+    svg: "sassy_since_birth",
+    src: "/expressions/sassy_since_birth.svg",
+    color: "#EC4899",
+    keywords: ["sassy", "attitude", "fun", "sarcastic"],
+  },
+
+  {
+    id: "lucky_af",
+    label: "Lucky AF",
+    category: "Fun",
+    svg: "lucky_af",
+    src: "/expressions/lucky_af.svg",
+    color: "#22C55E",
+    keywords: ["lucky", "luck", "fun", "irish"],
+  },
+
+  {
+    id: "hey_boo",
+    label: "Hey Boo",
+    category: "Fun",
+    svg: "hey_boo",
+    src: "/expressions/hey_boo.svg",
+    color: "#F97316",
+    keywords: ["boo", "halloween", "spooky", "fun"],
+  },
+
+  {
+    id: "sarcastic",
+    label: "Sarcastic",
+    category: "Fun",
+    svg: "sarcastic",
+    src: "/expressions/sarcastic.svg",
+    color: "#A855F7",
+    keywords: ["sarcastic", "sarcasm", "funny", "attitude"],
+  },
+
+  {
+    id: "coffee_mama",
+    label: "Coffee Mama",
+    category: "Food",
+    svg: "coffee_mama",
+    src: "/expressions/coffee_mama.svg",
+    color: "#92400E",
+    keywords: ["coffee", "mama", "mom", "drink"],
+  },
+
+  {
+    id: "irish",
+    label: "100% Irish",
+    category: "Culture",
+    svg: "irish",
+    src: "/expressions/irish.svg",
+    color: "#22C55E",
+    keywords: ["irish", "ireland", "green", "irish pride"],
+  },
+
+  {
+    id: "kindness",
+    label: "Kindness",
+    category: "Positive",
+    svg: "kindness",
+    src: "/expressions/kindness.svg",
+    color: "#EC4899",
+    keywords: ["kindness", "positive", "love", "good vibes"],
+  },
+
+  {
+    id: "coffee_quote",
+    label: "Coffee Quote",
+    category: "Food",
+    svg: "coffee_quote",
+    src: "/expressions/coffee_quote.svg",
+    color: "#92400E",
+    keywords: ["coffee", "quote", "caffeine", "drink"],
+  },
+
+  {
+    id: "he_is_risen",
+    label: "He Is Risen",
+    category: "Positive",
+    svg: "he_is_risen",
+    src: "/expressions/he_is_risen.svg",
+    color: "#F59E0B",
+    keywords: ["risen", "easter", "positive", "faith"],
+  },
+
+  {
+    id: "witch_in_training",
+    label: "Witch In Training",
+    category: "Fun",
+    svg: "witch_in_training",
+    src: "/expressions/witch_in_training.svg",
+    color: "#8B5CF6",
+    keywords: ["witch", "halloween", "spooky", "fun"],
+  },
+
+  {
+    id: "choose_happy",
+    label: "Choose Happy",
+    category: "Positive",
+    svg: "choose_happy",
+    src: "/expressions/choose_happy.svg",
+    color: "#F59E0B",
+    keywords: ["happy", "positive", "joy", "good vibes"],
+  },
+
+  {
+    id: "summer_beach",
+    label: "Peace Love Beach",
+    category: "Lifestyle",
+    svg: "summer_beach",
+    src: "/expressions/summer_beach.svg",
+    color: "#06B6D4",
+    keywords: ["summer", "beach", "peace", "love", "travel"],
+  },
+
+  {
+    id: "coffee_addict",
+    label: "Coffee Addict",
+    category: "Food",
+    svg: "coffee_addict",
+    src: "/expressions/coffee_addict.svg",
+    color: "#92400E",
+    keywords: ["coffee", "addict", "caffeine", "drink"],
+  },
+
+  {
+    id: "live_laugh_love",
+    label: "Live Laugh Love",
+    category: "Positive",
+    svg: "live_laugh_love",
+    src: "/expressions/live_laugh_love.svg",
+    color: "#EC4899",
+    keywords: ["live", "laugh", "love", "positive"],
+  },
+
+  {
+    id: "girl_boss",
+    label: "Girl Boss",
+    category: "Lifestyle",
+    svg: "girl_boss",
+    src: "/expressions/girl_boss.svg",
+    color: "#EC4899",
+    keywords: ["girl boss", "boss", "business", "confidence"],
+  },
+];
+
+export function getExpression(id) {
+  return expressions.find((e) => e.id === id);
+}
+
+
+export function searchExpressions(query) {
+  if (!query) return expressions;
+
+  const q = query.toLowerCase();
+
+  return expressions.filter(
+    (e) =>
+      e.label.toLowerCase().includes(q) ||
+      e.id.toLowerCase().includes(q) ||
+      e.category.toLowerCase().includes(q) ||
+      (e.keywords || []).some((k) =>
+        k.toLowerCase().includes(q)
+      )
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

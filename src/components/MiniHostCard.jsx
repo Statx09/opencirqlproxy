@@ -26,6 +26,10 @@ function MiniHostCard({ host, user, onAction }) {
   );
 
   const h = useMemo(() => normalizeHost(host), [host]);
+  const payment = h.payment_methods || {};
+  const messageRate = payment.messages?.enabled ? Number(payment.messages?.ratePerMessage ?? 0) : 0;
+  const voiceRate = payment.voice?.enabled ? Number(payment.voice?.ratePerMinute ?? 0) : 0;
+  const videoRate = payment.video?.enabled ? Number(payment.video?.ratePerMinute ?? 0) : 0;
 
 console.log("NORMALIZED", h.expressions);
 console.log("BANNER:", h.banner);
@@ -130,7 +134,8 @@ console.log("BANNER:", h.banner);
     color: theme.text,
   }}
 >
-  <div style={identityStack}>
+  <div style={topInfoRow}>
+    <div style={identityStack}>
     <div
       style={{
         ...name,
@@ -151,6 +156,13 @@ console.log("BANNER:", h.banner);
       {h.headline || "\u00A0"}
     </div>
   </div>
+  <div style={rateColumn}>
+    {messageRate > 0 && <span style={rateItem}>💬 ${messageRate.toFixed(2)}</span>}
+    {voiceRate > 0 && <span style={rateItem}>🎙 ${voiceRate.toFixed(2)}/min</span>}
+    {videoRate > 0 && <span style={rateItem}>📹 ${videoRate.toFixed(2)}/min</span>}
+  </div>
+  <div style={interactionHint}><span style={gestureArrows}>‹  ›</span><span style={gestureExpand}>⤢</span></div>
+</div>
 
  {/* EXPRESSIONS */}
 <ExpressionBadges
@@ -159,7 +171,7 @@ console.log("BANNER:", h.banner);
   size={36}
 />
 
-        {/* INTENTS */}
+
 <div style={chipRow}>
   {h.intents.slice(0, 3).map((t, i) => (
     <span
@@ -203,6 +215,7 @@ console.log("BANNER:", h.banner);
       )}
 
       {/* ACTION RAIL */}
+
 
 <div style={rail}>
 
@@ -270,6 +283,7 @@ const card = {
   maxWidth: "100%",
   boxSizing: "border-box",
   padding: 12,
+  minHeight: 128,
   background: "#111827",
   borderRadius: 16,
   color: "#fff",
@@ -386,6 +400,15 @@ const headline = {
 };
 
 /* TAGS */
+const topInfoRow = { display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, minWidth: 0, width: "100%", paddingRight: 70, boxSizing: "border-box" };
+const rateColumn = { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 };
+const interactionHint = { position: "absolute", top: 8, right: 10, display: "flex", alignItems: "center", gap: 5, zIndex: 2, opacity: 0.95 };
+const gestureArrows = { fontSize: 19, fontWeight: 800, lineHeight: 1, color: "#22c55e", textShadow: "0 0 6px rgba(34,197,94,.9), 0 0 14px rgba(34,197,94,.45)" };
+
+
+const gestureExpand = { fontSize: 13, fontWeight: 800, lineHeight: 1, color: "#22c55e", opacity: 0.85, textShadow: "0 0 7px rgba(34,197,94,.65)" };
+const rateItem = { fontSize: 11, fontWeight: 700, opacity: 0.9, whiteSpace: "nowrap" };
+
 const chipRow = {
   display: "flex",
   alignItems: "center",
@@ -478,20 +501,21 @@ const callBtn = {
 };
 
 const rail = {
+  marginTop: 14,
   display: "flex",
   flexDirection: "column",
   gap: 5,
   justifyContent: "center",
   alignItems: "center",
-  flex: "0 0 38px",
-  width: 38,
-  minWidth: 38,
+  flex: "0 0 34px",
+  width: 34,
+  minWidth: 34,
 };
 
 
 const railButton = {
-  width: 38,
-  height: 38,
+  width: 34,
+  height: 34,
 
   borderRadius: "50%",
 
@@ -535,6 +559,12 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
+
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-import { supabase } from "../lib/supabaseClient";
+﻿import { supabase } from "../lib/supabaseClient";
 import { normalizeHost } from "../utils/normalizeHost";
 
 export async function fetchHosts() {
@@ -55,6 +55,7 @@ export async function fetchHosts() {
       avatar: host.avatar,
       banner: host.banner,
       presence: host.presence,
+      payment_methods: host.payment_methods,
       expressions: host.expressions?.length || 0,
       topics: host.topics?.length || 0,
     }))

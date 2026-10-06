@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -488,7 +488,7 @@ console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBE
         }
       )
       .subscribe((status) => {
-        console.log("TIP REALTIME STATUS:", status); if (status === "SUBSCRIBED") setTipPopup("🟢 Tip realtime connected"); else if (status === "CHANNEL_ERROR") setTipPopup("🔴 Tip realtime error"); else if (status === "TIMED_OUT") setTipPopup("🟠 Tip realtime timeout");
+        
       });
 
     return () => {
@@ -3275,6 +3275,9 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
 
 
 

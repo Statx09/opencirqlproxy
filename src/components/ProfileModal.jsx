@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
-import { X, MessageCircle, Handshake, Phone, Video } from "lucide-react";
+import { X, MessageCircle, Handshake, Phone, Video, CircleDollarSign } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
 import MessagesModal from "./MessagesModal";
@@ -125,8 +125,9 @@ console.log("error =", error);
   const voiceRatePerMinute =
     paymentSettings.voice?.ratePerMinute ?? 0.60;
 
-  const videoRatePerMinute =
-    paymentSettings.video?.ratePerMinute ?? 0.60;
+  const videoRatePerMinute = paymentSettings.video?.ratePerMinute ?? 0.60;
+  const messageEnabled = paymentSettings.messages?.enabled ?? false;
+  const messageRate = paymentSettings.messages?.ratePerMessage ?? 0;
 
   const paymentCurrency =
     paymentSettings.currency || "USD";
@@ -139,8 +140,7 @@ console.log("error =", error);
     paymentSettings.usdcNetwork ||
     "Solana";
 
-  const hasCallRates =
-    voiceEnabled || videoEnabled;
+  const hasCallRates = voiceEnabled || videoEnabled || (messageEnabled && messageRate > 0);
 
   const hasSupportOptions =
     freeEnabled ||
@@ -280,11 +280,19 @@ console.log("error =", error);
         {hasCallRates && (
           <div style={paymentDisplayCard}>
 
-            <div style={paymentDisplayTitle}>
-              Call Rates
-            </div>
-
             <div style={paymentDisplayRows}>
+
+              {messageEnabled && messageRate > 0 && (
+                <div style={paymentDisplayRow}>
+                  <div style={paymentDisplayLabel}>
+                    <MessageCircle size={15} strokeWidth={1.8} />
+                    <span>Message</span>
+                  </div>
+                  <div style={paymentDisplayValue}>
+                    {paymentCurrency} {Number(messageRate).toFixed(2)}
+                  </div>
+                </div>
+              )}
 
               {voiceEnabled && (
                 <div style={paymentDisplayRow}>
@@ -324,7 +332,6 @@ console.log("error =", error);
         {profile.social_links?.[0] &&
           Object.values(profile.social_links[0]).some(Boolean) && (
             <div style={linksSection}>
-              <div style={linksTitle}>Links</div>
 
               <div style={linksRow}>
                 {profile.social_links[0].website && (
@@ -436,7 +443,7 @@ console.log("error =", error);
             title="Tip"
             aria-label="Tip"
           >
-            <span style={{ fontSize: 18 }}>💛</span>
+            <CircleDollarSign size={19} strokeWidth={1.8} />
           </button>
 
           <button
@@ -636,16 +643,6 @@ const linksSection = {
   padding: "10px 16px 4px",
   boxSizing: "border-box",
 };
-
-const linksTitle = {
-  fontSize: 11,
-  fontWeight: 700,
-  color: "rgba(255,255,255,0.55)",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  marginBottom: 8,
-};
-
 const linksRow = {
   display: "flex",
   gap: 8,
@@ -695,44 +692,27 @@ const glassActionButton = {
   transition: "background 0.15s ease, border-color 0.15s ease, transform 0.15s ease",
 };
 const paymentDisplayCard = {
-  margin: "12px 16px 4px",
-  padding: "14px",
-  background: "rgba(255,255,255,0.035)",
-  border: "1px solid rgba(255,255,255,0.09)",
-  borderRadius: 13,
+  margin: "8px 16px 2px",
+  padding: "4px 0",
 };
-
-const paymentDisplayTitle = {
-  fontSize: 11,
-  fontWeight: 700,
-  color: "rgba(255,255,255,0.55)",
-  textTransform: "uppercase",
-  letterSpacing: "0.08em",
-  marginBottom: 9,
-};
-
 const paymentDisplayRows = {
   display: "flex",
-  flexDirection: "column",
-  gap: 7,
-  marginBottom: 13,
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 14,
+  marginBottom: 2,
 };
 
 const paymentDisplayRow = {
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
-  gap: 12,
-  padding: "9px 10px",
-  background: "rgba(255,255,255,0.035)",
-  border: "1px solid rgba(255,255,255,0.07)",
-  borderRadius: 10,
+  gap: 6,
 };
 
 const paymentDisplayLabel = {
   display: "flex",
   alignItems: "center",
-  gap: 7,
+  gap: 5,
   color: "rgba(255,255,255,0.78)",
   fontSize: 12,
   fontWeight: 600,
@@ -768,11 +748,11 @@ const overlay = {
 };
 
 const modal = {
-  width: "95%",
-  maxWidth: 650,
-  maxHeight: "90vh",
+  width: "100%",
+  maxWidth: "100%",
+  height: "100vh",
   background: "#111827",
-  borderRadius: 18,
+  borderRadius: 0,
   overflowY: "auto",
   color: "#fff",
   position: "relative",
@@ -790,6 +770,27 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

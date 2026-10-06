@@ -465,7 +465,7 @@ console.log("error =", error);
 const bannerRateColumn = { position: "absolute", top: 10, right: 48, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 9, zIndex: 2 };
 const bannerRateItem = { color: "rgba(255,255,255,0.95)", fontSize: 16, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7 };
 
-const bannerWrap = { width: "100%", height: 100, overflow: "visible", position: "relative" };
+const bannerWrap = { width: "100%", height: 130, overflow: "visible", position: "relative" };
 const bannerImg = { width: "100%", height: "100%", objectFit: "cover" };
 
 const header = {
@@ -694,6 +694,7 @@ const closeBtn = {
   position: "absolute",
   right: 12,
   top: 12,
+  zIndex: 20,
   background: "#000",
   color: "#fff",
   border: "none",
@@ -701,6 +702,9 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
+
+
 
 
 

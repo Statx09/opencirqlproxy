@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -50,7 +50,7 @@ const loadWalletBalance = useCallback(async () => {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("balance")
+    .select("balance, push_notifications, notify_messages, notify_calls, notify_video_calls")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -60,6 +60,13 @@ const loadWalletBalance = useCallback(async () => {
   }
 
   setWalletBalance(Number(data?.balance || 0));
+  setNotificationsEnabled(data?.push_notifications ?? true);
+  setNotificationSettings({
+    messages: data?.notify_messages ?? true,
+    voiceCalls: data?.notify_calls ?? true,
+    videoCalls: data?.notify_video_calls ?? true,
+    connections: data?.push_notifications ?? true,
+  });
 }, [user?.id]);
 
 useEffect(() => {
@@ -395,7 +402,7 @@ useEffect(() => {
             }
           }
 
-          if (notification.event === 'tip_received') { setTipPopup('💛 You’ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
+          if (notification.event === 'tip_received') { setTipPopup('?? You�ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
 
 const enrichedNotification = {
             ...notification,
@@ -473,7 +480,7 @@ console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBE
           }
 
           setTipPopup(
-            `💚 +$${amount.toFixed(2)} tip from ${senderName} 🎉`
+            `?? +$${amount.toFixed(2)} tip from ${senderName} ??`
           );
 
           setTimeout(() => setTipPopup(null), 5000);
@@ -999,7 +1006,7 @@ useEffect(() => {
           }
 
           if (connection?.status !== "accepted") {
-            alert("ðŸ”’ You need a confirmed connection before calling.");
+            alert("🔒 You need a confirmed connection before calling.");
             return;
           }
           const { data: hostPaymentProfile, error: hostPaymentError } =
@@ -1250,7 +1257,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION Ã¯Â¿Â½ INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1531,7 +1538,7 @@ useEffect(() => {
             type="button"
             style={settingsRow(theme)}
             onClick={() =>
-              setNotificationsEnabled((v) => !v)
+              setNotificationsEnabled((v) => { const next = !v; supabase.from("profiles").update({ push_notifications: next }).eq("user_id", user.id); return next; })
             }
           >
             <span style={settingsRowLeft}>
@@ -1571,10 +1578,7 @@ useEffect(() => {
                   type="button"
                   style={settingsRow(theme)}
                   onClick={() =>
-                    setNotificationSettings((prev) => ({
-                      ...prev,
-                      [key]: !prev[key],
-                    }))
+                    setNotificationSettings((prev) => { const next = !prev[key]; const field = key === "messages" ? "notify_messages" : key === "voiceCalls" ? "notify_calls" : key === "videoCalls" ? "notify_video_calls" : null; if (field) supabase.from("profiles").update({ [field]: next }).eq("user_id", user.id).then(({ error }) => { if (error) console.error("Notification preference update failed:", error); }); return { ...prev, [key]: next }; })
                   }
                 >
                   <span style={settingsRowLeft}>
@@ -1838,7 +1842,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            Ã—
+            ×
           </button>
         </div>
       )}
@@ -2228,7 +2232,7 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          Ã—
+          ×
         </button>
       </div>
 
@@ -2358,7 +2362,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() =>
-            console.log("WITHDRAW USDC â€” payout integration pending")
+            console.log("WITHDRAW USDC — payout integration pending")
           }
           style={{
             marginTop: 10,
@@ -3275,6 +3279,15 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
+
+
+
+
+
+
 
 
 

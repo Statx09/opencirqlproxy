@@ -1537,9 +1537,21 @@ useEffect(() => {
           <button
             type="button"
             style={settingsRow(theme)}
-            onClick={() =>
-              setNotificationsEnabled((v) => { const next = !v; supabase.from("profiles").update({ push_notifications: next }).eq("user_id", user.id); return next; })
-            }
+            onClick={async () => {
+              const next = !notificationsEnabled;
+              setNotificationsEnabled(next);
+              await supabase.from("profiles").update({ push_notifications: next }).eq("user_id", user.id);
+
+              if (next) {
+                try {
+                  const { createPushSubscription, savePushSubscription } = await import("./pushNotifications.js");
+                  const subscription = await createPushSubscription();
+                  await savePushSubscription(user.id, subscription);
+                } catch (error) {
+                  console.error("Push subscription setup failed:", error);
+                }
+              }
+            }}
           >
             <span style={settingsRowLeft}>
               <span style={settingsBell}></span>

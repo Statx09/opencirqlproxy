@@ -1,4 +1,6 @@
-﻿function urlBase64ToUint8Array(base64String) {
+﻿import { supabase } from "./lib/supabaseClient";
+
+function urlBase64ToUint8Array(base64String) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
     .replace(/-/g, "+")
@@ -40,5 +42,17 @@ export async function createPushSubscription() {
     applicationServerKey,
   });
 }
+
+
+
+export async function savePushSubscription(userId, subscription) {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ push_subscription: subscription.toJSON() })
+    .eq("user_id", userId);
+
+  if (error) throw error;
+}
+
 
 

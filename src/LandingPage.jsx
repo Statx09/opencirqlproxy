@@ -1548,7 +1548,7 @@ useEffect(() => {
                   const subscription = await createPushSubscription();
                   await savePushSubscription(user.id, subscription);
                 } catch (error) {
-                  console.error("Push subscription setup failed:", error);
+                  console.error("Push subscription setup failed:", error); alert("Push setup failed: " + (error?.message || error));
                 }
               }
             }}

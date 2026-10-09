@@ -46,13 +46,20 @@ export async function createPushSubscription() {
 
 
 export async function savePushSubscription(userId, subscription) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("profiles")
     .update({ push_subscription: subscription.toJSON() })
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .select("user_id")
+    .maybeSingle();
 
   if (error) throw error;
+
+  if (!data) {
+    throw new Error("No profile row was updated. Check the signed-in user ID and profiles UPDATE policy.");
+  }
 }
+
 
 
 

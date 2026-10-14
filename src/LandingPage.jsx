@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -203,6 +203,93 @@ const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 const [tipPopup, setTipPopup] = useState(null);
 const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState(0);
+const [pushOnboardingOpen, setPushOnboardingOpen] = useState(false);
+const [pushOnboardingBusy, setPushOnboardingBusy] = useState(false);
+const [pushOnboardingError, setPushOnboardingError] = useState("");
+
+useEffect(() => {
+  if (!user?.id || typeof window === "undefined") return;
+  let cancelled = false;
+
+  const checkPushSetup = async () => {
+    try {
+      if (!("Notification" in window) ||
+          !("serviceWorker" in navigator) ||
+          !("PushManager" in window) ||
+          Notification.permission === "denied") return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("push_subscription, push_notifications")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data || data.push_notifications === false || cancelled) return;
+
+      const dismissedKey = `upcall-push-onboarding-dismissed:${user.id}`;
+      const registration = await navigator.serviceWorker.ready;
+      const existing = await registration.pushManager.getSubscription();
+      if (cancelled) return;
+
+      if (existing) {
+        const { createPushSubscription, savePushSubscription } =
+          await import("./pushNotifications.js");
+        const subscription = await createPushSubscription();
+        await savePushSubscription(user.id, subscription);
+        return;
+      }
+
+      if (localStorage.getItem(dismissedKey) !== "1") {
+        setPushOnboardingOpen(true);
+      }
+    } catch (error) {
+      console.error("Push onboarding check failed:", error);
+    }
+  };
+
+  checkPushSetup();
+  return () => { cancelled = true; };
+}, [user?.id]);
+
+const enablePushOnboarding = async () => {
+  if (!user?.id || pushOnboardingBusy) return;
+  setPushOnboardingBusy(true);
+  setPushOnboardingError("");
+
+  try {
+    const { createPushSubscription, savePushSubscription } =
+      await import("./pushNotifications.js");
+    const subscription = await createPushSubscription();
+    await savePushSubscription(user.id, subscription);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ push_notifications: true })
+      .eq("user_id", user.id);
+    if (error) throw error;
+
+    setNotificationsEnabled(true);
+    localStorage.setItem(`upcall-push-onboarding-dismissed:${user.id}`, "1");
+    setPushOnboardingOpen(false);
+  } catch (error) {
+    console.error("Push onboarding setup failed:", error);
+    setPushOnboardingError(
+      error?.message || "Could not enable notifications. Please try Settings."
+    );
+  } finally {
+    setPushOnboardingBusy(false);
+  }
+};
+
+const dismissPushOnboarding = () => {
+  if (user?.id) {
+    localStorage.setItem(`upcall-push-onboarding-dismissed:${user.id}`, "1");
+  }
+  setPushOnboardingOpen(false);
+  setPushOnboardingError("");
+};
+
 
 /* ================= INCOMING CALL ================= */
 
@@ -402,7 +489,7 @@ useEffect(() => {
             }
           }
 
-          if (notification.event === 'tip_received') { setTipPopup('?? You�ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
+          if (notification.event === 'tip_received') { setTipPopup('?? You�ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
 
 const enrichedNotification = {
             ...notification,
@@ -1365,7 +1452,24 @@ useEffect(() => {
   }
 
   return (
-  <div style={page(theme)}>{tipPopup && <div style={{position:"fixed",top:20,right:20,zIndex:99999,padding:"14px 18px",borderRadius:12,background:"#111",color:"#fff",boxShadow:"0 8px 30px rgba(0,0,0,.25)",fontWeight:600}}>{tipPopup}</div>}
+  <div style={page(theme)}>
+  {pushOnboardingOpen && (
+    <div style={{position:"fixed",inset:0,zIndex:10000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,background:"rgba(0,0,0,0.65)"}}>
+      <div style={{width:"100%",maxWidth:380,padding:24,borderRadius:20,background:theme.card || theme.background || "#171717",color:theme.text || "#fff",border:`1px solid ${theme.border || "#444"}`}}>
+        <div style={{fontSize:30,marginBottom:10}}>🔔</div>
+        <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on UpCall</h2>
+        <p style={{lineHeight:1.5,opacity:0.85}}>Get alerts for messages, connection requests and calls, even when UpCall isn’t open.</p>
+        {pushOnboardingError && <p role="alert" style={{color:"#ff8585",fontSize:13}}>{pushOnboardingError}</p>}
+        <button type="button" disabled={pushOnboardingBusy} onClick={enablePushOnboarding} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
+          {pushOnboardingBusy ? "Enabling…" : "Enable notifications"}
+        </button>
+        <button type="button" disabled={pushOnboardingBusy} onClick={dismissPushOnboarding} style={{width:"100%",marginTop:8,padding:11,border:"1px solid "+(theme.border || "#555"),borderRadius:12,background:"transparent",color:theme.text || "#fff"}}>
+          Not now
+        </button>
+      </div>
+    </div>
+  )}
+  {tipPopup && <div style={{position:"fixed",top:20,right:20,zIndex:99999,padding:"14px 18px",borderRadius:12,background:"#111",color:"#fff",boxShadow:"0 8px 30px rgba(0,0,0,.25)",fontWeight:600}}>{tipPopup}</div>}
 
 {mode === "grid" && (
   <div style={header(theme)}>
@@ -1544,6 +1648,7 @@ useEffect(() => {
 
               if (next) {
                 try {
+                  console.log("PUSH SETUP HANDLER REACHED");
                   const { createPushSubscription, savePushSubscription } = await import("./pushNotifications.js");
                   const subscription = await createPushSubscription();
                   await savePushSubscription(user.id, subscription);
@@ -3291,6 +3396,12 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
+
+
+
 
 
 

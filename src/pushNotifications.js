@@ -25,10 +25,6 @@ export async function createPushSubscription() {
   const registration = await navigator.serviceWorker.ready;
   const existing = await registration.pushManager.getSubscription();
 
-  if (existing) {
-    return existing;
-  }
-
   const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
   if (!publicKey) {
@@ -37,10 +33,51 @@ export async function createPushSubscription() {
 
   const applicationServerKey = urlBase64ToUint8Array(publicKey);
 
-  return registration.pushManager.subscribe({
+  if (existing) {
+    const oldKey = existing.options.applicationServerKey;
+
+    const keysMatch =
+      oldKey &&
+      oldKey.byteLength === applicationServerKey.byteLength &&
+      applicationServerKey.every((byte, index) => byte === new Uint8Array(oldKey)[index]);
+
+    if (keysMatch) {
+      return existing;
+    }
+
+    console.log("Renewing push subscription for the current VAPID key.");
+    await existing.unsubscribe();
+  }
+
+  console.log("Push diagnostics:", {
+    origin: location.origin,
+    keyLength: publicKey.length,
+    decodedKeyLength: applicationServerKey.length,
     userVisibleOnly: true,
-    applicationServerKey,
+    serviceWorkerState: registration.active?.state,
+    existingSubscription: false,
   });
+
+  try {
+    return await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey,
+    });
+  } catch (error) {
+    console.error("Push subscribe diagnostic:", {
+      name: error?.name,
+      message: error?.message,
+      constructor: error?.constructor?.name,
+      keyLength: publicKey.length,
+      decodedKeyLength: applicationServerKey.length,
+      origin: location.origin,
+      serviceWorkerState: registration.active?.state,
+    });
+    throw new Error(
+      "Push subscribe failed [" + (error?.name || "UnknownError") +
+      "]: " + (error?.message || String(error))
+    );
+  }
 }
 
 
@@ -59,6 +96,8 @@ export async function savePushSubscription(userId, subscription) {
     throw new Error("No profile row was updated. Check the signed-in user ID and profiles UPDATE policy.");
   }
 }
+
+
 
 
 

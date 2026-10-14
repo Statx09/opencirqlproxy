@@ -143,6 +143,12 @@ const scrollToBottom = () => {
 
 const sendMessage = async () => {
   console.log("SEND CLICKED");
+  console.log("MESSAGE ID DIAGNOSTIC", {
+    senderId: user?.id,
+    hostId: host?.id,
+    hostUserId: host?.user_id,
+    resolvedHostId: hostId,
+  });
 
   if (sending) {
     console.log("SEND ALREADY IN PROGRESS");
@@ -180,6 +186,50 @@ const sendMessage = async () => {
     }
 
     console.log("MESSAGE INSERT SUCCESS:", data);
+
+    if (host?.is_ai) {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData?.session?.access_token;
+
+        if (!token) {
+          console.error("AI REPLY: No signed-in session token.");
+        } else {
+          const apiUrl =
+            window.location.hostname === "localhost"
+              ? "http://localhost:3000/api/ai-reply"
+              : "https://cirql-ai-chatbot.vercel.app/api/ai-reply";
+
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              sender_id: user.id,
+              receiver_id: hostId,
+              text,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            console.error("AI REPLY FAILED:", response.status, result);
+          } else if (result.ai_message) {
+            setMessages((current) =>
+              current.some((msg) => msg.id === result.ai_message.id)
+                ? current
+                : [...current, result.ai_message]
+            );
+            console.log("AI REPLY RECEIVED:", result.ai_message);
+          }
+        }
+      } catch (aiError) {
+        console.error("AI REPLY REQUEST FAILED:", aiError);
+      }
+    }
 
     if (data) {
       setMessages((current) => {
@@ -406,4 +456,6 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
+
+
 

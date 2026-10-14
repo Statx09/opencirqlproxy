@@ -159,11 +159,8 @@ console.log("BANNER:", h.banner);
     </div>
   </div>
   <div style={rateColumn}>
-    {messageRate > 0 && <span style={rateItem}><MessageCircle size={18} strokeWidth={2.2} />${messageRate.toFixed(2)}</span>}
-    {pictureRate > 0 && <span style={rateItem}><Image size={18} strokeWidth={2.2} />${pictureRate.toFixed(2)}</span>}
-    {voiceNoteRate > 0 && <span style={rateItem}><Mic size={18} strokeWidth={2.2} />${voiceNoteRate.toFixed(2)}</span>}
-    {voiceRate > 0 && <span style={rateItem}><Phone size={18} strokeWidth={2.2} />${voiceRate.toFixed(2)}/min</span>}
-    {videoRate > 0 && <span style={rateItem}><Video size={18} strokeWidth={2.2} />${videoRate.toFixed(2)}/min</span>}
+    {voiceRate > 0 && <span style={rateItem}><Phone size={12} strokeWidth={2.2} />${voiceRate.toFixed(2)}/min</span>}
+    {videoRate > 0 && <span style={rateItem}><Video size={12} strokeWidth={2.2} />${videoRate.toFixed(2)}/min</span>}
   </div>
   <div style={interactionHint}><span style={gestureArrows}>‹  ›</span><span style={gestureExpand}>⤢</span></div>
 </div>
@@ -405,13 +402,13 @@ const headline = {
 
 /* TAGS */
 const topInfoRow = { display: "flex", alignItems: "flex-start", gap: 8, minWidth: 0, width: "100%", boxSizing: "border-box" };
-const rateColumn = { position: "absolute", top: 10, right: 54, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, zIndex: 2 };
+const rateColumn = { position: "absolute", top: 10, right: 54, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, zIndex: 2 };
 const interactionHint = { position: "absolute", top: 8, right: 10, display: "flex", alignItems: "center", gap: 5, zIndex: 2, opacity: 0.95 };
 const gestureArrows = { fontSize: 19, fontWeight: 800, lineHeight: 1, color: "#22c55e", textShadow: "0 0 6px rgba(34,197,94,.9), 0 0 14px rgba(34,197,94,.45)" };
 
 
 const gestureExpand = { fontSize: 13, fontWeight: 800, lineHeight: 1, color: "#22c55e", opacity: 0.85, textShadow: "0 0 7px rgba(34,197,94,.65)" };
-const rateItem = { color: "rgba(255,255,255,0.95)", fontSize: 10, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5 };
+const rateItem = { color: "rgba(255,255,255,0.95)", fontSize: 9, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5 };
 
 const chipRow = {
   display: "flex",
@@ -563,6 +560,8 @@ const tipButton = {
   boxShadow:
     "0 0 14px rgba(250,204,21,.55)",
 };
+
+
 
 
 

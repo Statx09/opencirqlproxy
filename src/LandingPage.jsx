@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -225,7 +225,11 @@ useEffect(() => {
         .maybeSingle();
 
       if (error) throw error;
-      if (!data || data.push_notifications === false || cancelled) return;
+      if (cancelled) return;
+      if (!data) {
+        setTimeout(checkPushSetup, 1200);
+        return;
+      }
 
       const dismissedKey = `upcall-push-onboarding-dismissed:${user.id}`;
       const registration = await navigator.serviceWorker.ready;
@@ -273,10 +277,20 @@ const enablePushOnboarding = async () => {
     localStorage.setItem(`upcall-push-onboarding-dismissed:${user.id}`, "1");
     setPushOnboardingOpen(false);
   } catch (error) {
-    console.error("Push onboarding setup failed:", error);
-    setPushOnboardingError(
-      error?.message || "Could not enable notifications. Please try Settings."
-    );
+    const permissionDenied =
+      error?.message?.includes("Notification permission was not granted") ||
+      ("Notification" in window && Notification.permission === "denied");
+
+    if (permissionDenied) {
+      setPushOnboardingError(
+        "Notifications are blocked by your browser. Allow them in site settings, then try again."
+      );
+    } else {
+      console.error("Push onboarding setup failed:", error);
+      setPushOnboardingError(
+        error?.message || "Could not enable notifications. Please try Settings."
+      );
+    }
   } finally {
     setPushOnboardingBusy(false);
   }
@@ -489,7 +503,7 @@ useEffect(() => {
             }
           }
 
-          if (notification.event === 'tip_received') { setTipPopup('?? You�ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
+          if (notification.event === 'tip_received') { setTipPopup('?? You?ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
 
 const enrichedNotification = {
             ...notification,
@@ -1093,7 +1107,7 @@ useEffect(() => {
           }
 
           if (connection?.status !== "accepted") {
-            alert("🔒 You need a confirmed connection before calling.");
+            alert("?? You need a confirmed connection before calling.");
             return;
           }
           const { data: hostPaymentProfile, error: hostPaymentError } =
@@ -1344,7 +1358,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION � INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1456,12 +1470,12 @@ useEffect(() => {
   {pushOnboardingOpen && (
     <div style={{position:"fixed",inset:0,zIndex:10000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,background:"rgba(0,0,0,0.65)"}}>
       <div style={{width:"100%",maxWidth:380,padding:24,borderRadius:20,background:theme.card || theme.background || "#171717",color:theme.text || "#fff",border:`1px solid ${theme.border || "#444"}`}}>
-        <div style={{fontSize:30,marginBottom:10}}>🔔</div>
+        <div style={{fontSize:30,marginBottom:10}}>??</div>
         <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on UpCall</h2>
-        <p style={{lineHeight:1.5,opacity:0.85}}>Get alerts for messages, connection requests and calls, even when UpCall isn’t open.</p>
+        <p style={{lineHeight:1.5,opacity:0.85}}>Get alerts for messages, connection requests and calls, even when UpCall isn�t open.</p>
         {pushOnboardingError && <p role="alert" style={{color:"#ff8585",fontSize:13}}>{pushOnboardingError}</p>}
         <button type="button" disabled={pushOnboardingBusy} onClick={enablePushOnboarding} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
-          {pushOnboardingBusy ? "Enabling…" : "Enable notifications"}
+          {pushOnboardingBusy ? "Enabling�" : "Enable notifications"}
         </button>
         <button type="button" disabled={pushOnboardingBusy} onClick={dismissPushOnboarding} style={{width:"100%",marginTop:8,padding:11,border:"1px solid "+(theme.border || "#555"),borderRadius:12,background:"transparent",color:theme.text || "#fff"}}>
           Not now
@@ -1959,7 +1973,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ×
+            �
           </button>
         </div>
       )}
@@ -2349,7 +2363,7 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          ×
+          �
         </button>
       </div>
 
@@ -2479,7 +2493,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() =>
-            console.log("WITHDRAW USDC — payout integration pending")
+            console.log("WITHDRAW USDC � payout integration pending")
           }
           style={{
             marginTop: 10,
@@ -2685,6 +2699,26 @@ useEffect(() => {
           <ProfileTab
   user={user}
   onViewCard={() => handleOpenProfile(user?.id)}
+  onProfileSaved={async () => {
+    const dismissedKey = `upcall-push-onboarding-dismissed:${user.id}`;
+
+    if (
+      !user?.id ||
+      localStorage.getItem(dismissedKey) === "1" ||
+      !("Notification" in window) ||
+      Notification.permission === "denied" ||
+      !("serviceWorker" in navigator) ||
+      !("PushManager" in window)
+    ) return;
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const existing = await registration.pushManager.getSubscription();
+      if (!existing) setPushOnboardingOpen(true);
+    } catch (error) {
+      console.error("Push onboarding check failed after profile save:", error);
+    }
+  }}
 />
         </ModalShell>
       )}
@@ -3396,6 +3430,7 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
 
 
 

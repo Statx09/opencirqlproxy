@@ -1,11 +1,11 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import useProfile from "../../hooks/useProfile";
 import ExpressSection from "./ExpressSection";
 import IntentSection from "./IntentSection";
 import IdentitySection from "./IdentitySection";
 
-export default function ProfileTab({ user, onViewCard }) {
+export default function ProfileTab({ user, onViewCard, onProfileSaved }) {
   const [tab, setTab] = useState("profile");
   const [loading, setLoading] = useState(false);
 
@@ -281,6 +281,7 @@ console.log("PROFILE UPSERT RESULT:", JSON.stringify({ data, error }, null, 2));
       return;
     }
 
+    onProfileSaved?.();
     alert("Profile saved");
   };
 
@@ -492,7 +493,7 @@ if (url) setAvatarUrl(url);
                 fontSize: 12,
               }}
             >
-              {topic} ×
+              {topic} �
             </button>
           ))}
         </div>

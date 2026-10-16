@@ -245,7 +245,7 @@ console.log("error =", error);
       badges={expressions}
       max={999}
       showLabels
-      size={56}
+      size={36}
     />
   </div>
 )}
@@ -462,17 +462,17 @@ console.log("error =", error);
   );
 }
 
-const bannerRateColumn = { position: "absolute", top: 10, right: 48, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 9, zIndex: 2 };
-const bannerRateItem = { color: "rgba(255,255,255,0.95)", fontSize: 16, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7 };
+const bannerRateColumn = { position: "absolute", top: 10, right: 48, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, zIndex: 2 };
+const bannerRateItem = { color: "rgba(255,255,255,0.95)", fontSize: 11, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7 };
 
-const bannerWrap = { width: "100%", height: 130, overflow: "visible", position: "relative" };
+const bannerWrap = { width: "100%", height: 88, overflow: "visible", position: "relative" };
 const bannerImg = { width: "100%", height: "100%", objectFit: "cover" };
 
 const header = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  marginTop: -55,
+  marginTop: -38,
   paddingBottom: 10,
   position: "relative",
   zIndex: 5,
@@ -681,13 +681,13 @@ const overlay = {
 const modal = {
   width: "100%",
   maxWidth: "100%",
-  height: "100vh",
+  height: "100dvh",
   background: "#111827",
   borderRadius: 0,
-  overflowY: "auto",
+  overflowY: "hidden",
   color: "#fff",
   position: "relative",
-  paddingBottom: 20,
+  paddingBottom: 0,
 };
 
 const closeBtn = {
@@ -702,6 +702,7 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
 
 
 

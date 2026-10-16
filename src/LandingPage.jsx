@@ -300,6 +300,20 @@ const enablePushOnboarding = async () => {
   }
 };
 
+const handlePushOnboardingButton = () => {
+  if ("Notification" in window && Notification.permission === "denied") {
+    const ua = navigator.userAgent;
+    const instructions = /Android/i.test(ua)
+      ? "Android: open your browser menu, then Settings > Site settings > Notifications. Find UpCall and allow notifications. You can also open the site controls beside the address bar and check Permissions."
+      : /iPhone|iPad|iPod/i.test(ua)
+      ? "iPhone/iPad: if UpCall is installed on your Home Screen, check Settings > Notifications for UpCall. If you use Safari, you may need to add UpCall to your Home Screen first."
+      : "Open your browser's site settings for UpCall, change Notifications to Allow, then return to UpCall and reload the page.";
+    setPushOnboardingError(instructions);
+    return;
+  }
+
+  enablePushOnboarding();
+};
 const dismissPushOnboarding = () => {
   if (user?.id) {
     localStorage.setItem(`upcall-push-onboarding-dismissed:${user.id}`, "1");
@@ -1535,12 +1549,11 @@ useEffect(() => {
   {pushOnboardingOpen && (
     <div style={{position:"fixed",inset:0,zIndex:10000,display:"flex",alignItems:"center",justifyContent:"center",padding:20,background:"rgba(0,0,0,0.65)"}}>
       <div style={{width:"100%",maxWidth:380,padding:24,borderRadius:20,background:theme.card || theme.background || "#171717",color:theme.text || "#fff",border:`1px solid ${theme.border || "#444"}`}}>
-        <div style={{fontSize:30,marginBottom:10}}>??</div>
-        <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on UpCall</h2>
+        <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on Cirql</h2>
         <p style={{lineHeight:1.5,opacity:0.85}}>{("Notification" in window && Notification.permission === "denied") ? "Notifications are blocked by your browser. Allow them in this site browser settings, then return to UpCall and reload the page." : "Get alerts for messages, connection requests and calls, even when UpCall is closed."}</p>
         {pushOnboardingError && <p role="alert" style={{color:"#ff8585",fontSize:13}}>{pushOnboardingError}</p>}
-        <button type="button" disabled={pushOnboardingBusy || ("Notification" in window && Notification.permission === "denied")} onClick={enablePushOnboarding} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
-          {pushOnboardingBusy ? "Enabling..." : (("Notification" in window && Notification.permission === "denied") ? "Blocked in browser settings" : "Enable notifications")}
+        <button type="button" disabled={pushOnboardingBusy} onClick={handlePushOnboardingButton} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
+          {pushOnboardingBusy ? "Enabling..." : (("Notification" in window && Notification.permission === "denied") ? "How to unblock notifications" : "Enable notifications")}
         </button>
         <button type="button" disabled={pushOnboardingBusy} onClick={dismissPushOnboarding} style={{width:"100%",marginTop:8,padding:11,border:"1px solid "+(theme.border || "#555"),borderRadius:12,background:"transparent",color:theme.text || "#fff"}}>
           Not now

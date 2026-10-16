@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+ï»¿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -215,8 +215,7 @@ useEffect(() => {
     try {
       if (!("Notification" in window) ||
           !("serviceWorker" in navigator) ||
-          !("PushManager" in window) ||
-          Notification.permission === "denied") return;
+          !("PushManager" in window)) return;
 
       const { data, error } = await supabase
         .from("profiles")
@@ -308,6 +307,67 @@ const dismissPushOnboarding = () => {
 /* ================= INCOMING CALL ================= */
 
 const [incomingCall, setIncomingCall] = useState(null);
+
+useEffect(() => {
+  if (!user?.id || typeof window === "undefined") return;
+
+  const params = new URLSearchParams(window.location.search);
+  const messageId = params.get("incomingMessageId");
+  if (!messageId) return;
+
+  let cancelled = false;
+
+  const restoreIncomingCall = async () => {
+    const { data: message, error } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("id", messageId)
+      .eq("receiver_id", user.id)
+      .eq("event", "incoming_call")
+      .maybeSingle();
+
+    if (error) {
+      console.error("PUSH CALL RESTORE ERROR:", error);
+      return;
+    }
+
+    if (!message || !message.sender_id) {
+      console.warn("PUSH CALL RESTORE: message not found for this user");
+      return;
+    }
+
+    const { data: callerProfile, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", message.sender_id)
+      .maybeSingle();
+
+    if (cancelled) return;
+
+    if (profileError) {
+      console.error("PUSH CALL PROFILE ERROR:", profileError);
+    }
+
+    setIncomingCall({
+      ...message,
+      callerProfile: callerProfile || null,
+    });
+
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete("incomingMessageId");
+    window.history.replaceState(
+      {},
+      "",
+      cleanUrl.pathname + cleanUrl.search + cleanUrl.hash
+    );
+  };
+
+  restoreIncomingCall();
+
+  return () => {
+    cancelled = true;
+  };
+}, [user?.id]);
 const [outgoingCall, setOutgoingCall] = useState(null);
 
   const loadNotifications = useCallback(async () => {
@@ -1358,7 +1418,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION Ã¯Â¿Â½ INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1472,10 +1532,10 @@ useEffect(() => {
       <div style={{width:"100%",maxWidth:380,padding:24,borderRadius:20,background:theme.card || theme.background || "#171717",color:theme.text || "#fff",border:`1px solid ${theme.border || "#444"}`}}>
         <div style={{fontSize:30,marginBottom:10}}>??</div>
         <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on UpCall</h2>
-        <p style={{lineHeight:1.5,opacity:0.85}}>Get alerts for messages, connection requests and calls, even when UpCall isn’t open.</p>
+        <p style={{lineHeight:1.5,opacity:0.85}}>{("Notification" in window && Notification.permission === "denied") ? "Notifications are blocked by your browser. Allow them in this site browser settings, then return to UpCall and reload the page." : "Get alerts for messages, connection requests and calls, even when UpCall is closed."}</p>
         {pushOnboardingError && <p role="alert" style={{color:"#ff8585",fontSize:13}}>{pushOnboardingError}</p>}
-        <button type="button" disabled={pushOnboardingBusy} onClick={enablePushOnboarding} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
-          {pushOnboardingBusy ? "Enabling…" : "Enable notifications"}
+        <button type="button" disabled={pushOnboardingBusy || ("Notification" in window && Notification.permission === "denied")} onClick={enablePushOnboarding} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
+          {pushOnboardingBusy ? "Enabling..." : (("Notification" in window && Notification.permission === "denied") ? "Blocked in browser settings" : "Enable notifications")}
         </button>
         <button type="button" disabled={pushOnboardingBusy} onClick={dismissPushOnboarding} style={{width:"100%",marginTop:8,padding:11,border:"1px solid "+(theme.border || "#555"),borderRadius:12,background:"transparent",color:theme.text || "#fff"}}>
           Not now
@@ -1973,7 +2033,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ×
+            Ã—
           </button>
         </div>
       )}
@@ -2363,7 +2423,7 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          ×
+          Ã—
         </button>
       </div>
 
@@ -2493,7 +2553,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() =>
-            console.log("WITHDRAW USDC — payout integration pending")
+            console.log("WITHDRAW USDC â€” payout integration pending")
           }
           style={{
             marginTop: 10,
@@ -2706,7 +2766,6 @@ useEffect(() => {
       !user?.id ||
       localStorage.getItem(dismissedKey) === "1" ||
       !("Notification" in window) ||
-      Notification.permission === "denied" ||
       !("serviceWorker" in navigator) ||
       !("PushManager" in window)
     ) return;
@@ -3430,34 +3489,3 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

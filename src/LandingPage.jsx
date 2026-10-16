@@ -1552,9 +1552,9 @@ useEffect(() => {
       <div style={{width:"100%",maxWidth:380,padding:24,borderRadius:20,background:theme.card || theme.background || "#171717",color:theme.text || "#fff",border:`1px solid ${theme.border || "#444"}`}}>
         <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on Cirql</h2>
         <p style={{lineHeight:1.5,opacity:0.85}}>{("Notification" in window && Notification.permission === "denied") ? "Notifications are blocked by your browser. Allow them in this site browser settings, then return to UpCall and reload the page." : "Get alerts for messages, connection requests and calls, even when UpCall is closed."}</p>
-        {pushOnboardingError && <p role="status" style={{color:theme.text || "#fff",fontSize:13,lineHeight:1.5,opacity:0.85}}>{pushOnboardingError}</p>}
+        {pushOnboardingError && <div><p role="status" style={{color:theme.text || "#fff",fontSize:13,lineHeight:1.5,opacity:0.85,whiteSpace:"pre-line"}}>{pushOnboardingError}</p><button type="button" onClick={() => setPushOnboardingError("")} style={{marginTop:6,padding:"7px 16px",border:0,borderRadius:8,background:theme.border || "#444",color:theme.text || "#fff"}}>OK</button></div>}
         <button type="button" disabled={pushOnboardingBusy} onClick={handlePushOnboardingButton} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
-          {pushOnboardingBusy ? "Enabling..." : (("Notification" in window && Notification.permission === "denied") ? "How to unblock notifications" : "Enable notifications")}
+          {pushOnboardingBusy ? "Enabling..." : "Enable notifications"}
         </button>
         <button type="button" disabled={pushOnboardingBusy} onClick={dismissPushOnboarding} style={{width:"100%",marginTop:8,padding:11,border:"1px solid "+(theme.border || "#555"),borderRadius:12,background:"transparent",color:theme.text || "#fff"}}>
           Not now
@@ -1746,7 +1746,17 @@ useEffect(() => {
                   const subscription = await createPushSubscription();
                   await savePushSubscription(user.id, subscription);
                 } catch (error) {
-                  console.error("Push subscription setup failed:", error); alert("Push setup failed: " + (error?.message || error));
+                  console.error("Push subscription setup failed:", error);
+                  setNotificationsEnabled(false);
+                  await supabase.from("profiles").update({ push_notifications: false }).eq("user_id", user.id);
+
+                  if (error?.message?.includes("Notification permission was not granted") || ("Notification" in window && Notification.permission === "denied")) {
+                    setPushOnboardingError("Blocked. In Chrome: ? > Settings > Site settings > Notifications > Cirql > Allow.");
+                  } else {
+                    setPushOnboardingError(error?.message || "Could not enable notifications. Please try again.");
+                  }
+
+                  setPushOnboardingOpen(true);
                 }
               }
             }}
@@ -2052,7 +2062,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ×
+            ï¿½
           </button>
         </div>
       )}
@@ -2442,7 +2452,7 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          ×
+          ï¿½
         </button>
       </div>
 
@@ -2572,7 +2582,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() =>
-            console.log("WITHDRAW USDC — payout integration pending")
+            console.log("WITHDRAW USDC ï¿½ payout integration pending")
           }
           style={{
             marginTop: 10,

@@ -309,8 +309,7 @@ const handlePushOnboardingButton = () => {
       ? "CIRQL NOTIFICATIONS\n\n1. If Cirql is installed on your Home Screen, open the iPhone Settings app and look for Cirql notification settings.\n2. If you use Safari and cannot enable notifications, add Cirql to your Home Screen and open it from there.\n3. Return to Cirql and try enabling notifications again."
       : "CIRQL NOTIFICATIONS\n\n1. Open Cirql in your browser.\n2. Click the site controls icon beside the address bar.\n3. Open Site settings or Permissions.\n4. Change Notifications to Allow.\n5. Return to Cirql and reload the page.";
 
-    setPushOnboardingError(instructions);
-    window.alert(instructions);
+    setPushOnboardingError("Blocked. In Chrome: ? > Settings > Site settings > Notifications > Cirql > Allow.");
     return;
   }
 
@@ -1553,7 +1552,7 @@ useEffect(() => {
       <div style={{width:"100%",maxWidth:380,padding:24,borderRadius:20,background:theme.card || theme.background || "#171717",color:theme.text || "#fff",border:`1px solid ${theme.border || "#444"}`}}>
         <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on Cirql</h2>
         <p style={{lineHeight:1.5,opacity:0.85}}>{("Notification" in window && Notification.permission === "denied") ? "Notifications are blocked by your browser. Allow them in this site browser settings, then return to UpCall and reload the page." : "Get alerts for messages, connection requests and calls, even when UpCall is closed."}</p>
-        {pushOnboardingError && <p role="alert" style={{color:"#ff8585",fontSize:13}}>{pushOnboardingError}</p>}
+        {pushOnboardingError && <p role="status" style={{color:theme.text || "#fff",fontSize:13,lineHeight:1.5,opacity:0.85}}>{pushOnboardingError}</p>}
         <button type="button" disabled={pushOnboardingBusy} onClick={handlePushOnboardingButton} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
           {pushOnboardingBusy ? "Enabling..." : (("Notification" in window && Notification.permission === "denied") ? "How to unblock notifications" : "Enable notifications")}
         </button>

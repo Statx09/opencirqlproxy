@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -304,11 +304,13 @@ const handlePushOnboardingButton = () => {
   if ("Notification" in window && Notification.permission === "denied") {
     const ua = navigator.userAgent;
     const instructions = /Android/i.test(ua)
-      ? "Android: open your browser menu, then Settings > Site settings > Notifications. Find UpCall and allow notifications. You can also open the site controls beside the address bar and check Permissions."
+      ? "CIRQL NOTIFICATIONS\n\n1. Open Cirql in your browser.\n2. Tap the site controls icon beside the address bar, or open the browser menu.\n3. Open Site settings or Permissions > Notifications.\n4. Change notifications to Allow.\n5. Return to Cirql and reload the page.\n\nIf you cannot find this setting, open your browser Settings > Site settings > Notifications and find the Cirql website."
       : /iPhone|iPad|iPod/i.test(ua)
-      ? "iPhone/iPad: if UpCall is installed on your Home Screen, check Settings > Notifications for UpCall. If you use Safari, you may need to add UpCall to your Home Screen first."
-      : "Open your browser's site settings for UpCall, change Notifications to Allow, then return to UpCall and reload the page.";
+      ? "CIRQL NOTIFICATIONS\n\n1. If Cirql is installed on your Home Screen, open the iPhone Settings app and look for Cirql notification settings.\n2. If you use Safari and cannot enable notifications, add Cirql to your Home Screen and open it from there.\n3. Return to Cirql and try enabling notifications again."
+      : "CIRQL NOTIFICATIONS\n\n1. Open Cirql in your browser.\n2. Click the site controls icon beside the address bar.\n3. Open Site settings or Permissions.\n4. Change Notifications to Allow.\n5. Return to Cirql and reload the page.";
+
     setPushOnboardingError(instructions);
+    window.alert(instructions);
     return;
   }
 
@@ -1437,7 +1439,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION � INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -2051,7 +2053,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ×
+            �
           </button>
         </div>
       )}
@@ -2441,7 +2443,7 @@ useEffect(() => {
             justifyContent: "center",
           }}
         >
-          ×
+          �
         </button>
       </div>
 
@@ -2571,7 +2573,7 @@ useEffect(() => {
         <button
           type="button"
           onClick={() =>
-            console.log("WITHDRAW USDC — payout integration pending")
+            console.log("WITHDRAW USDC � payout integration pending")
           }
           style={{
             marginTop: 10,

@@ -217,6 +217,11 @@ useEffect(() => {
           !("serviceWorker" in navigator) ||
           !("PushManager" in window)) return;
 
+      if (Notification.permission === "denied") {
+        setPushOnboardingOpen(true);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("profiles")
         .select("push_subscription, push_notifications")

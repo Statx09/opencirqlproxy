@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabaseClient";
@@ -28,6 +28,13 @@ export default function MessagesModal({
 
 const chatRef = useRef(null);
 const inputRef = useRef(null);
+const fileInputRef = useRef(null);
+const recorderRef = useRef(null);
+const recordedChunksRef = useRef([]);
+const [mediaUrls, setMediaUrls] = useState({});
+const [recording, setRecording] = useState(false);
+const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 const scrollToBottom = () => {
   requestAnimationFrame(() => {
@@ -36,6 +43,216 @@ const scrollToBottom = () => {
     }
   });
 };
+  /* PAID MEDIA HANDLERS */
+
+  async function sendPaidMedia(file, mediaType) {
+    if (!user?.id || !hostId || !file || sending) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setSendError("Media must be 10 MB or smaller.");
+      return;
+    }
+
+    setSending(true);
+    setSendError("");
+
+    let storagePath;
+    let paymentSucceeded = false;
+
+    try {
+      const extension = (file.name?.split(".").pop() || "webm")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .slice(0, 10);
+
+      storagePath = `${user.id}/${crypto.randomUUID()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("chat-media")
+        .upload(storagePath, file, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data, error } = await supabase.rpc("send_paid_media", {
+        p_receiver_id: hostId,
+        p_media_type: mediaType,
+        p_storage_path: storagePath,
+      });
+
+      if (error) throw error;
+      if (!data?.success || !data?.message_id) {
+        throw new Error("Media message was not confirmed.");
+      }
+
+      paymentSucceeded = true;
+
+      setMessages((previous) => {
+        if (previous.some((item) => item.id === data.message_id)) return previous;
+        return [...previous, {
+          id: data.message_id,
+          sender_id: user.id,
+          receiver_id: hostId,
+          text: mediaType === "picture" ? "Picture" : "Voice note",
+          created_at: new Date().toISOString(),
+          payload: {
+            media_type: mediaType,
+            storage_path: storagePath,
+            charge: data.charged,
+          },
+        }];
+      });
+
+      if (onMessageSent) onMessageSent();
+      scrollToBottom();
+    } catch (error) {
+      console.error("Paid media send failed:", { message: error?.message, code: error?.code, details: error?.details, hint: error?.hint, status: error?.status });
+
+      if (storagePath && !paymentSucceeded) {
+        await supabase.storage.from("chat-media").remove([storagePath]);
+      }
+
+      const detail = String(error?.message || error);
+      setSendError(
+        detail.includes("INSUFFICIENT_BALANCE")
+          ? "Insufficient balance to send this media."
+          : detail.includes("MEDIA_PAYMENTS_DISABLED")
+            ? "This user is not accepting paid media."
+            : "Could not send media. Please try again."
+      );
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handlePictureSelected(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file && !file.type.startsWith("image/")) {
+      setSendError("Please select an image file.");
+      return;
+    }
+    if (file) await sendPaidMedia(file, "picture");
+  }
+  async function toggleVoiceRecording() {
+    if (sending) return;
+
+    if (recording) {
+      recorderRef.current?.stop();
+      return;
+    }
+
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
+      setSendError("Voice recording is not supported by this browser.");
+      return;
+    }
+
+    let stream;
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      const mimeType = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+      ].find((type) => MediaRecorder.isTypeSupported(type));
+
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+
+      recordedChunksRef.current = [];
+      recorderRef.current = recorder;
+
+      recorder.ondataavailable = (event) => {
+        if (event.data?.size) recordedChunksRef.current.push(event.data);
+      };
+
+      recorder.onerror = () => {
+        setSendError("Voice recording failed. Please try again.");
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false);
+        recorderRef.current = null;
+
+        const chunks = recordedChunksRef.current;
+        recordedChunksRef.current = [];
+
+        if (!chunks.length) {
+          setSendError("No voice audio was recorded.");
+          return;
+        }
+
+        const type = recorder.mimeType || "audio/webm";
+        const extension = type.includes("mp4") ? "m4a" : "webm";
+        const file = new File(chunks, `voice-note-${Date.now()}.${extension}`, {
+          type,
+        });
+
+        await sendPaidMedia(file, "voice_note");
+      };
+
+      recorder.start();
+      setRecording(true);
+      setSendError("");
+    } catch (error) {
+      if (stream) stream.getTracks().forEach((track) => track.stop());
+      console.error("Voice recording could not start:", error);
+      setSendError("Allow microphone access to record a voice note.");
+    }
+  }
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMediaUrls() {
+      const missing = messages.filter((msg) =>
+        msg.payload?.storage_path &&
+        ["picture", "voice_note"].includes(msg.payload?.media_type) &&
+        !mediaUrls[msg.id]
+      );
+
+      const results = await Promise.all(
+        missing.map(async (msg) => {
+          const { data, error } = await supabase.storage
+            .from("chat-media")
+            .createSignedUrl(msg.payload.storage_path, 3600);
+
+          return {
+            id: msg.id,
+            url: error ? null : data?.signedUrl,
+          };
+        })
+      );
+
+      if (cancelled) return;
+
+      const found = Object.fromEntries(
+        results.filter((item) => item.url).map((item) => [item.id, item.url])
+      );
+
+      if (Object.keys(found).length) {
+        setMediaUrls((previous) => ({ ...previous, ...found }));
+      }
+    }
+
+    loadMediaUrls().catch((error) =>
+      console.error("Could not load chat media:", error)
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [messages, mediaUrls]);
+
+
+
 
   /* ================= LOAD MESSAGES ================= */
 
@@ -302,7 +519,25 @@ const sendMessage = async () => {
                       color: mine ? "#fff" : theme.text,
                     }}
                   >
-                    {msg.text}
+                    {msg.payload?.media_type === "picture" ? (
+                      mediaUrls[msg.id] ? (
+                        <img
+                          src={mediaUrls[msg.id]}
+                          alt="Paid picture"
+                          style={{ display: "block", maxWidth: "100%", maxHeight: 320, borderRadius: 8, objectFit: "contain" }}
+                        />
+                      ) : (
+                        <span>Loading picture...</span>
+                      )
+                    ) : msg.payload?.media_type === "voice_note" ? (
+                      mediaUrls[msg.id] ? (
+                        <audio controls preload="none" src={mediaUrls[msg.id]} style={{ display: "block", maxWidth: "100%" }} />
+                      ) : (
+                        <span>Loading voice note...</span>
+                      )
+                    ) : (
+                      msg.text
+                    )}
 
                     {msg.payload?.charge > 0 && (
                       <div
@@ -314,7 +549,7 @@ const sendMessage = async () => {
                         }}
                       >
                         {mine
-                          ? `− $${Number(msg.payload.charge).toFixed(2)}`
+                          ? `- $${Number(msg.payload.charge).toFixed(2)}`
                           : `+ $${Number(msg.payload.charge).toFixed(2)}`}
                       </div>
                     )}
@@ -328,11 +563,137 @@ const sendMessage = async () => {
         {sendError && <div style={{ color: "#ef4444", fontSize: 13, padding: "6px 12px", textAlign: "center" }}>{sendError}</div>}
 
         {/* INPUT */}
-        <div className="messages-modal-input-area" style={{ ...inputArea, background: theme.surface, borderTopColor: theme.border }}>
-          <input ref={inputRef} className="messages-modal-input" value={message}
-            onChange={(e) => { setMessage(e.target.value); setSendError(""); }}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={handlePictureSelected}
+        />
+
+        <div
+          className="messages-modal-input-area"
+          style={{
+            ...inputArea,
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            gap: 7,
+            padding: "8px 10px",
+            background: theme.surface,
+            borderTopColor: theme.border
+          }}
+        >
+          {showAttachmentMenu && (
+            <div style={{
+              position: "absolute",
+              bottom: "100%",
+              left: 10,
+              zIndex: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 5,
+              padding: 8,
+              border: `1px solid ${theme.border}`,
+              borderRadius: 12,
+              background: theme.surface,
+              boxShadow: "0 4px 18px rgba(0,0,0,0.16)"
+            }}>
+              <button
+                type="button"
+                disabled={sending || recording}
+                onClick={() => {
+                  setShowAttachmentMenu(false);
+                  fileInputRef.current?.click();
+                }}
+                style={composerMenuButton}
+              >
+                🖼 Picture
+              </button>
+              <button
+                type="button"
+                disabled={sending}
+                onClick={() => {
+                  setShowAttachmentMenu(false);
+                  toggleVoiceRecording();
+                }}
+                style={composerMenuButton}
+              >
+                {recording ? "⏹ Stop recording" : "🎙 Voice note"}
+              </button>
+            </div>
+          )}
+
+          {showEmojiPicker && (
+            <div style={{
+              position: "absolute",
+              bottom: "100%",
+              right: 48,
+              zIndex: 20,
+              display: "grid",
+              gridTemplateColumns: "repeat(6, 34px)",
+              gap: 4,
+              padding: 8,
+              border: `1px solid ${theme.border}`,
+              borderRadius: 12,
+              background: theme.surface,
+              boxShadow: "0 4px 18px rgba(0,0,0,0.16)"
+            }}>
+              {["😀", "😂", "😍", "🥰", "😎", "😭", "👍", "❤️", "🔥", "🎉", "🙏", "😉"].map((emoji) => (
+                <button
+                  key={emoji}
+                  type="button"
+                  onClick={() => {
+                    setMessage((previous) => previous + emoji);
+                    setShowEmojiPicker(false);
+                    inputRef.current?.focus();
+                  }}
+                  style={{
+                    border: 0,
+                    borderRadius: 6,
+                    background: "transparent",
+                    fontSize: 21,
+                    padding: 4,
+                    cursor: "pointer"
+                  }}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            aria-label="Attachments"
+            title="Attachments"
+            disabled={sending}
+            onClick={() => {
+              setShowAttachmentMenu((value) => !value);
+              setShowEmojiPicker(false);
+            }}
+            style={composerIconButton}
+          >
+            📎
+          </button>
+
+          <input
+            ref={inputRef}
+            className="messages-modal-input"
+            value={message}
+            onChange={(e) => {
+              setMessage(e.target.value);
+              setSendError("");
+            }}
             placeholder="Send a message..."
-            style={{ ...input, background: theme.surface, color: theme.text, borderColor: theme.border }}
+            style={{
+              ...input,
+              flex: 1,
+              minWidth: 0,
+              background: theme.surface,
+              color: theme.text,
+              borderColor: theme.border
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();
@@ -343,8 +704,21 @@ const sendMessage = async () => {
 
           <button
             type="button"
+            aria-label="Emoji"
+            title="Emoji"
+            onClick={() => {
+              setShowEmojiPicker((value) => !value);
+              setShowAttachmentMenu(false);
+              inputRef.current?.focus();
+            }}
+            style={composerIconButton}
+          >
+            😊
+          </button>
+
+          <button
+            type="button"
             onClick={(e) => {
-              console.log("BUTTON TOUCH/CLICK");
               e.preventDefault();
               sendMessage();
             }}
@@ -353,8 +727,7 @@ const sendMessage = async () => {
           >
             Send
           </button>
-        </div>
-      </div>
+        </div>      </div>
     </div>
   );
 }
@@ -448,6 +821,33 @@ const input = {
   border: "1px solid #ddd",
 };
 
+const composerIconButton = {
+  flexShrink: 0,
+  width: 36,
+  height: 40,
+  padding: 0,
+  border: "none",
+  borderRadius: "50%",
+  background: "transparent",
+  color: "inherit",
+  fontSize: 23,
+  cursor: "pointer",
+};
+
+const composerMenuButton = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  padding: "10px 12px",
+  border: "none",
+  borderRadius: 8,
+  background: "transparent",
+  color: "inherit",
+  whiteSpace: "nowrap",
+  textAlign: "left",
+  cursor: "pointer",
+};
+
 const sendBtn = {
   padding: "10px 16px",
   borderRadius: 10,
@@ -456,6 +856,3 @@ const sendBtn = {
   border: "none",
   cursor: "pointer",
 };
-
-
-

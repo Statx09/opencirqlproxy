@@ -244,16 +244,17 @@ expression_badges: expressions,
     messages: {
       enabled: paymentSettings.messages?.enabled ?? false,
       ratePerMessage: paymentSettings.messages?.ratePerMessage ?? 0.10,
-        pictures: {
-          enabled: paymentSettings.pictures?.enabled ?? false,
-          ratePerPicture: paymentSettings.pictures?.ratePerPicture ?? 0.50,
-        },
-        voiceNotes: {
-          enabled: paymentSettings.voiceNotes?.enabled ?? false,
-          ratePerNote: paymentSettings.voiceNotes?.ratePerNote ?? 0.50,
-        },
     },
 
+    pictures: {
+      enabled: paymentSettings.pictures?.enabled ?? false,
+      ratePerPicture: paymentSettings.pictures?.ratePerPicture ?? 0.50,
+    },
+
+    voiceNotes: {
+      enabled: paymentSettings.voiceNotes?.enabled ?? false,
+      ratePerNote: paymentSettings.voiceNotes?.ratePerNote ?? 0.50,
+    },
     enabled: [
       ...(paypal.trim() ? ["paypal"] : []),
       ...(kofi.trim() ? ["kofi"] : []),
@@ -493,7 +494,7 @@ if (url) setAvatarUrl(url);
                 fontSize: 12,
               }}
             >
-              {topic} ×
+              {topic} ï¿½
             </button>
           ))}
         </div>

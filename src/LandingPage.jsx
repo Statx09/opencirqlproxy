@@ -388,6 +388,44 @@ useEffect(() => {
     cancelled = true;
   };
 }, [user?.id]);
+
+useEffect(() => {
+  const callId = incomingCall?.payload?.call_id;
+  if (!callId) return;
+
+  let stopped = false;
+
+  const checkIncomingCallStatus = async () => {
+    const { data, error } = await supabase
+      .from("calls")
+      .select("status")
+      .eq("id", callId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("INCOMING CALL STATUS CHECK ERROR:", error);
+      return;
+    }
+
+    if (stopped || !data) return;
+
+    if (data.status === "cancelled" || data.status === "completed") {
+      console.log("INCOMING CALL PROMPT CLOSED:", callId, data.status);
+      setIncomingCall((current) =>
+        current?.payload?.call_id === callId ? null : current
+      );
+    }
+  };
+
+  checkIncomingCallStatus();
+  const interval = setInterval(checkIncomingCallStatus, 2000);
+
+  return () => {
+    stopped = true;
+    clearInterval(interval);
+  };
+}, [incomingCall?.payload?.call_id]);
+
 const [outgoingCall, setOutgoingCall] = useState(null);
 
   const loadNotifications = useCallback(async () => {
@@ -2039,13 +2077,26 @@ useEffect(() => {
             >
               {outgoingCall.alias || outgoingCall.name || "Host"}
             </div>
-
+            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgba(255,255,255,.6)' }}>Calling... Waiting for answer</div>
           </div>
 
           <button
             type="button"
-            onClick={() => {
-              console.log("OUTGOING CALL CANCELLED");
+            onClick={async () => {
+              console.log("OUTGOING CALL CANCELLED", outgoingCall.call_id);
+
+              if (outgoingCall.call_id) {
+                const { error } = await supabase
+                  .from("calls")
+                  .update({ status: "cancelled" })
+                  .eq("id", outgoingCall.call_id)
+                  .eq("status", "ringing");
+
+                if (error) {
+                  console.error("CALL CANCELLATION ERROR:", error);
+                }
+              }
+
               setOutgoingCall(null);
               setSelectedHost(null);
             }}
@@ -2062,7 +2113,7 @@ useEffect(() => {
             aria-label="Cancel call"
             title="Cancel call"
           >
-            �
+            ×
           </button>
         </div>
       )}
@@ -2244,10 +2295,20 @@ useEffect(() => {
             <button
               type="button"
               onClick={async () => {
-                console.log(
-                  "INCOMING CALL DECLINED:",
-                  incomingCall
-                );
+                console.log("INCOMING CALL DECLINED:", incomingCall);
+
+                const callId = incomingCall.payload?.call_id;
+                if (callId) {
+                  const { error } = await supabase
+                    .from("calls")
+                    .update({ status: "cancelled" })
+                    .eq("id", callId)
+                    .eq("status", "ringing");
+
+                  if (error) {
+                    console.error("INCOMING CALL DECLINE ERROR:", error);
+                  }
+                }
 
                 setIncomingCall(null);
               }}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+﻿import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -1151,6 +1151,41 @@ useEffect(() => {
   });
 }, []);
 
+  /* ================= CIRI FIRST WELCOME ================= */
+  useEffect(() => {
+    if (!user?.id) return;
+
+    let cancelled = false;
+
+    async function requestCiriWelcome() {
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data?.session?.access_token;
+        if (!token || cancelled) return;
+
+        const response = await fetch("https://cirql-ai-chatbot.vercel.app/api/ciri-welcome", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          console.error("CIRI WELCOME ERROR:", result);
+          return;
+        }
+
+        console.log("CIRI WELCOME RESULT:", result);
+      } catch (error) {
+        console.error("CIRI WELCOME REQUEST FAILED:", error);
+      }
+    }
+
+    requestCiriWelcome();
+    return () => { cancelled = true; };
+  }, [user?.id]);
   /* ================= ACTION ROUTER ================= */
 
   const handleAction = useCallback(
@@ -1502,7 +1537,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION � INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1666,7 +1701,7 @@ break;
       </div>
     </div>
   )}
-  {tipPopup && <div role="status" aria-live="polite" style={{position:"fixed",top:20,right:16,zIndex:100010,width:"min(300px,calc(100vw - 32px))",boxSizing:"border-box",padding:"12px 14px",borderRadius:14,background:theme.card || (theme.isDark ? "rgba(15,23,42,.97)" : "rgba(255,255,255,.98)"),color:theme.text,border:"1px solid "+(theme.border || "rgba(128,128,128,.25)"),boxShadow:"0 8px 28px rgba(0,0,0,.2)",fontSize:12,fontWeight:650,lineHeight:1.5,backdropFilter:"blur(12px)"}}><span style={{color:"#22c55e",marginRight:7}}>●</span>{tipPopup}</div>}
+  {tipPopup && <div role="status" aria-live="polite" style={{position:"fixed",top:20,right:16,zIndex:100010,width:"min(300px,calc(100vw - 32px))",boxSizing:"border-box",padding:"12px 14px",borderRadius:14,background:theme.card || (theme.isDark ? "rgba(15,23,42,.97)" : "rgba(255,255,255,.98)"),color:theme.text,border:"1px solid "+(theme.border || "rgba(128,128,128,.25)"),boxShadow:"0 8px 28px rgba(0,0,0,.2)",fontSize:12,fontWeight:650,lineHeight:1.5,backdropFilter:"blur(12px)"}}><span style={{color:"#22c55e",marginRight:7}}>â—</span>{tipPopup}</div>}
 
 {mode === "grid" && (
   <div style={header(theme)}>
@@ -2179,7 +2214,7 @@ break;
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ×
+            Ã—
           </button>
         </div>
       )}
@@ -2579,7 +2614,7 @@ break;
             justifyContent: "center",
           }}
         >
-          �
+          ï¿½
         </button>
       </div>
 
@@ -2709,7 +2744,7 @@ break;
         <button
           type="button"
           onClick={() =>
-            console.log("WITHDRAW USDC � payout integration pending")
+            console.log("WITHDRAW USDC ï¿½ payout integration pending")
           }
           style={{
             marginTop: 10,
@@ -3646,3 +3681,5 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+

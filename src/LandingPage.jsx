@@ -201,6 +201,7 @@ const [notificationSettings, setNotificationSettings] = useState({
 const [notifications, setNotifications] = useState([]);
 const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 const [tipPopup, setTipPopup] = useState(null);
+  const tipPopupTimerRef = React.useRef(null);
 const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState(0);
 const [pushOnboardingOpen, setPushOnboardingOpen] = useState(false);
@@ -621,7 +622,7 @@ useEffect(() => {
             }
           }
 
-          if (notification.event === 'tip_received') { setTipPopup('?? You?ve been tipped $' + Number(notification.payload?.amount || 0).toFixed(2) + ' by ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); setTimeout(() => setTipPopup(null), 5000); }
+          if (notification.event === 'tip_received') { setTipPopup('You received a $' + Number(notification.payload?.amount || 0).toFixed(2) + ' tip from ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); clearTimeout(tipPopupTimerRef.current); tipPopupTimerRef.current = setTimeout(() => setTipPopup(null), 5000); }
 
 const enrichedNotification = {
             ...notification,
@@ -699,10 +700,10 @@ console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBE
           }
 
           setTipPopup(
-            `?? +$${amount.toFixed(2)} tip from ${senderName} ??`
+            `+$${amount.toFixed(2)} tip received from ${senderName}`
           );
 
-          setTimeout(() => setTipPopup(null), 5000);
+          clearTimeout(tipPopupTimerRef.current); tipPopupTimerRef.current = setTimeout(() => setTipPopup(null), 5000);
 
           loadWalletActivity();
           loadWalletBalance();
@@ -1660,7 +1661,7 @@ break;
       </div>
     </div>
   )}
-  {tipPopup && <div style={{position:"fixed",top:20,right:20,zIndex:99999,padding:"14px 18px",borderRadius:12,background:"#111",color:"#fff",boxShadow:"0 8px 30px rgba(0,0,0,.25)",fontWeight:600}}>{tipPopup}</div>}
+  {tipPopup && <div role="status" aria-live="polite" style={{position:"fixed",top:20,right:16,zIndex:100010,width:"min(300px,calc(100vw - 32px))",boxSizing:"border-box",padding:"12px 14px",borderRadius:14,background:theme.card || (theme.isDark ? "rgba(15,23,42,.97)" : "rgba(255,255,255,.98)"),color:theme.text,border:"1px solid "+(theme.border || "rgba(128,128,128,.25)"),boxShadow:"0 8px 28px rgba(0,0,0,.2)",fontSize:12,fontWeight:650,lineHeight:1.5,backdropFilter:"blur(12px)"}}><span style={{color:"#22c55e",marginRight:7}}>●</span>{tipPopup}</div>}
 
 {mode === "grid" && (
   <div style={header(theme)}>

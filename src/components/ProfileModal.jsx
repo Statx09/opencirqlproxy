@@ -125,8 +125,10 @@ console.log("error =", error);
   const voiceRatePerMinute =
     paymentSettings.voice?.ratePerMinute ?? 0.60;
 
-  const videoRatePerMinute = paymentSettings.video?.ratePerMinute ?? 0.60;
-  const messageEnabled = paymentSettings.messages?.enabled ?? false;
+  const videoRatePerMinute = paymentSettings.video?.ratePerMinute ?? 0.60;
+
+  const messageEnabled = paymentSettings.messages?.enabled ?? false;
+
   const messageRate = paymentSettings.messages?.ratePerMessage ?? 0;
 
   const pictureEnabled = paymentSettings.pictures?.enabled ?? false;
@@ -197,15 +199,15 @@ console.log("error =", error);
             src={profile.banner_url || "https://placehold.co/600x200"}
             style={bannerImg}
           />
+        </div>
 
-          <div style={bannerRateColumn}>
+        <div style={bannerRateColumn}>
             {messageEnabled && messageRate > 0 && <span style={bannerRateItem}><MessageCircle size={22} strokeWidth={2.2} />${Number(messageRate).toFixed(2)}</span>}
             {pictureEnabled && pictureRate > 0 && <span style={bannerRateItem}><Image size={22} strokeWidth={2.2} />${Number(pictureRate).toFixed(2)}</span>}
             {voiceNoteEnabled && voiceNoteRate > 0 && <span style={bannerRateItem}><Mic size={22} strokeWidth={2.2} />${Number(voiceNoteRate).toFixed(2)}</span>}
             {voiceEnabled && voiceRatePerMinute > 0 && <span style={bannerRateItem}><Phone size={22} strokeWidth={2.2} />${Number(voiceRatePerMinute).toFixed(2)}/min</span>}
             {videoEnabled && videoRatePerMinute > 0 && <span style={bannerRateItem}><Video size={22} strokeWidth={2.2} />${Number(videoRatePerMinute).toFixed(2)}/min</span>}
           </div>
-        </div>
 
         {/* HEADER */}
         <div style={header}>
@@ -462,8 +464,8 @@ console.log("error =", error);
   );
 }
 
-const bannerRateColumn = { position: "absolute", top: 10, right: 48, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 3, zIndex: 2 };
-const bannerRateItem = { color: "rgba(255,255,255,0.95)", fontSize: 11, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 7 };
+const bannerRateColumn = { position: "relative", display: "flex", flexDirection: "column", flexWrap: "nowrap", justifyContent: "flex-start", alignItems: "flex-end", gap: 3, padding: "6px 12px", zIndex: 2 };
+const bannerRateItem = { color: "#ffffff", fontSize: 12, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 };
 
 const bannerWrap = { width: "100%", height: 88, overflow: "visible", position: "relative" };
 const bannerImg = { width: "100%", height: "100%", objectFit: "cover" };

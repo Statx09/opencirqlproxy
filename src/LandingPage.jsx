@@ -1390,13 +1390,33 @@ useEffect(() => {
             user?.email ||
             "Someone";
 
-          await supabase.from("messages").insert({
+          const { error: statusLikeError } = await supabase.from("messages").insert({
             sender_id: user.id,
             receiver_id: receiverId,
             text: `${likerName} liked your post`,
             event: "status_like",
             created_at: new Date().toISOString(),
           });
+
+          if (statusLikeError) {
+            console.error("STATUS LIKE MESSAGE ERROR:", statusLikeError);
+            return;
+          }
+
+          const { error: statusPushError } = await supabase
+            .from("notifications")
+            .insert({
+              user_id: receiverId,
+              actor_id: user.id,
+              type: "status_like",
+              title: `${likerName} liked your post`,
+              body: "Open UpCall to see the activity.",
+              is_read: false,
+            });
+
+          if (statusPushError) {
+            console.error("STATUS LIKE PUSH RECORD ERROR:", statusPushError);
+          }
 
           break;
         }
@@ -1482,6 +1502,7 @@ useEffect(() => {
             .insert({
               user_a: user.id,
               user_b: receiverId,
+              requested_by: user.id,
               status: "pending",
             });
 
@@ -1496,7 +1517,27 @@ useEffect(() => {
             to: receiverId,
           });
 
-          alert("Connection request sent.");
+          const actorName =
+            user?.user_metadata?.name ||
+            user?.user_metadata?.full_name ||
+            user?.email ||
+            "Someone";
+
+          const { error: connectionPushError } = await supabase
+            .from("notifications")
+            .insert({
+              user_id: receiverId,
+              actor_id: user.id,
+              type: "connection_request",
+              title: `${actorName} sent you a connection request`,
+              body: "Open UpCall to respond.",
+              is_read: false,
+            });
+
+          if (connectionPushError) {
+            console.error("CONNECTION REQUEST PUSH RECORD ERROR:", connectionPushError);
+          }
+alert("Connection request sent.");
           break;
         }
 
@@ -1562,15 +1603,34 @@ useEffect(() => {
             return;
           }
 
-          console.log(
-            `${type.toUpperCase()} SENT SUCCESSFULLY`,
-            {
-              senderId: user.id,
-              receiverId,
-            }
-          );
+          console.log("CONNECT REQUEST SENT:", {
+            from: user.id,
+            to: receiverId,
+          });
 
-          break;
+          const actorName =
+            user?.user_metadata?.name ||
+            user?.user_metadata?.full_name ||
+            user?.email ||
+            "Someone";
+
+          const { error: actionPushError } = await supabase
+            .from("notifications")
+            .insert({
+              user_id: receiverId,
+              actor_id: user.id,
+              type,
+              title: type === "wave"
+                ? `${actorName} waved at you`
+                : `${actorName} liked your profile`,
+              body: "Open UpCall to see the activity.",
+              is_read: false,
+            });
+
+          if (actionPushError) {
+            console.error(`${type.toUpperCase()} PUSH RECORD ERROR:`, actionPushError);
+          }
+break;
         }
         default:
           console.log("UNKNOWN ACTION:", type);

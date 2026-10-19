@@ -1,4 +1,4 @@
-﻿import {
+import {
   Bell,
   MessageCircle,
   Newspaper,
@@ -25,7 +25,7 @@ export default function GlassBar({
       <div style={bar(theme)}>
 
         <button
-          style={{ ...iconBtn, position: "relative" }}
+          style={{ ...iconBtn, color: theme.text, position: "relative" }}
           onClick={() => onAction("notifications")}
           aria-label="Notifications"
         >
@@ -60,7 +60,7 @@ export default function GlassBar({
         </button>
 
         <button
-          style={{ ...iconBtn, position: "relative" }}
+          style={{ ...iconBtn, color: theme.text, position: "relative" }}
           onClick={() => onAction("chats")}
           aria-label="Messages"
         >
@@ -93,14 +93,14 @@ export default function GlassBar({
         </button>
 
         <button
-          style={iconBtn}
+          style={{ ...iconBtn, color: theme.text }}
           onClick={() => onAction("status")}
         >
           <Newspaper size={21} strokeWidth={2.1} />
         </button>
 
         <button
-          style={{ ...iconBtn, position: "relative" }}
+          style={{ ...iconBtn, color: theme.text, position: "relative" }}
           onClick={() => onAction("connections")}
           aria-label="Connections"
         >
@@ -135,9 +135,7 @@ export default function GlassBar({
         </button>
 
         <button
-          style={{
-            ...iconBtn,
-            border: isLoggedIn
+          style={{ ...iconBtn, color: theme.text, border: isLoggedIn
               ? "1px solid rgba(34,197,94,0.8)"
               : "1px solid rgba(239,68,68,0.8)",
           }}

@@ -1,4 +1,4 @@
-﻿import React, { memo, useMemo } from "react";
+import React, { memo, useMemo } from "react";
 import { normalizeHost } from "../utils/normalizeHost";
 import { Hand, Handshake, MessageCircle, Phone, Image, Mic, Video } from "lucide-react";
 import ExpressionBadges from "./expressions/ExpressionBadges";
@@ -225,7 +225,13 @@ console.log("BANNER:", h.banner);
     style={{
       ...railButton,
       ...waveButton,
-      ...(actionFeedback === "wave" ? feedbackActive : {}),
+    color: theme.text,
+      background: theme.mode === "dark"
+        ? "rgba(255,255,255,0.06)"
+        : "rgba(15,23,42,0.06)",
+      border: theme.mode === "dark"
+        ? "1px solid rgba(255,255,255,0.14)"
+        : "1px solid rgba(15,23,42,0.14)",    ...(actionFeedback === "wave" ? feedbackActive : {}),
     }}
     onPointerDown={(e) => {
       e.stopPropagation();
@@ -244,7 +250,13 @@ console.log("BANNER:", h.banner);
     style={{
       ...railButton,
       ...connectButton,
-      ...(actionFeedback === "connect" ? feedbackActive : {}),
+    color: theme.text,
+      background: theme.mode === "dark"
+        ? "rgba(255,255,255,0.06)"
+        : "rgba(15,23,42,0.06)",
+      border: theme.mode === "dark"
+        ? "1px solid rgba(255,255,255,0.14)"
+        : "1px solid rgba(15,23,42,0.14)",    ...(actionFeedback === "connect" ? feedbackActive : {}),
     }}
     onPointerDown={(e) => {
       e.stopPropagation();

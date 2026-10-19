@@ -464,11 +464,11 @@ console.log("error =", error);
   );
 }
 
-const bannerRateColumn = { position: "relative", display: "flex", flexDirection: "column", flexWrap: "nowrap", justifyContent: "flex-start", alignItems: "flex-end", gap: 3, padding: "6px 12px", zIndex: 2 };
+const bannerRateColumn = { position: "absolute", top: 143, right: 0, display: "flex", flexDirection: "column", flexWrap: "nowrap", justifyContent: "flex-start", alignItems: "flex-end", gap: 3, padding: "8px 12px", margin: 0, zIndex: 6 };
 const bannerRateItem = { color: "#ffffff", fontSize: 12, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 5 };
 
 const bannerWrap = { width: "100%", height: 88, overflow: "visible", position: "relative" };
-const bannerImg = { width: "100%", height: "100%", objectFit: "cover" };
+const bannerImg = { position: "absolute", top: 0, left: 0, width: "100%", height: 143, objectFit: "cover" };
 
 const header = {
   display: "flex",

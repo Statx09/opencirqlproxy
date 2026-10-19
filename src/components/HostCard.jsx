@@ -2,6 +2,7 @@
 import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video } from "lucide-react";
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
+import ImageModal from "./ImageModal";
 
 function HostCard({ host, onAction, onNext, onPrev, variant = "swipe" }) {
   if (!host) return null;
@@ -40,6 +41,8 @@ function HostCard({ host, onAction, onNext, onPrev, variant = "swipe" }) {
 
 
   const [actionFeedback, setActionFeedback] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(null);
+  const galleryImages = normalizeArray(host?.gallery_urls).filter(Boolean);
 
   const showActionFeedback = useCallback((type) => {
     setActionFeedback(type);
@@ -73,19 +76,7 @@ console.log("HOSTCARD normalized", expressions);
       ) : (
         <div style={fallbackBanner} />
       )}
-
-      {/* PROFILE BUTTON */}
-      <button
-  style={{
-    ...glassTopButton,
-    right: 16,
-  }}
-  onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); handle("profile"); }}
->
-  <UserRound size={19} strokeWidth={1.8} />
-</button>
-
-      {actionFeedback && (
+{actionFeedback && (
         <div style={actionFeedbackStyle}>
           <span style={actionFeedbackIcon}>
             {actionFeedback === "wave"
@@ -111,18 +102,37 @@ console.log("HOSTCARD normalized", expressions);
         <button style={railBtn} onClick={() => { showActionFeedback("support"); handle("support"); }} title="Support" aria-label="Support"><CircleDollarSign size={19} strokeWidth={1.8} /></button>
       </div>
 
+      {/* TOP-RIGHT PHOTO GALLERY */}
+      {galleryImages.length > 0 && (
+        <div
+          style={{ position: "absolute", top: 18, right: 18, zIndex: 60, display: "flex", gap: 6, maxWidth: "65%", overflowX: "auto", padding: 4, borderRadius: 10, background: "rgba(0,0,0,0.45)" }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {galleryImages.map((img, i) => (
+            <img
+              key={i}
+              src={img}
+              alt={"Gallery photo " + (i + 1)}
+              onClick={() => setShowImageModal({ images: galleryImages, initialIndex: i })}
+              style={{ width: 48, height: 48, flex: "0 0 48px", objectFit: "cover", borderRadius: 7, cursor: "pointer", border: "1px solid rgba(255,255,255,0.65)" }}
+            />
+          ))}
+        </div>
+      )}
+
       {/* CONTENT */}
       <div style={content}>
 
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, width: "100%", boxSizing: "border-box" }}>
           <img src={avatarSrc} style={avatarStyle} />
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 9, paddingTop: 12, marginLeft: "auto", paddingRight: 55 }}>
-            {messageRate > 0 && <span style={rateItem}><MessageCircle size={22} strokeWidth={2.2} />${messageRate.toFixed(2)}</span>}
-            {pictureRate > 0 && <span style={rateItem}><Image size={22} strokeWidth={2.2} />${pictureRate.toFixed(2)}</span>}
-            {voiceNoteRate > 0 && <span style={rateItem}><Mic size={22} strokeWidth={2.2} />${voiceNoteRate.toFixed(2)}</span>}
-            {voiceRate > 0 && <span style={rateItem}><Phone size={22} strokeWidth={2.2} />${voiceRate.toFixed(2)}/min</span>}
-            {videoRate > 0 && <span style={rateItem}><Video size={22} strokeWidth={2.2} />${videoRate.toFixed(2)}/min</span>}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 0, marginLeft: "auto", paddingRight: 55, position: "relative", top: 108 }}>
+            {messageRate > 0 && <span style={rateItem}><MessageCircle size={16} strokeWidth={2.2} />${messageRate.toFixed(2)}</span>}
+            {pictureRate > 0 && <span style={rateItem}><Image size={16} strokeWidth={2.2} />${pictureRate.toFixed(2)}</span>}
+            {voiceNoteRate > 0 && <span style={rateItem}><Mic size={16} strokeWidth={2.2} />${voiceNoteRate.toFixed(2)}</span>}
+            {voiceRate > 0 && <span style={rateItem}><Phone size={16} strokeWidth={2.2} />${voiceRate.toFixed(2)}/min</span>}
+            {videoRate > 0 && <span style={rateItem}><Video size={16} strokeWidth={2.2} />${videoRate.toFixed(2)}/min</span>}
           </div>
         </div>
 
@@ -235,6 +245,7 @@ console.log("HOSTCARD normalized", expressions);
         )}
 
       </div>
+      {showImageModal && <ImageModal images={showImageModal.images} initialIndex={showImageModal.initialIndex} onClose={() => setShowImageModal(null)} />}
     </div>
   );
 }
@@ -369,7 +380,7 @@ const actionFeedbackStyle = {
 };
 
 const actionFeedbackIcon = {
-  fontSize: 16,
+  fontSize: 12,
   lineHeight: 1,
 };
 const rail = {
@@ -567,7 +578,7 @@ const expressionChip = {
 
 const rateItem = {
   color: "rgba(255,255,255,0.95)",
-  fontSize: 16,
+  fontSize: 12,
   fontWeight: 800,
   whiteSpace: "nowrap",
   display: "flex",
@@ -600,6 +611,14 @@ const flagBubble = {
 
   color: "#fff",
 };
+
+
+
+
+
+
+
+
 
 
 

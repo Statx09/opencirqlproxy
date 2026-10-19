@@ -236,6 +236,11 @@ useEffect(() => {
         return;
       }
 
+      if (data.push_notifications === false) {
+        setPushOnboardingOpen(true);
+        return;
+      }
+
       const dismissedKey = `upcall-push-onboarding-dismissed:${user.id}`;
       const registration = await navigator.serviceWorker.ready;
       const existing = await registration.pushManager.getSubscription();
@@ -2983,6 +2988,7 @@ break;
         <SayThanksModal
           host={selectedHost}
           user={user}
+          theme={theme}
           onClose={closeModal}
         />
       )}

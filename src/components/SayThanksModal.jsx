@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
-export default function SayThanksModal({ host, onClose, onTipSent }) {
+export default function SayThanksModal({ host, onClose, onTipSent, theme }) {
   const [amount, setAmount] = useState(3);
   const [balance, setBalance] = useState(null);
   const [loadingBalance, setLoadingBalance] = useState(true);
@@ -121,8 +121,8 @@ export default function SayThanksModal({ host, onClose, onTipSent }) {
   };
 
   return (
-    <div style={overlay}>
-      <div style={modal}>
+    <div style={{ ...overlay, background: theme?.mode === "dark" ? "rgba(0,0,0,.78)" : "rgba(15,23,42,.42)" }}>
+      <div style={{ ...modal, background: theme?.mode === "dark" ? "rgba(15,23,42,.97)" : "rgba(255,255,255,.98)", color: theme?.text || "#111827", border: `1px solid ${theme?.border || "rgba(148,163,184,.18)"}`, boxShadow: theme?.mode === "dark" ? "0 18px 55px rgba(0,0,0,.45)" : "0 18px 55px rgba(15,23,42,.14)" }}>
         {/* HEADER */}
         <div style={header}>
           <h2 style={{ margin: 0 }}>Say Thanks 💛</h2>
@@ -133,7 +133,7 @@ export default function SayThanksModal({ host, onClose, onTipSent }) {
         </div>
 
         <p style={{ fontSize: 13, color: "#555" }}>
-          Send {name} a tip from your UpCall wallet.
+          Send {name} a tip from your Cirql wallet.
         </p>
 
         {success ? (
@@ -170,8 +170,8 @@ export default function SayThanksModal({ host, onClose, onTipSent }) {
                     disabled={sending}
                     style={{
                       ...btn,
-                      background: amount === v ? "#7c3aed" : "#eee",
-                      color: amount === v ? "#fff" : "#111",
+                      background: amount === v ? "#22c55e" : (theme?.mode === "dark" ? "rgba(255,255,255,.08)" : "#f3f4f6"),
+                      color: amount === v ? "#fff" : (theme?.text || "#111827"),
                       opacity: sending ? 0.6 : 1,
                     }}
                   >
@@ -260,11 +260,11 @@ const overlay = {
 };
 
 const modal = {
-  width: 420,
-  maxWidth: "calc(100vw - 32px)",
-  background: "#fff",
-  borderRadius: 16,
-  padding: 16,
+  width: "min(300px, calc(100vw - 32px))",
+  maxHeight: "calc(100vh - 110px)",
+  overflowY: "auto",
+  borderRadius: 14,
+  padding: 13,
   boxSizing: "border-box",
 };
 
@@ -362,7 +362,7 @@ const payBtn = {
   padding: 12,
   borderRadius: 12,
   border: "none",
-  background: "#7c3aed",
+  background: "#22c55e",
   color: "#fff",
   fontWeight: 700,
   cursor: "pointer",

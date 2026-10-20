@@ -132,12 +132,12 @@ console.log("HOSTCARD normalized", expressions);
       </div>
 
       {/* CONTENT */}
-      <div style={variant === "expanded" ? { ...content, bottom: 20 } : content}>
+      <div style={variant === "expanded" ? { ...content, bottom: 55 } : content}>
 
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, width: "100%", boxSizing: "border-box" }}>
           <img src={avatarSrc} style={avatarStyle} />
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 0, marginLeft: "auto", paddingRight: 55, position: "relative", top: 108 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 0, marginLeft: "auto", paddingRight: 55, position: "relative", top: variant === "expanded" ? 70 : 108 }}>
             {messageRate > 0 && <span style={rateItem}><MessageCircle size={16} strokeWidth={2.2} />${messageRate.toFixed(2)}</span>}
             {pictureRate > 0 && <span style={rateItem}><Image size={16} strokeWidth={2.2} />${pictureRate.toFixed(2)}</span>}
             {voiceNoteRate > 0 && <span style={rateItem}><Mic size={16} strokeWidth={2.2} />${voiceNoteRate.toFixed(2)}</span>}

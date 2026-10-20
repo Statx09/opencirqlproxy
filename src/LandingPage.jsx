@@ -3067,6 +3067,7 @@ break;
               host={selectedHost}
               user={user}
               onAction={handleAction}
+              onClose={closeModal}
               variant="expanded"
             />
           </div>

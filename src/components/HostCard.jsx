@@ -1,10 +1,10 @@
-﻿import React, { memo, useMemo, useCallback, useState } from "react";
-import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video } from "lucide-react";
+import React, { memo, useMemo, useCallback, useState } from "react";
+import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video, X } from "lucide-react";
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import ImageModal from "./ImageModal";
 
-function HostCard({ host, onAction, onNext, onPrev, variant = "swipe" }) {
+function HostCard({ host, onAction, onNext, onPrev, onClose, variant = "swipe" }) {
   if (!host) return null;
 
   const {
@@ -95,6 +95,35 @@ console.log("HOSTCARD normalized", expressions);
           </span>
         </div>
       )}
+      {variant === "expanded" && (
+        <button
+          type="button"
+          aria-label="Close expanded profile"
+          title="Close"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose?.();
+          }}
+          style={{
+            position: "absolute",
+            top: 14,
+            right: 14,
+            zIndex: 100,
+            width: 40,
+            height: 40,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.35)",
+            background: "rgba(0,0,0,0.65)",
+            color: "#fff",
+            cursor: "pointer",
+          }}
+        >
+          <X size={21} />
+        </button>
+      )}
       {/* ACTION RAIL */}
       <div style={rail}>
         <button style={railBtn} onClick={() => { showActionFeedback("wave"); handle("wave"); }} title="Wave" aria-label="Wave"><Hand size={19} strokeWidth={1.8} /></button>
@@ -102,27 +131,8 @@ console.log("HOSTCARD normalized", expressions);
         <button style={railBtn} onClick={() => { showActionFeedback("support"); handle("support"); }} title="Support" aria-label="Support"><CircleDollarSign size={19} strokeWidth={1.8} /></button>
       </div>
 
-      {/* TOP-RIGHT PHOTO GALLERY */}
-      {galleryImages.length > 0 && (
-        <div
-          style={{ position: "absolute", top: 18, right: 18, zIndex: 60, display: "flex", gap: 6, maxWidth: "65%", overflowX: "auto", padding: 4, borderRadius: 10, background: "rgba(0,0,0,0.45)" }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {galleryImages.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              alt={"Gallery photo " + (i + 1)}
-              onClick={() => setShowImageModal({ images: galleryImages, initialIndex: i })}
-              style={{ width: 48, height: 48, flex: "0 0 48px", objectFit: "cover", borderRadius: 7, cursor: "pointer", border: "1px solid rgba(255,255,255,0.65)" }}
-            />
-          ))}
-        </div>
-      )}
-
       {/* CONTENT */}
-      <div style={content}>
+      <div style={variant === "expanded" ? { ...content, bottom: 20 } : content}>
 
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, width: "100%", boxSizing: "border-box" }}>
           <img src={avatarSrc} style={avatarStyle} />
@@ -184,6 +194,46 @@ console.log("HOSTCARD normalized", expressions);
           ))}
         </div>
 
+
+        {/* PHOTO GALLERY */}
+        {galleryImages.length > 0 && (
+          <div
+            style={{
+              position: "relative",
+              display: "flex",
+              gap: 6,
+              width: "100%",
+              maxWidth: "100%",
+              boxSizing: "border-box",
+              overflowX: "auto",
+              padding: 4,
+              marginTop: 10,
+              marginBottom: 8,
+              borderRadius: 10,
+              background: "rgba(0,0,0,0.45)",
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {galleryImages.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt={"Gallery photo " + (i + 1)}
+                onClick={() => setShowImageModal({ images: galleryImages, initialIndex: i })}
+                style={{
+                  width: 48,
+                  height: 48,
+                  flex: "0 0 48px",
+                  objectFit: "cover",
+                  borderRadius: 7,
+                  cursor: "pointer",
+                  border: "1px solid rgba(255,255,255,0.65)",
+                }}
+              />
+            ))}
+          </div>
+        )}
         {/* MESSAGE + CALL */}
         {(variant === "swipe" || variant === "expanded") && (
           <div style={buttons}>

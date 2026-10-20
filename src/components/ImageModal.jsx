@@ -1,190 +1,142 @@
-import React, { useEffect, useState, useRef } from "react";
+﻿import React, { useEffect, useState, useRef } from "react";
 
-export default function ImageModal({
-  images = [],
-  initialIndex = 0,
-  onClose,
-}) {
+export default function ImageModal({ images = [], initialIndex = 0, onClose }) {
   const [index, setIndex] = useState(initialIndex);
-  const stripRef = useRef(null);
+  const touchStartX = useRef(null);
 
-  // Sync when reopened
   useEffect(() => {
     setIndex(initialIndex);
   }, [initialIndex]);
 
-  if (!images || images.length === 0) return null;
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose?.();
+      if (e.key === "ArrowRight") setIndex((i) => (i + 1) % images.length);
+      if (e.key === "ArrowLeft") setIndex((i) => (i - 1 + images.length) % images.length);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [images.length, onClose]);
 
-  // ---------------- NAV ----------------
-  const goNext = () => {
-    setIndex((prev) => {
-      const next = (prev + 1) % images.length;
-      scrollToThumb(next);
-      return next;
-    });
-  };
+  if (!images.length) return null;
 
-  const goPrev = () => {
-    setIndex((prev) => {
-      const next = (prev - 1 + images.length) % images.length;
-      scrollToThumb(next);
-      return next;
-    });
-  };
-
-  // ---------------- SCROLL FIX (IMPORTANT) ----------------
-  const scrollToThumb = (i) => {
-    const el = stripRef.current?.querySelectorAll("img")?.[i];
-
-    if (el) {
-      el.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest",
-      });
-    }
-  };
+  const goNext = () => setIndex((i) => (i + 1) % images.length);
+  const goPrev = () => setIndex((i) => (i - 1 + images.length) % images.length);
 
   return (
     <div style={overlay} onClick={onClose}>
-      <div style={modal} onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        aria-label="Close gallery"
+        onClick={onClose}
+        style={closeBtn}
+      >
+        ×
+      </button>
 
-        {/* CLOSE */}
-        <button onClick={onClose} style={closeBtn}>
-          ✕
-        </button>
+      <button
+        type="button"
+        aria-label="Previous picture"
+        onClick={(e) => { e.stopPropagation(); goPrev(); }}
+        style={{ ...navBtn, left: 12 }}
+      >
+        ‹
+      </button>
 
-        {/* MAIN IMAGE */}
-        <div style={mainContainer}>
-          <img src={images[index]} alt="" style={mainImage} />
+      <img
+        src={images[index]}
+        alt=""
+        draggable={false}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          if (touchStartX.current === null) return;
+          const delta = e.changedTouches[0].clientX - touchStartX.current;
+          if (Math.abs(delta) > 45) delta < 0 ? goNext() : goPrev();
+          touchStartX.current = null;
+        }}
+        style={mainImage}
+      />
+
+      <button
+        type="button"
+        aria-label="Next picture"
+        onClick={(e) => { e.stopPropagation(); goNext(); }}
+        style={{ ...navBtn, right: 12 }}
+      >
+        ›
+      </button>
+
+      {images.length > 1 && (
+        <div style={counter}>
+          {index + 1} / {images.length}
         </div>
-
-        {/* NAV */}
-        <div style={navRow}>
-          <button onClick={goPrev} style={navBtn}>←</button>
-
-          <div style={counter}>
-            {index + 1} / {images.length}
-          </div>
-
-          <button onClick={goNext} style={navBtn}>→</button>
-        </div>
-
-        {/* SCROLLABLE THUMBS */}
-        <div style={thumbStrip} ref={stripRef}>
-          {images.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              onClick={() => setIndex(i)}
-              style={{
-                ...thumb,
-                border:
-                  i === index
-                    ? "2px solid #7c3aed"
-                    : "2px solid transparent",
-                opacity: i === index ? 1 : 0.6,
-              }}
-              alt=""
-            />
-          ))}
-        </div>
-
-      </div>
+      )}
     </div>
   );
 }
 
-/* ================= STYLES ================= */
-
 const overlay = {
   position: "fixed",
   inset: 0,
-  background: "rgba(0,0,0,0.9)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 99999,
-};
-
-const modal = {
-  width: "95%",
-  maxWidth: 900,
-  background: "#0f172a",
-  borderRadius: 16,
-  padding: 12,
-  display: "flex",
-  flexDirection: "column",
-  gap: 10,
-  position: "relative",
-  color: "#fff",
-};
-
-const closeBtn = {
-  position: "absolute",
-  right: 10,
-  top: 10,
-  background: "#000",
-  border: "none",
-  color: "#fff",
-  padding: "6px 10px",
-  borderRadius: 8,
-  cursor: "pointer",
-};
-
-const mainContainer = {
   width: "100%",
-  height: "60vh",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
+  height: "100dvh",
   background: "#000",
-  borderRadius: 12,
+  zIndex: 99999,
   overflow: "hidden",
 };
 
 const mainImage = {
-  maxWidth: "100%",
-  maxHeight: "100%",
-  objectFit: "contain",
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  objectPosition: "center",
+  userSelect: "none",
 };
 
-const navRow = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
+const closeBtn = {
+  position: "absolute",
+  top: "max(16px, env(safe-area-inset-top))",
+  right: 16,
+  zIndex: 3,
+  width: 44,
+  height: 44,
+  borderRadius: "50%",
+  border: "1px solid rgba(255,255,255,0.4)",
+  background: "rgba(0,0,0,0.45)",
+  color: "#fff",
+  fontSize: 30,
+  lineHeight: 1,
+  cursor: "pointer",
 };
 
 const navBtn = {
-  background: "#7c3aed",
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  zIndex: 3,
+  width: 44,
+  height: 60,
   border: "none",
+  borderRadius: 12,
+  background: "rgba(0,0,0,0.4)",
   color: "#fff",
-  padding: "8px 14px",
-  borderRadius: 10,
+  fontSize: 42,
+  lineHeight: 1,
   cursor: "pointer",
-  fontWeight: 700,
 };
 
 const counter = {
-  fontSize: 13,
-  color: "#aaa",
-};
-
-/* 🔥 FIXED SCROLL BEHAVIOR */
-const thumbStrip = {
-  display: "flex",
-  gap: 8,
-  overflowX: "auto",
-  WebkitOverflowScrolling: "touch", // important for smooth mobile scroll
-  scrollBehavior: "smooth",
-  padding: "6px 0",
-};
-
-const thumb = {
-  width: 70,
-  height: 70,
-  borderRadius: 10,
-  objectFit: "cover",
-  cursor: "pointer",
-  flexShrink: 0,
+  position: "absolute",
+  bottom: "max(20px, env(safe-area-inset-bottom))",
+  left: "50%",
+  transform: "translateX(-50%)",
+  zIndex: 3,
+  color: "#fff",
+  background: "rgba(0,0,0,0.45)",
+  borderRadius: 20,
+  padding: "6px 12px",
+  fontSize: 14,
 };

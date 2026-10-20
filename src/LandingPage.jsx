@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
@@ -626,8 +626,21 @@ useEffect(() => {
               senderProfile = data || null;
             }
           }
+          const senderName = senderProfile?.alias || senderProfile?.name || "Someone";
 
-          if (notification.event === 'tip_received') { setTipPopup('You received a $' + Number(notification.payload?.amount || 0).toFixed(2) + ' tip from ' + (senderProfile?.alias || senderProfile?.name || 'Someone')); clearTimeout(tipPopupTimerRef.current); tipPopupTimerRef.current = setTimeout(() => setTipPopup(null), 5000); }
+          if (notification.event !== "tip_received") {
+            const interactionText = {
+              wave: "👋 " + senderName + " waved at you",
+              like: "💜 " + senderName + " liked your profile",
+              status_like: "✨ " + senderName + " liked your status"
+            };
+            const toastMessage = interactionText[notification.event];
+            if (toastMessage) {
+              clearTimeout(tipPopupTimerRef.current);
+              setTipPopup(toastMessage);
+              tipPopupTimerRef.current = setTimeout(() => setTipPopup(null), 4500);
+            }
+          }
 
 const enrichedNotification = {
             ...notification,
@@ -705,7 +718,7 @@ console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBE
           }
 
           setTipPopup(
-            `+$${amount.toFixed(2)} tip received from ${senderName}`
+            `🎉 You received a $${amount.toFixed(2)} tip from ${senderName}! 💜`
           );
 
           clearTimeout(tipPopupTimerRef.current); tipPopupTimerRef.current = setTimeout(() => setTipPopup(null), 5000);
@@ -909,9 +922,14 @@ console.log(
             return;
           }
 
-          // Re-read the real unread count so the badge stays accurate.
+          // Keep the unread badge accurate.
           loadUnreadMessages();
-        }
+
+          clearTimeout(tipPopupTimerRef.current);
+          setTipPopup("💬 New message received");
+          tipPopupTimerRef.current = setTimeout(() => {
+            setTipPopup(null);
+          }, 4500);}
       )
       .subscribe((status) => {
         console.log("MESSAGES REALTIME:", status);
@@ -1191,6 +1209,11 @@ useEffect(() => {
   const handleAction = useCallback(
     async (type, host = null) => {
       switch (type) {
+        case "expandedHostCard":
+          setSelectedHost(host);
+          setSelectedProfile(null);
+          setActiveModal("expandedHostCard");
+          break;
         case "profile":
   setSelectedHost(host);
   setSelectedProfile(null); // IMPORTANT
@@ -1691,7 +1714,7 @@ break;
       <div style={{width:"100%",maxWidth:380,padding:24,borderRadius:20,background:theme.card || theme.background || "#171717",color:theme.text || "#fff",border:`1px solid ${theme.border || "#444"}`}}>
         <h2 style={{margin:"0 0 10px",fontSize:21}}>Stay connected on Cirql</h2>
         <p style={{lineHeight:1.5,opacity:0.85}}>{("Notification" in window && Notification.permission === "denied") ? "Notifications are blocked by your browser. Allow them in this site browser settings, then return to UpCall and reload the page." : "Get alerts for messages, connection requests and calls, even when UpCall is closed."}</p>
-        {pushOnboardingError && <div><p role="status" style={{color:theme.text || "#fff",fontSize:13,lineHeight:1.5,opacity:0.85,whiteSpace:"pre-line",margin:"0 0 12px"}}>{pushOnboardingError}</p><div style={{display:"flex",justifyContent:"flex-end",marginBottom:12,marginBottom:12}}><button type="button" onClick={() => { setPushOnboardingError(""); setPushOnboardingOpen(false); }} style={{minWidth:66,padding:"6px 14px",fontSize:12,border:0,borderRadius:9,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600,cursor:"pointer"}}>OK</button></div></div>}
+        {pushOnboardingError && <div><p role="status" style={{color:theme.text || "#fff",fontSize:13,lineHeight:1.5,opacity:0.85,whiteSpace:"pre-line",margin:"0 0 12px"}}>{pushOnboardingError}</p><div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" onClick={() => { setPushOnboardingError(""); setPushOnboardingOpen(false); }} style={{minWidth:66,padding:"6px 14px",fontSize:12,border:0,borderRadius:9,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600,cursor:"pointer"}}>OK</button></div></div>}
         <button type="button" disabled={pushOnboardingBusy} onClick={handlePushOnboardingButton} style={{width:"100%",padding:12,border:0,borderRadius:12,background:theme.accent || "#7c5cff",color:"#fff",fontWeight:600}}>
           {pushOnboardingBusy ? "Enabling..." : "Enable notifications"}
         </button>
@@ -1701,7 +1724,75 @@ break;
       </div>
     </div>
   )}
-  {tipPopup && <div role="status" aria-live="polite" style={{position:"fixed",top:20,right:16,zIndex:100010,width:"min(300px,calc(100vw - 32px))",boxSizing:"border-box",padding:"12px 14px",borderRadius:14,background:theme.card || (theme.isDark ? "rgba(15,23,42,.97)" : "rgba(255,255,255,.98)"),color:theme.text,border:"1px solid "+(theme.border || "rgba(128,128,128,.25)"),boxShadow:"0 8px 28px rgba(0,0,0,.2)",fontSize:12,fontWeight:650,lineHeight:1.5,backdropFilter:"blur(12px)"}}><span style={{color:"#22c55e",marginRight:7}}>â—</span>{tipPopup}</div>}
+  {tipPopup && (
+    <div
+      role="status"
+      aria-live="polite"
+      style={{
+        position: "fixed",
+        top: 20,
+        right: 16,
+        zIndex: 100010,
+        width: "min(340px, calc(100vw - 32px))",
+        boxSizing: "border-box",
+        padding: "14px 16px",
+        borderRadius: 14,
+        background: theme.panel || theme.card || theme.background,
+        color: theme.text,
+        border: `1px solid ${theme.border}`,
+        boxShadow: theme.mode === "dark"
+          ? "0 12px 32px rgba(0,0,0,.38)"
+          : "0 12px 32px rgba(15,23,42,.12)",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        animation: "cirqlToastIn .28s ease-out"
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 10,
+          fontWeight: 750,
+          letterSpacing: ".08em",
+          textTransform: "uppercase",
+          color: theme.text,
+          opacity: 0.6,
+          marginBottom: 4
+        }}>
+          CIRQL
+        </div>
+        <div style={{
+          fontSize: 13,
+          fontWeight: 600,
+          lineHeight: 1.5,
+          color: theme.text,
+          overflowWrap: "anywhere"
+        }}>
+          {tipPopup}
+        </div>
+      </div>
+      <button
+        type="button"
+        aria-label="Dismiss notification"
+        onClick={() => {
+          clearTimeout(tipPopupTimerRef.current);
+          setTipPopup(null);
+        }}
+        style={{
+          border: 0,
+          background: "transparent",
+          color: theme.text,
+          opacity: 0.65,
+          fontSize: 20,
+          cursor: "pointer",
+          padding: "0 2px",
+          alignSelf: "flex-start"
+        }}
+      >
+        ×
+      </button>
+    </div>
+  )}
 
 {mode === "grid" && (
   <div style={header(theme)}>
@@ -2945,6 +3036,42 @@ break;
   </>
 )}
 
+      {activeModal === "expandedHostCard" && selectedHost && (
+        <div
+          onClick={closeModal}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100001,
+            display: "flex",
+            alignItems: "stretch",
+            justifyContent: "stretch",
+            padding: 0,
+            margin: 0,
+            background: "transparent",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              height: "100%",
+              maxWidth: "none",
+              maxHeight: "none",
+              margin: 0,
+              padding: 0,
+              overflow: "auto",
+            }}
+          >
+            <HostCard
+              host={selectedHost}
+              user={user}
+              onAction={handleAction}
+              variant="expanded"
+            />
+          </div>
+        </div>
+      )}
       {activeModal === "userProfile" && (
         <ModalShell title="Identity Studio" onClose={closeModal}>
           <ProfileTab
@@ -3681,5 +3808,16 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -472,8 +472,8 @@ const bannerImg = { position: "absolute", top: 0, left: 0, width: "100%", height
 
 const header = {
   display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
+  flexDirection: "row",
+  alignItems: "flex-start",
   marginTop: -38,
   paddingBottom: 10,
   position: "relative",
@@ -481,15 +481,15 @@ const header = {
 };
 
 const avatarStyle = {
-  width: 110,
-  height: 110,
+  width: 76,
+  height: 76,
   borderRadius: "50%",
   border: "4px solid #111827",
   objectFit: "cover",
 };
 
 const headlineText = {
-  fontSize: 14,
+  fontSize: 12,
   color: "#fff",
   fontWeight: 600,
   marginTop: 6,
@@ -506,7 +506,7 @@ const metaText = {
 };
 
 const bioText = {
-  fontSize: 13,
+  fontSize: 12,
   color: "#aaa",
   marginTop: 6,
   maxWidth: 420,
@@ -704,6 +704,7 @@ const closeBtn = {
   padding: "6px 10px",
   cursor: "pointer",
 };
+
 
 
 

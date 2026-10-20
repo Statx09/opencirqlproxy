@@ -185,7 +185,7 @@ console.log("HOSTCARD normalized", expressions);
         </div>
 
         {/* MESSAGE + CALL */}
-        {variant === "swipe" && (
+        {(variant === "swipe" || variant === "expanded") && (
           <div style={buttons}>
 
             <button
@@ -611,6 +611,9 @@ const flagBubble = {
 
   color: "#fff",
 };
+
+
+
 
 
 

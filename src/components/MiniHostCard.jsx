@@ -72,7 +72,7 @@ console.log("BANNER:", h.banner);
         ? "0 0 22px rgba(139,92,246,.35)"
         : "none",
   }}
-  onClick={() => { console.log("MINI CARD PROFILE CLICK:", h); onAction?.("profile", h); }}
+  onClick={() => { console.log("MINI CARD EXPANDED CLICK:", h); onAction?.("expandedHostCard", h); }}
 >
       {/* AVATAR */}
       <div

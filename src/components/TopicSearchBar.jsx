@@ -1,4 +1,4 @@
-﻿
+
 import React, { useState } from "react";
 import { SlidersHorizontal } from "lucide-react";
 
@@ -7,6 +7,7 @@ export default function TopicSearchBar({
   onChange,
   filter = "all",
   onFilterChange,
+  darkGlass = false,
 }) {
   const [open, setOpen] = useState(false);
 
@@ -38,8 +39,11 @@ export default function TopicSearchBar({
             height: 42,
             padding: "0 50px 0 14px",
             borderRadius: 12,
-            border: "1px solid rgba(148,163,184,.25)",
-            background: "rgba(255,255,255,.06)",
+            border: darkGlass ? "1px solid rgba(203,213,225,.30)" : "1px solid rgba(148,163,184,.25)",
+            background: darkGlass ? "rgba(5,10,20,.82)" : "rgba(255,255,255,.06)",
+            backdropFilter: darkGlass ? "blur(18px)" : undefined,
+            WebkitBackdropFilter: darkGlass ? "blur(18px)" : undefined,
+            boxShadow: darkGlass ? "0 12px 28px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.06)" : undefined,
             color: "inherit",
             outline: "none",
             boxSizing: "border-box",
@@ -56,8 +60,9 @@ export default function TopicSearchBar({
             width: 32,
             height: 32,
             borderRadius: 8,
-            border: "1px solid rgba(255,255,255,.12)",
-            background: "rgba(255,255,255,.07)",
+            border: darkGlass ? "1px solid rgba(255,255,255,.22)" : "1px solid rgba(255,255,255,.12)",
+            background: darkGlass ? "rgba(255,255,255,.12)" : "rgba(255,255,255,.07)",
+            backdropFilter: darkGlass ? "blur(12px)" : undefined,
             color: "inherit",
             display: "flex",
             alignItems: "center",
@@ -76,7 +81,9 @@ export default function TopicSearchBar({
             top: 48,
             right: 0,
             width: 180,
-            background: "#111827",
+            background: darkGlass ? "rgba(5,10,20,.96)" : "#111827",
+            backdropFilter: darkGlass ? "blur(20px)" : undefined,
+            WebkitBackdropFilter: darkGlass ? "blur(20px)" : undefined,
             borderRadius: 12,
             padding: 8,
             border: "1px solid rgba(255,255,255,.1)",

@@ -2336,7 +2336,7 @@ break;
       {/* SWIPE */}
 {mode === "swipe" && (
   <div style={{ ...swipeStage, position: "relative" }}>
-<div style={{ position: "absolute", top: 12, right: 12, zIndex: 50, width: "min(260px, calc(100vw - 88px))" }}><TopicSearchBar value={swipeSearchQuery} onChange={(value) => { setSwipeSearchQuery(value); setIndex(0); }} filter={swipeSearchFilter} onFilterChange={(value) => { setSwipeSearchFilter(value); setIndex(0); }} /></div>
+<div style={{ position: "absolute", top: 26, right: 12, zIndex: 50, width: "min(260px, calc(100vw - 88px))" }}><TopicSearchBar value={swipeSearchQuery} onChange={(value) => { setSwipeSearchQuery(value); setIndex(0); }} filter={swipeSearchFilter} onFilterChange={(value) => { setSwipeSearchFilter(value); setIndex(0); }} darkGlass /></div>
 
     <button
       style={modeBtn}

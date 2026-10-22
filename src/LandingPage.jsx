@@ -201,6 +201,31 @@ const [notificationSettings, setNotificationSettings] = useState({
 const [notifications, setNotifications] = useState([]);
 const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
 const [tipPopup, setTipPopup] = useState(null);
+const [feedHighlight, setFeedHighlight] = useState(null);
+const [feedHighlightsEnabled, setFeedHighlightsEnabled] = useState(() => {
+  try {
+    return !user?.id || window.localStorage.getItem(`upcall-feed-highlights:${user.id}`) !== "false";
+  } catch {
+    return true;
+  }
+});
+const feedHighlightTimerRef = React.useRef(null);
+const seenFeedStatusIdsRef = React.useRef(null);
+
+React.useEffect(() => {
+  if (!user?.id) return;
+  try {
+    setFeedHighlightsEnabled(
+      window.localStorage.getItem(`upcall-feed-highlights:${user.id}`) !== "false"
+    );
+  } catch (error) {
+    console.warn("Could not load Feed Highlights preference:", error);
+  }
+}, [user?.id]);
+
+React.useEffect(() => {
+  return () => clearTimeout(feedHighlightTimerRef.current);
+}, []);
   const tipPopupTimerRef = React.useRef(null);
 const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState(0);
@@ -1117,6 +1142,41 @@ const [showStatusModal, setShowStatusModal] = useState(false);
 
 const { statuses, reload: reloadStatuses } = useStatusFeed();
 
+React.useEffect(() => {
+  if (!user?.id || !Array.isArray(statuses) || statuses.length === 0) return;
+
+  const currentIds = new Set(statuses.map((status) => status.id).filter(Boolean));
+
+  if (seenFeedStatusIdsRef.current === null) {
+    seenFeedStatusIdsRef.current = currentIds;
+    return;
+  }
+
+  const seenIds = seenFeedStatusIdsRef.current;
+  const freshStatuses = statuses.filter(
+    (status) => status.id && !seenIds.has(status.id)
+  );
+
+  currentIds.forEach((id) => seenIds.add(id));
+
+  if (!feedHighlightsEnabled || freshStatuses.length === 0) {
+    return;
+  }
+
+  const candidate = freshStatuses.find(
+    (status) => status.user_id !== user.id && status.profile?.user_id !== user.id
+  );
+
+  if (!candidate) return;
+
+  clearTimeout(feedHighlightTimerRef.current);
+  setFeedHighlight(candidate);
+
+  feedHighlightTimerRef.current = setTimeout(() => {
+    setFeedHighlight(null);
+  }, 6500);
+}, [statuses, user?.id, feedHighlightsEnabled]);
+
 const [refreshChatsKey] = useState(0);
 
 const closeModal = useCallback(() => {
@@ -1724,6 +1784,54 @@ break;
       </div>
     </div>
   )}
+  {feedHighlight && (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label="Open Feed Highlight profile"
+      onClick={() => {
+        clearTimeout(feedHighlightTimerRef.current);
+        setFeedHighlight(null);
+        handleOpenProfile(feedHighlight.profile?.user_id || feedHighlight.user_id);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          clearTimeout(feedHighlightTimerRef.current);
+          setFeedHighlight(null);
+          handleOpenProfile(feedHighlight.profile?.user_id || feedHighlight.user_id);
+        }
+      }}
+      style={{
+        position: "fixed", top: tipPopup ? 112 : 20, right: 16,
+        zIndex: 100009, width: "min(340px, calc(100vw - 32px))",
+        boxSizing: "border-box", padding: "14px 16px", borderRadius: 14,
+        background: theme.panel || theme.card || theme.background,
+        color: theme.text, border: `1px solid ${theme.border}`,
+        boxShadow: theme.mode === "dark" ? "0 12px 32px rgba(0,0,0,.38)" : "0 12px 32px rgba(15,23,42,.12)",
+        display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
+        animation: "cirqlToastIn .28s ease-out"
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 10, fontWeight: 750, letterSpacing: ".08em", marginBottom: 4, opacity: .6 }}>CIRQL</div>
+        <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, overflowWrap: "anywhere" }}>
+          <strong>{feedHighlight.profile?.alias || feedHighlight.profile?.name || "Someone"}</strong>
+          {" shared a new "}
+          {feedHighlight.post_type === "chat_request" ? "chat prompt" : feedHighlight.post_type === "call_request" ? "call invitation" : "moment"}.
+          {" Tap to view their profile."}
+        </div>
+      </div>
+      <button type="button" aria-label="Dismiss Feed Highlight"
+        onClick={(event) => {
+          event.stopPropagation();
+          clearTimeout(feedHighlightTimerRef.current);
+          setFeedHighlight(null);
+        }}
+        style={{ border: 0, background: "transparent", color: theme.text, fontSize: 20, cursor: "pointer" }}
+      >×</button>
+    </div>
+  )}
   {tipPopup && (
     <div
       role="status"
@@ -2056,6 +2164,57 @@ break;
               ))}
             </div>
           )}
+        </div>
+
+        <div style={settingsSection}>
+          <div style={settingsLabel}>Feed popups</div>
+          <button
+            type="button"
+            style={settingsRow(theme)}
+            aria-pressed={feedHighlightsEnabled}
+            onClick={() => {
+              const next = !feedHighlightsEnabled;
+              setFeedHighlightsEnabled(next);
+
+              try {
+                window.localStorage.setItem(
+                  `upcall-feed-highlights:${user.id}`,
+                  String(next)
+                );
+              } catch (error) {
+                console.error("Feed Highlights preference save failed:", error);
+              }
+
+              if (!next) {
+                clearTimeout(feedHighlightTimerRef.current);
+                setFeedHighlight(null);
+              }
+            }}
+          >
+            <span style={settingsRowLeft}>
+              <span>Enable</span>
+            </span>
+            <span
+              style={{
+                ...settingsSwitch,
+                background: feedHighlightsEnabled
+                  ? "#22c55e"
+                  : "rgba(148,163,184,.22)",
+              }}
+            >
+              <span
+                style={{
+                  ...settingsSwitchKnob,
+                  transform: feedHighlightsEnabled
+                    ? "translateX(14px)"
+                    : "translateX(2px)",
+                }}
+              />
+            </span>
+          </button>
+          <div style={{ fontSize: 12, color: theme.text, opacity: 0.65, padding: "0 12px 4px" }}>
+
+          </div>
         </div>
 
         <div style={settingsDivider}></div>

@@ -22,6 +22,7 @@ import { fetchHosts } from "./api/fetchHosts";
 import { useSwipe } from "./hooks/useSwipe";
 import useStatusFeed from "./hooks/useStatusFeed";
 import { supabase } from "./lib/supabaseClient";
+import { normalizeHost } from "./utils/normalizeHost";
 
 export default function LandingPage({ user }) {
 
@@ -1161,7 +1162,7 @@ React.useEffect(() => {
 
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("user_id, alias, name, avatar_url")
+          .select("id, user_id, alias, name, avatar_url, banner_url, gallery_urls, expression_badges, intent_tags, topics, country, location, languages, payment_methods")
           .eq("user_id", status.user_id)
           .maybeSingle();
 
@@ -1803,14 +1804,14 @@ break;
       onClick={() => {
         clearTimeout(feedHighlightTimerRef.current);
         setFeedHighlight(null);
-        handleOpenProfile(feedHighlight.profile?.user_id || feedHighlight.user_id);
+        setShowStatusModal(false); handleAction("expandedHostCard", normalizeHost(feedHighlight.profile || { user_id: feedHighlight.user_id }));
       }}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           clearTimeout(feedHighlightTimerRef.current);
           setFeedHighlight(null);
-          handleOpenProfile(feedHighlight.profile?.user_id || feedHighlight.user_id);
+          setShowStatusModal(false); handleAction("expandedHostCard", normalizeHost(feedHighlight.profile || { user_id: feedHighlight.user_id }));
         }
       }}
       style={{
@@ -1826,12 +1827,31 @@ break;
     >
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 10, fontWeight: 750, letterSpacing: ".08em", marginBottom: 4, opacity: .6 }}>CIRQL</div>
-        <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, overflowWrap: "anywhere" }}>
-          <strong>{feedHighlight.profile?.alias || feedHighlight.profile?.name || "Someone"}</strong>
-          {" shared a new "}
-          {feedHighlight.post_type === "chat_request" ? "chat prompt" : feedHighlight.post_type === "call_request" ? "call invitation" : "moment"}.
-          {" Tap to view their profile."}
-        </div>
+        <div style={{ fontSize: 13, fontWeight: 750, lineHeight: 1.4, marginBottom: 7 }}>
+  {feedHighlight.profile?.alias || feedHighlight.profile?.name || "Someone"}
+</div>
+{feedHighlight.image_url && (
+  <img
+    src={feedHighlight.image_url}
+    alt="Post photo preview"
+    loading="lazy"
+    style={{
+      display: "block", width: "100%", maxHeight: 130,
+      objectFit: "cover", borderRadius: 10, marginBottom: 8,
+    }}
+  />
+)}
+<div style={{
+  fontSize: 13, fontWeight: 500, lineHeight: 1.45,
+  overflowWrap: "anywhere", whiteSpace: "pre-wrap",
+  display: "-webkit-box", WebkitLineClamp: 3,
+  WebkitBoxOrient: "vertical", overflow: "hidden",
+}}>
+  {feedHighlight.content || (feedHighlight.image_url ? "Shared a photo" : "New post")}
+</div>
+<div style={{ fontSize: 11, marginTop: 7, opacity: 0.65 }}>
+  Tap to view profile
+</div>
       </div>
       <button type="button" aria-label="Dismiss Feed Highlight"
         onClick={(event) => {

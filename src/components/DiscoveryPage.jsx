@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import TopicSearchBar from "./TopicSearchBar";
 import { expressions } from "./expressions/expressions";
 import MiniHostCard from "./MiniHostCard";
@@ -222,6 +222,32 @@ export default function DiscoveryPage({
       }))
     );
 
+    // Pin Ciri only on the default landing view.
+    if (!query.trim() && filter === "all") {
+      const ciriIndex = result.findIndex((h) =>
+        [h.alias, h.name, h.username, h.display_name].some(
+          (value) => String(value || "").trim().toLowerCase() === "ciri"
+        )
+      );
+
+      if (ciriIndex > 0) {
+        result.unshift(result.splice(ciriIndex, 1)[0]);
+      }
+    }
+
+    // Pin Ciri only on the default landing view.
+    if (!query.trim() && filter === "all") {
+      const ciriIndex = result.findIndex((h) =>
+        [h.alias, h.name, h.username, h.display_name].some(
+          (value) => String(value || "").trim().toLowerCase() === "ciri"
+        )
+      );
+
+      if (ciriIndex > 0) {
+        result.unshift(result.splice(ciriIndex, 1)[0]);
+      }
+    }
+
     return result;
     }, [hosts, query, filter]);
 
@@ -290,7 +316,12 @@ export default function DiscoveryPage({
 
       <div style={grid}>
     {filtered
-      .filter((host) => !dismissedIds.includes(host.id))
+      .filter((host) => {
+        const defaultView = !query.trim() && filter === "all";
+        const isCiri = [host.alias, host.name, host.username, host.display_name]
+          .some((value) => String(value || "").trim().toLowerCase() === "ciri");
+        return !dismissedIds.includes(host.id) || (defaultView && isCiri);
+      })
       .map((host) => {
         const isActive = activeSwipe?.id === host.id;
         const x = isActive ? activeSwipe.x : 0;

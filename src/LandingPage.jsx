@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import HostCard from "./components/HostCard";
 import DiscoveryPage from "./components/DiscoveryPage";
 import GlassBar from "./components/GlassBar";
+import TopicSearchBar from "./components/TopicSearchBar";
 import ModalShell from "./components/ui/ModalShell";
 import StatusFeedModal from "./components/StatusFeedModal";
 import CallsStudioModal from "./components/CallsStudioModal";
@@ -36,6 +37,8 @@ export default function LandingPage({ user }) {
   const [hosts, setHosts] = useState([]);
   const [mode, setMode] = useState("grid");
   const [index, setIndex] = useState(0);
+const [swipeSearchQuery, setSwipeSearchQuery] = useState("");
+const [swipeSearchFilter, setSwipeSearchFilter] = useState("all");
   const [showNetwork, setShowNetwork] = useState(false);
 const [showSettings, setShowSettings] = useState(false);
 const [walletBalance, setWalletBalance] = useState(0);
@@ -1197,7 +1200,8 @@ const closeModal = useCallback(() => {
   setSelectedHost(null);
 }, []);
 
-const safeLength = hosts?.length || 0;
+const swipeFilteredHosts = (hosts || []).map(normalizeHost).filter((h) => { const q = swipeSearchQuery.trim().toLowerCase(); const vals = (v) => Array.isArray(v) ? v.join(" ") : String(v || ""); const t = [h.name, vals(h.topics), vals(h.intents || h.intent_tags), vals(h.expressions || h.expression_badges)].join(" ").toLowerCase(); const terms = { ai_hosts:["ai","artificial intelligence"], social:["friendship","social","community"], professionals:["professional","expert","career","business"], consulting:["consult","advisor"], opportunities:["opportunity","hiring","investment","income","earning"], collaboration:["collaboration","partnership","project"], languages:["language","translation"], support:["support","help","advice","mentor"], podcasting:["podcast"], promotion:["promotion","marketing"], freelancers:["freelance","contractor"] }; return (!q || t.includes(q)) && (swipeSearchFilter === "all" || (terms[swipeSearchFilter] || []).some((x) => t.includes(x))); });
+const safeLength = swipeFilteredHosts.length;
 const hasHosts = safeLength > 0;
 
   /* ================= SAFE NAV ================= */
@@ -1219,7 +1223,7 @@ const hasHosts = safeLength > 0;
     onSwipeRight: prev,
   });
 
-  const current = hasHosts ? hosts[index] : null;
+  const current = hasHosts ? swipeFilteredHosts[index % safeLength] : null;
 
   /* ================= LOAD HOSTS ================= */
 
@@ -2330,8 +2334,9 @@ break;
     )}
 
       {/* SWIPE */}
-{mode === "swipe" && current && (
-  <div style={swipeStage}>
+{mode === "swipe" && (
+  <div style={{ ...swipeStage, position: "relative" }}>
+<div style={{ position: "absolute", top: 12, right: 12, zIndex: 50, width: "min(260px, calc(100vw - 88px))" }}><TopicSearchBar value={swipeSearchQuery} onChange={(value) => { setSwipeSearchQuery(value); setIndex(0); }} filter={swipeSearchFilter} onFilterChange={(value) => { setSwipeSearchFilter(value); setIndex(0); }} /></div>
 
     <button
       style={modeBtn}
@@ -2353,13 +2358,7 @@ break;
       onPointerUp={handleEnd}
       onPointerCancel={handleEnd}
     >
-      <HostCard
-        host={current}
-        user={user}
-        onAction={handleAction}
-        onNext={next}
-        onPrev={prev}
-      />
+      {current ? (<HostCard host={current} user={user} onAction={handleAction} onNext={next} onPrev={prev} />) : (<div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: 12, color: "white", padding: 24, textAlign: "center" }}><div>No hosts match this search.</div><button type="button" onClick={() => { setSwipeSearchQuery(""); setSwipeSearchFilter("all"); setIndex(0); }}>Clear search</button></div>)}
     </div>
 
   </div>

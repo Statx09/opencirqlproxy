@@ -13,7 +13,7 @@ export default function StatusFeedModal({
   reloadStatuses,
   onAction,
 }) {
-  const handlePost = async ({ content, expression }) => {
+  const handlePost = async ({ content, expression, post_type = "moment", topic = null, proposed_rate = null, imageFile = null }) => {
     console.log("Posting...", {
       content,
       expression,
@@ -28,12 +28,33 @@ export default function StatusFeedModal({
       return;
     }
 
+    let image_url = null;
+    if (imageFile) {
+      const safeName = imageFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const storagePath = `${user.id}/feed/${Date.now()}-${safeName}`;
+      const { error: uploadError } = await supabase.storage
+        .from("profile_images")
+        .upload(storagePath, imageFile, { cacheControl: "3600", upsert: false, contentType: imageFile.type || "image/jpeg" });
+      if (uploadError) {
+        console.error("FEED IMAGE UPLOAD ERROR:", uploadError);
+        return false;
+      }
+      const { data: publicData } = supabase.storage
+        .from("profile_images")
+        .getPublicUrl(storagePath);
+      image_url = publicData?.publicUrl || null;
+      if (!image_url) return false;
+    }
     const { data, error } = await supabase
       .from("live_statuses")
       .insert({
         user_id: user.id,
         content,
         expression,
+        post_type,
+        topic,
+        proposed_rate,
+        image_url,
         created_at: new Date().toISOString(),
       })
       .select();
@@ -41,9 +62,13 @@ export default function StatusFeedModal({
     console.log("INSERT DATA:", data);
     console.log("INSERT ERROR:", error);
 
-    if (!error) {
-      await reloadStatuses?.();
+    if (error) {
+      console.error('FEED POST ERROR:', error);
+      return false;
     }
+
+    await reloadStatuses?.();
+    return true;
   };
 
   return (

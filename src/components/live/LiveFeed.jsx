@@ -6,6 +6,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
+import { useTheme } from "../../context/ThemeContext";
 import { normalizeHost } from "../../utils/normalizeHost";
 
 function formatTime(date) {
@@ -32,6 +33,7 @@ export default function LiveFeed({
   onOpenProfile,
   onAction,
 }) {
+  const { theme } = useTheme();
   const [liked, setLiked] = useState({});
   const [likeCounts, setLikeCounts] = useState({});
   const [comments, setComments] = useState({});
@@ -446,7 +448,7 @@ const isCommentsOpen =
         return (
           <article
             key={status.id}
-            style={post}
+            style={{ ...post, background: theme.panel || theme.surface || theme.background, border: `1px solid ${theme.border}`, boxShadow: theme.mode === "dark" ? "0 12px 30px rgba(0,0,0,.16)" : "0 8px 24px rgba(15,23,42,.06)" }}
           >
             {/* AVATAR */}
 
@@ -478,7 +480,7 @@ const isCommentsOpen =
               <div style={header}>
                 <button
                   type="button"
-                  style={nameButton}
+                  style={{ ...nameButton, color: theme.text }}
                   onClick={(event) =>
                     openProfile(
                       event,
@@ -506,11 +508,51 @@ const isCommentsOpen =
                 </span>
               </div>
 
+              {status.post_type && status.post_type !== "moment" && (
+                <div style={{ marginTop: 8, marginBottom: 6 }}>
+                  <span style={{
+                    display: "inline-block",
+                    padding: "4px 8px",
+                    borderRadius: 999,
+                    background: status.post_type === "call_request" ? "#ede9fe" : "#dbeafe",
+                    color: status.post_type === "call_request" ? "#6d28d9" : "#1d4ed8",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}>
+                    {status.post_type === "call_request" ? "Looking for a call" : "Looking to chat"}
+                  </span>
+                  {status.topic && (
+                    <div style={{ marginTop: 6, fontSize: 14 }}>
+                      Topic: {status.topic}
+                    </div>
+                  )}
+                  {status.post_type === "call_request" && status.proposed_rate != null && (
+                    <div style={{ marginTop: 4, fontSize: 13, color: "#8b95a7" }}>
+                      Proposed budget: ${Number(status.proposed_rate).toFixed(2)}/min
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* CONTENT */}
 
-              <div style={content}>
-                {status.content}
-              </div>
+              <div style={{ ...content, color: theme.text }}>{status.content}</div>
+              {status.image_url && (
+                <img
+                  src={status.image_url}
+                  alt="Post attachment"
+                  loading="lazy"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxHeight: 420,
+                    objectFit: "cover",
+                    borderRadius: 14,
+                    marginTop: 12,
+                    border: `1px solid ${theme.border}`,
+                  }}
+                />
+              )}
 
               {/* ACTIONS */}
 
@@ -752,6 +794,9 @@ const feed = {
   width: "100%",
   display: "flex",
   flexDirection: "column",
+  gap: 12,
+  padding: "12px 14px 26px",
+  boxSizing: "border-box",
   background: "transparent",
 };
 
@@ -762,13 +807,15 @@ const feed = {
 
 const post = {
   display: "flex",
+  alignItems: "flex-start",
   width: "100%",
+  minWidth: 0,
   boxSizing: "border-box",
-  padding: "16px 18px 14px 18px",
-  borderBottom:
-    "1px solid rgba(255,255,255,.09)",
-  background: "transparent",
-  transition: "background .15s ease",
+  padding: "16px 16px 14px",
+  borderRadius: 16,
+  marginBottom: 0,
+  overflow: "hidden",
+  transition: "box-shadow .18s ease, background .18s ease",
 };
 
 

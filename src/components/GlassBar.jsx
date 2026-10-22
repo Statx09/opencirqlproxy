@@ -1,7 +1,7 @@
 import {
   Bell,
   MessageCircle,
-  Newspaper,
+  RadioTower,
   Users,
   UserRound,
 } from "lucide-react";
@@ -95,8 +95,10 @@ export default function GlassBar({
         <button
           style={{ ...iconBtn, color: theme.text }}
           onClick={() => onAction("status")}
+          aria-label="Pulse"
+          title="Pulse"
         >
-          <Newspaper size={21} strokeWidth={2.1} />
+          <RadioTower size={21} strokeWidth={2.1} />
         </button>
 
         <button

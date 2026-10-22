@@ -73,7 +73,7 @@ export default function StatusFeedModal({
 
   return (
     <ModalShell
-      title="Feed"
+      title="Pulse"
       onClose={onClose}
       zIndex={90000}
     >

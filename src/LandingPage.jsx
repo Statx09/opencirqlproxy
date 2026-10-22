@@ -1143,39 +1143,50 @@ const [showStatusModal, setShowStatusModal] = useState(false);
 const { statuses, reload: reloadStatuses } = useStatusFeed();
 
 React.useEffect(() => {
-  if (!user?.id || !Array.isArray(statuses) || statuses.length === 0) return;
+  if (!user?.id || !feedHighlightsEnabled) return;
 
-  const currentIds = new Set(statuses.map((status) => status.id).filter(Boolean));
+  let cancelled = false;
+  const channel = supabase
+    .channel(`feed-popup-${user.id}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "live_statuses",
+      },
+      async (payload) => {
+        const status = payload.new;
+        if (!status?.id || !status.user_id || status.user_id === user.id) return;
 
-  if (seenFeedStatusIdsRef.current === null) {
-    seenFeedStatusIdsRef.current = currentIds;
-    return;
-  }
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("user_id, alias, name, avatar_url")
+          .eq("user_id", status.user_id)
+          .maybeSingle();
 
-  const seenIds = seenFeedStatusIdsRef.current;
-  const freshStatuses = statuses.filter(
-    (status) => status.id && !seenIds.has(status.id)
-  );
+        if (cancelled) return;
+        if (error) console.error("FEED POPUP PROFILE LOOKUP:", error);
 
-  currentIds.forEach((id) => seenIds.add(id));
+        clearTimeout(feedHighlightTimerRef.current);
+        setFeedHighlight({ ...status, profile: profile || null });
+        feedHighlightTimerRef.current = setTimeout(() => {
+          setFeedHighlight(null);
+        }, 6500);
+      }
+    )
+    .subscribe((status) => {
+      if (status !== "SUBSCRIBED") {
+        console.info("FEED POPUP REALTIME STATUS:", status);
+      }
+    });
 
-  if (!feedHighlightsEnabled || freshStatuses.length === 0) {
-    return;
-  }
-
-  const candidate = freshStatuses.find(
-    (status) => status.user_id !== user.id && status.profile?.user_id !== user.id
-  );
-
-  if (!candidate) return;
-
-  clearTimeout(feedHighlightTimerRef.current);
-  setFeedHighlight(candidate);
-
-  feedHighlightTimerRef.current = setTimeout(() => {
-    setFeedHighlight(null);
-  }, 6500);
-}, [statuses, user?.id, feedHighlightsEnabled]);
+  return () => {
+    cancelled = true;
+    clearTimeout(feedHighlightTimerRef.current);
+    supabase.removeChannel(channel);
+  };
+}, [user?.id, feedHighlightsEnabled]);
 
 const [refreshChatsKey] = useState(0);
 

@@ -362,6 +362,11 @@ if (url) setAvatarUrl(url);
             onClick={() => setTab(t)}
             style={{
               ...tabBtn,
+            flex: "1 1 0",
+            minWidth: 0,
+            padding: "8px 2px",
+            fontSize: "clamp(9px, 2.6vw, 12px)",
+            whiteSpace: "nowrap",
               background: tab === t ? "#7c3aed" : "#222",
             }}
           >
@@ -1099,9 +1104,11 @@ const uploadBtnSmall = {
 
 const tabs = {
   display: "flex",
-  gap: 8,
-  flexWrap: "wrap",
+  gap: 3,
+  flexWrap: "nowrap",
   marginTop: 20,
+  width: "100%",
+  minWidth: 0,
 };
 
 const tabBtn = {

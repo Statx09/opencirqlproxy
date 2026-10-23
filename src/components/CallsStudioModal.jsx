@@ -295,6 +295,7 @@ export default function CallsStudioModal({
     };
 
     const billCall = async () => {
+      if (!dailyConnected || !billingStartedRef.current) return;
       if (isCallHost === null) return;
       if (isCallHost === false && !billingStartedRef.current) return;
 
@@ -331,7 +332,7 @@ export default function CallsStudioModal({
 
         setLiveBilling((current) => ({
           ...(current || {}),
-          host_credit: Math.max(Number(current?.host_credit ?? 0), currentHostAmount),
+          host_credit: currentHostAmount,
           caller_spent: Number(
             current?.caller_spent ?? 0
           ),
@@ -424,10 +425,10 @@ export default function CallsStudioModal({
       cancelled = true;
       clearInterval(interval);
     };
-  }, [callId, user?.id, onClose, isCallHost]);
+  }, [callId, user?.id, onClose, isCallHost, dailyConnected]);
 
   useEffect(() => {
-    if (callEnded || callEnded || !liveBilling || isCallHost === null) return;
+    if (callEnded || !dailyConnected || !billingStartedRef.current || !liveBilling || isCallHost === null) return;
 
     const ticker = setInterval(() => {
       setLiveBilling((current) => {
@@ -484,7 +485,7 @@ export default function CallsStudioModal({
         <div
           style={{
             position: "absolute",
-            top: 115,
+            top: 80,
             right: 16,
             zIndex: 20,
             padding: "8px 12px",

@@ -26,6 +26,7 @@ export default function CallsStudioModal({
   const [tipEarned, setTipEarned] = useState(0);
   const [callEnded, setCallEnded] = useState(false);
   const [dailyConnected, setDailyConnected] = useState(false);
+  const [billingStarted, setBillingStarted] = useState(false);
   const callerRateRef = useRef(0);
   const hostRateRef = useRef(0);
   const callerStartingBalanceRef = useRef(null);
@@ -109,10 +110,12 @@ export default function CallsStudioModal({
     }
 
     billingStartedRef.current = true;
+    setBillingStarted(true);
 
     console.log("CALL BILLING STARTED:", callId);
   };
 
+  useEffect(() => { if (!callId || !user?.id || !dailyConnected || billingStarted) return; let cancelled = false; const syncBillingStarted = async () => { const { data, error } = await supabase.from("calls").select("status, start_time").eq("id", callId).maybeSingle(); if (cancelled || error || data?.status !== "active" || !data?.start_time) return; billingStartedRef.current = true; setBillingStarted(true); }; syncBillingStarted(); const interval = setInterval(syncBillingStarted, 1000); return () => { cancelled = true; clearInterval(interval); }; }, [callId, user?.id, dailyConnected, billingStarted]);
   const handleDailyLeave = useCallback(async () => {
     setCallEnded(true);
 
@@ -290,7 +293,7 @@ export default function CallsStudioModal({
 
       if (data?.rate != null) {
         callerRateRef.current = Number(data.rate) / 60;
-        hostRateRef.current = Number(data.rate) / 60;
+        hostRateRef.current = Math.max(0, Number(data.rate) - 0.10) / 60;
       }
     };
 
@@ -425,10 +428,10 @@ export default function CallsStudioModal({
       cancelled = true;
       clearInterval(interval);
     };
-  }, [callId, user?.id, onClose, isCallHost, dailyConnected]);
+  }, [callId, user?.id, onClose, isCallHost, dailyConnected, billingStarted]);
 
   useEffect(() => {
-    if (callEnded || !dailyConnected || !billingStartedRef.current || !liveBilling || isCallHost === null) return;
+    if (callEnded || !dailyConnected || !billingStarted || isCallHost === null) return;
 
     const ticker = setInterval(() => {
       setLiveBilling((current) => {
@@ -464,7 +467,7 @@ export default function CallsStudioModal({
     }, 1000);
 
     return () => clearInterval(ticker);
-  }, [liveBilling !== null, isCallHost, callEnded]);
+  }, [callEnded, dailyConnected, billingStarted, isCallHost]);
 
   if (!user?.id) return null;
 

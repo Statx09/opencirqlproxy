@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useCallback, useState } from "react";
-import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video, X } from "lucide-react";
+import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video, X, BadgeCheck } from "lucide-react";
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import ImageModal from "./ImageModal";
@@ -80,10 +80,10 @@ console.log("HOSTCARD normalized", expressions);
         <div style={actionFeedbackStyle}>
           <span style={actionFeedbackIcon}>
             {actionFeedback === "wave"
-              ? "👋"
+              ? "ðŸ‘‹"
               : actionFeedback === "like"
-              ? "❤️"
-              : "💰"}
+              ? "â¤ï¸"
+              : "ðŸ’°"}
           </span>
 
           <span>
@@ -132,12 +132,12 @@ console.log("HOSTCARD normalized", expressions);
       </div>
 
       {/* CONTENT */}
-      <div style={variant === "expanded" ? { ...content, bottom: 55 } : content}>
+      <div style={variant === "expanded" ? { ...content, bottom: 100 } : content}>
 
         <div style={{ display: "flex", alignItems: "flex-start", gap: 12, width: "100%", boxSizing: "border-box" }}>
           <img src={avatarSrc} style={avatarStyle} />
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 0, marginLeft: "auto", paddingRight: 55, position: "relative", top: variant === "expanded" ? 70 : 108 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 0, marginLeft: "auto", paddingRight: 55, position: "relative", top: variant === "expanded" ? 0 : 108 }}>
             {messageRate > 0 && <span style={rateItem}><MessageCircle size={16} strokeWidth={2.2} />${messageRate.toFixed(2)}</span>}
             {pictureRate > 0 && <span style={rateItem}><Image size={16} strokeWidth={2.2} />${pictureRate.toFixed(2)}</span>}
             {voiceNoteRate > 0 && <span style={rateItem}><Mic size={16} strokeWidth={2.2} />${voiceNoteRate.toFixed(2)}</span>}
@@ -146,7 +146,7 @@ console.log("HOSTCARD normalized", expressions);
           </div>
         </div>
 
-        <div style={nameStyle}>{displayName}</div>
+        <div style={nameStyle}>{displayName}{host.is_verified && <span title="Selfie verified" aria-label="Selfie verified" style={{ display: "inline-flex", alignItems: "center", gap: 6, marginLeft: 12, color: "#38BDF8", fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", verticalAlign: "middle" }}><BadgeCheck size={22} color="#38BDF8" style={{ flexShrink: 0 }} /><span>Verified</span></span>}</div>
 
 {host.headline && (
   <div style={headlineStyle}>
@@ -210,7 +210,7 @@ console.log("HOSTCARD normalized", expressions);
               marginTop: 10,
               marginBottom: 8,
               borderRadius: 10,
-              background: "rgba(0,0,0,0.45)",
+              background: "transparent",
             }}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
@@ -276,7 +276,7 @@ console.log("HOSTCARD normalized", expressions);
                 onPrev?.();
               }}
             >
-              ‹
+              â€¹
             </button>
 
             <button
@@ -288,7 +288,7 @@ console.log("HOSTCARD normalized", expressions);
                 onNext?.();
               }}
             >
-              ›
+              â€º
             </button>
 
           </div>
@@ -440,7 +440,7 @@ const rail = {
   display: "flex",
   flexDirection: "column",
   gap: 10,
-  zIndex: 9999,        // 🔥 ADD THIS
+  zIndex: 9999,        // ðŸ”¥ ADD THIS
   pointerEvents: "auto"
 };
 
@@ -661,6 +661,7 @@ const flagBubble = {
 
   color: "#fff",
 };
+
 
 
 

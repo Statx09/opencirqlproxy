@@ -4,6 +4,7 @@ import useProfile from "../../hooks/useProfile";
 import ExpressSection from "./ExpressSection";
 import IntentSection from "./IntentSection";
 import IdentitySection from "./IdentitySection";
+import ProfileVerificationCard from "../ProfileVerificationCard";
 
 export default function ProfileTab({ user, onViewCard, onProfileSaved }) {
   const [tab, setTab] = useState("profile");
@@ -355,7 +356,7 @@ if (url) setAvatarUrl(url);
 
       {/* ================= TABS ================= */}
       <div style={tabs}>
-        {["profile", "identity", "media", "payments"].map((t) => (
+        {["profile", "identity", "media", "payments", "verification"].map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -364,10 +365,12 @@ if (url) setAvatarUrl(url);
               background: tab === t ? "#7c3aed" : "#222",
             }}
           >
-            {t === "payments" ? "Call Rates" : t.charAt(0).toUpperCase() + t.slice(1)}
+            {t === "payments" ? "Call Rates" : t === "verification" ? "Verification" : t.charAt(0).toUpperCase() + t.slice(1)}
           </button>
         ))}
       </div>
+
+      {tab === "verification" && <ProfileVerificationCard user={user} />}
 
       {/* ================= IDENTITY ================= */}
 {tab === "profile" && (

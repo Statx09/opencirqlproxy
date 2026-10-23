@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from "react";
 import { normalizeHost } from "../utils/normalizeHost";
-import { Hand, Handshake, MessageCircle, Phone, Image, Mic, Video } from "lucide-react";
+import { Hand, Handshake, MessageCircle, Phone, Image, Mic, Video, BadgeCheck } from "lucide-react";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import { useTheme } from "../context/ThemeContext";
 
@@ -145,7 +145,7 @@ console.log("BANNER:", h.banner);
       }}
       title={h.alias || h.name}
     >
-      {h.alias || h.name}
+      {h.alias || h.name}{h.is_verified && <span title="Selfie verified" aria-label="Selfie verified" style={{ display: "inline-flex", alignItems: "center", gap: 4, marginLeft: 9, color: "#38BDF8", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", verticalAlign: "middle" }}><BadgeCheck size={18} color="#38BDF8" style={{ flexShrink: 0 }} /><span>Verified</span></span>}
     </div>
 
     <div

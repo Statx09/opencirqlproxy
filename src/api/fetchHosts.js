@@ -1,4 +1,4 @@
-﻿import { supabase } from "../lib/supabaseClient";
+import { supabase } from "../lib/supabaseClient";
 import { normalizeHost } from "../utils/normalizeHost";
 
 export async function fetchHosts() {
@@ -14,6 +14,12 @@ export async function fetchHosts() {
     console.error("Profile fetch error:", profileError);
     return [];
   }
+
+  const { data: verifiedRows, error: verifiedError } = await supabase
+    .from("verified_profiles")
+    .select("user_id");
+  if (verifiedError) console.warn("Verified profile lookup failed:", verifiedError);
+  const verifiedIds = new Set((verifiedRows || []).map((row) => row.user_id));
 
   /* ================= LOAD PRESENCE ================= */
 
@@ -38,6 +44,7 @@ export async function fetchHosts() {
   const result = (profiles || []).map((profile) =>
     normalizeHost({
       ...profile,
+      is_verified: verifiedIds.has(profile.user_id || profile.id),
       presence: presenceMap[profile.user_id] || "offline",
     })
   );

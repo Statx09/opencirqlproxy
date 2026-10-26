@@ -32,6 +32,7 @@ export default function CallsStudioModal({
   const callerStartingBalanceRef = useRef(null);
   const previousBillingRef = useRef(null);
   const billingStartedRef = useRef(false);
+  const insufficientBalanceHandlingRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -363,8 +364,30 @@ export default function CallsStudioModal({
         console.error("CALL BILLING ERROR:", error);
 
         if (error.message?.includes("INSUFFICIENT_BALANCE")) {
+          if (insufficientBalanceHandlingRef.current) return;
+          insufficientBalanceHandlingRef.current = true;
+
           console.warn("CALL BILLING STOPPED: insufficient balance.");
-          onClose();
+
+          const { data: finalizeData, error: finalizeError } =
+            await supabase.rpc("end_call_after_insufficient_balance", {
+              p_call_id: callId,
+            });
+
+          if (finalizeError) {
+            console.error(
+              "CALL FINALIZATION AFTER INSUFFICIENT BALANCE FAILED:",
+              finalizeError
+            );
+            insufficientBalanceHandlingRef.current = false;
+          } else {
+            console.log(
+              "CALL FINALIZED AT LAST BILLED CUTOFF:",
+              finalizeData
+            );
+            setCallEnded(true);
+            onClose?.();
+          }
         }
 
         return;

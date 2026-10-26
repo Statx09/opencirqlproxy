@@ -104,7 +104,7 @@ const loadWalletActivity = useCallback(async () => {
     `)
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(8);
+    .limit(1000);
 
   if (transactionsError) {
     console.error("WALLET TRANSACTIONS LOAD ERROR:", transactionsError);
@@ -659,9 +659,9 @@ useEffect(() => {
 
           if (notification.event !== "tip_received") {
             const interactionText = {
-              wave: "👋 " + senderName + " waved at you",
-              like: "💜 " + senderName + " liked your profile",
-              status_like: "✨ " + senderName + " liked your status"
+              wave: "\u{1F44B} " + senderName + " waved at you",
+              like: "\u{1F49C} " + senderName + " liked your profile",
+              status_like: "\u{2728} " + senderName + " liked your status"
             };
             const toastMessage = interactionText[notification.event];
             if (toastMessage) {
@@ -747,7 +747,7 @@ console.log("NOTIFICATIONS REALTIME STATUS:", status); if (status === "SUBSCRIBE
           }
 
           setTipPopup(
-            `🎉 You received a $${amount.toFixed(2)} tip from ${senderName}! 💜`
+            `\u{1F389} You received a $${amount.toFixed(2)} tip from ${senderName}! \u{1F49C}`
           );
 
           clearTimeout(tipPopupTimerRef.current); tipPopupTimerRef.current = setTimeout(() => setTipPopup(null), 5000);
@@ -955,7 +955,7 @@ console.log(
           loadUnreadMessages();
 
           clearTimeout(tipPopupTimerRef.current);
-          setTipPopup("💬 New message received");
+          setTipPopup("ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â°ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ New message received");
           tipPopupTimerRef.current = setTimeout(() => {
             setTipPopup(null);
           }, 4500);}
@@ -1636,7 +1636,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION ï¿½ INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1864,7 +1864,7 @@ break;
           setFeedHighlight(null);
         }}
         style={{ border: 0, background: "transparent", color: theme.text, fontSize: 20, cursor: "pointer" }}
-      >×</button>
+      >ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</button>
     </div>
   )}
   {tipPopup && (
@@ -1932,7 +1932,7 @@ break;
           alignSelf: "flex-start"
         }}
       >
-        ×
+        ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â
       </button>
     </div>
   )}
@@ -2494,7 +2494,7 @@ break;
             aria-label="Cancel call"
             title="Cancel call"
           >
-            Ã—
+            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â
           </button>
         </div>
       )}
@@ -2894,7 +2894,7 @@ break;
             justifyContent: "center",
           }}
         >
-          ï¿½
+          X
         </button>
       </div>
 
@@ -2962,87 +2962,105 @@ break;
           background: "rgba(255,255,255,.025)",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 9,
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: ".06em",
-              opacity: 0.48,
-            }}
-          >
-            Host earnings
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+          <strong style={{ fontSize: 10, fontWeight: 750 }}>Wallet & Activity</strong>
+          <span style={{ fontSize: 8, opacity: 0.55 }}>USD</span>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 }}>
+          <div>
+            <div style={{ fontSize: 9, opacity: 0.6 }}>Total earned</div>
+            <strong style={{ display: "block", marginTop: 3, fontSize: 15, color: "#22c55e" }}>
+              +${walletTransactions
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_earning", "message_received", "tip_received"].includes(t.type))
+                .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0)
+                .toFixed(2)}
+            </strong>
           </div>
-
-          <span
-            style={{
-              fontSize: 8,
-              fontWeight: 750,
-              color: "#22c55e",
-            }}
-          >
-            USDC
-          </span>
+          <div>
+            <div style={{ fontSize: 9, opacity: 0.6 }}>Total spent</div>
+            <strong style={{ display: "block", marginTop: 3, fontSize: 15 }}>
+              -${walletTransactions
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_charge", "tip_sent"].includes(t.type))
+                .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0)
+                .toFixed(2)}
+            </strong>
+          </div>
         </div>
 
-        <div
-          style={{
-            marginTop: 7,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <strong
-            style={{
-              fontSize: 19,
-              lineHeight: 1,
-              fontWeight: 800,
-              letterSpacing: "-.4px",
-            }}
-          >
-            ${walletAvailableEarnings.toFixed(2)}
+        <div style={{ marginTop: 9, paddingTop: 8, borderTop: `1px solid ${theme.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 9, opacity: 0.65 }}>Net change</span>
+          <strong style={{ fontSize: 12 }}>
+            {(() => {
+              const earned = walletTransactions
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_earning", "message_received", "tip_received"].includes(t.type))
+                .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0);
+              const spent = walletTransactions
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_charge", "tip_sent"].includes(t.type))
+                .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0);
+              return `${earned - spent >= 0 ? "+" : "-"}$${Math.abs(earned - spent).toFixed(2)}`;
+            })()}
           </strong>
-
-          <span
-            style={{
-              fontSize: 8,
-              opacity: 0.38,
-            }}
-          >
-            available for payout
-          </span>
         </div>
 
-        <button
-          type="button"
-          onClick={() =>
-            console.log("WITHDRAW USDC ï¿½ payout integration pending")
-          }
-          style={{
-            marginTop: 10,
-            width: "100%",
-            height: 31,
-            borderRadius: 8,
-            border: `1px solid ${theme.border}`,
-            background: "transparent",
-            color: theme.text,
-            fontSize: 9,
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
-        >
-          Withdraw USDC
-        </button>
-      </div>
+        <details style={{ marginTop: 13 }}>
+          <summary style={{ cursor: "pointer", fontSize: 9, fontWeight: 750, textTransform: "uppercase", letterSpacing: ".05em", opacity: 0.75, padding: "6px 0" }}>
+            Earnings breakdown
+          </summary>
 
+        {walletTransactions.filter((t) => t.currency === "USD").length === 0 ? (
+          <div style={{ padding: "12px 0", fontSize: 10, opacity: 0.6 }}>
+            Your wallet activity will appear here.
+          </div>
+        ) : (
+          <div style={{ maxHeight: 220, overflowY: "auto" }}>
+            {walletTransactions.filter((t) => t.currency === "USD").slice(0, 20).map((transaction) => {
+              const incoming = ["call_earning", "message_received", "tip_received"].includes(transaction.type);
+              const labels = {
+                call_earning: "Call earnings",
+                call_charge: "Call charge",
+                message_received: "Paid message",
+                tip_received: "Tip received",
+                tip_sent: "Tip sent",
+              };
+              const label = labels[transaction.type] || (transaction.description || String(transaction.type || "Wallet activity").replace(/_/g, " "));
+              const amount = Math.abs(Number(transaction.amount || 0));
+              return (
+                <div
+                  key={transaction.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "9px 0",
+                    borderTop: `1px solid ${theme.border}`,
+                  }}
+                >
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 10, fontWeight: 650 }}>{label}</div>
+                    <div style={{ marginTop: 3, fontSize: 8, opacity: 0.5 }}>
+                      {transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : ""}
+                      {transaction.status && transaction.status !== "completed" ? ` Ã‚Â· ${transaction.status}` : ""}
+                    </div>
+                  </div>
+                  <strong style={{ flexShrink: 0, fontSize: 11, color: incoming ? "#22c55e" : theme.text }}>
+                    {incoming ? "+" : "-"}${amount.toFixed(2)}
+                  </strong>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        </details>
+
+        <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 8, border: `1px solid ${theme.border}`, fontSize: 9, lineHeight: 1.5, opacity: 0.8 }}>
+          <strong>Manual Capitec payouts</strong>
+          <div style={{ marginTop: 3 }}>
+            In-app withdrawals are not available yet. Contact the UpCall administrator to discuss a manual payout.
+          </div>
+        </div>
+      </div>
       <button
         type="button"
         onClick={() => {
@@ -3266,7 +3284,7 @@ break;
         <ModalShell title="Identity Studio" onClose={closeModal}>
           <ProfileTab
   user={user}
-  onViewCard={() => handleOpenProfile(user?.id)}
+  onViewCard={() => { const ownCard = hosts.find((h) => h.user_id === user?.id || h.id === user?.id); if (ownCard) handleAction("expandedHostCard", ownCard); else console.error("Your saved profile was not found in hosts."); }}
   onProfileSaved={async () => {
     const dismissedKey = `upcall-push-onboarding-dismissed:${user.id}`;
 
@@ -3998,16 +4016,3 @@ const networkWeb3Text = {
   lineHeight: 1.5,
   opacity: 0.62,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-

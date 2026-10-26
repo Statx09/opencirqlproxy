@@ -3004,8 +3004,9 @@ break;
         </div>
 
         <details style={{ marginTop: 13 }}>
-          <summary style={{ cursor: "pointer", fontSize: 9, fontWeight: 750, textTransform: "uppercase", letterSpacing: ".05em", opacity: 0.75, padding: "6px 0" }}>
-            Earnings breakdown
+          <summary style={{ cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, fontSize: 10, fontWeight: 750, textTransform: "uppercase", letterSpacing: ".05em", opacity: 1, padding: "11px 12px", border: `1px solid ${theme.border}`, borderRadius: 9, background: "transparent", listStylePosition: "inside" }}>
+            <span>Earnings breakdown</span>
+            <span aria-hidden="true" style={{ fontSize: 14 }}>&#9662;</span>
           </summary>
 
         {walletTransactions.filter((t) => t.currency === "USD").length === 0 ? (
@@ -3054,27 +3055,40 @@ break;
         )}
         </details>
 
-        <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 8, border: `1px solid ${theme.border}`, fontSize: 9, lineHeight: 1.5, opacity: 0.8 }}>
-          Earnings are paid directly to your bank account.
-        </div>
+        <button
+        type="button"
+        onClick={() => window.alert("Bank withdrawals are not available yet.")}
+        style={{
+          marginTop: 10,
+          width: "100%",
+          minHeight: 40,
+          borderRadius: 9,
+          border: "1px solid rgba(34,197,94,.32)",
+          background: "rgba(34,197,94,.09)",
+          color: "#22c55e",
+          fontSize: 10,
+          fontWeight: 750,
+          cursor: "pointer",
+        }}
+      >Withdraw to Bank Account</button>
       </div>
       <button
         type="button"
-        disabled
+        title="USDC on Solana coming soon"
+        onClick={() => window.alert("USDC wallet connection on Solana is coming soon.")}
         style={{
           marginTop: 8,
           width: "100%",
-          minHeight: 36,
-          borderRadius: 8,
-          border: `1px solid ${theme.border}`,
-          background: "transparent",
-          color: theme.text,
-          fontSize: 9,
-          fontWeight: 700,
-          cursor: "not-allowed",
-          opacity: 0.65,
+          minHeight: 40,
+          borderRadius: 9,
+          border: "1px solid rgba(34,197,94,.32)",
+          background: "rgba(34,197,94,.09)",
+          color: "#22c55e",
+          fontSize: 10,
+          fontWeight: 750,
+          cursor: "pointer",
         }}
-      >Connect USDC Wallet (Solana) — Coming Soon</button>
+      >Connect Wallet</button>
 
       <div
         style={{

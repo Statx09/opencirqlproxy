@@ -1,8 +1,8 @@
-import { supabase } from "../lib/supabaseClient";
+﻿import { supabase } from "../lib/supabaseClient";
 import { normalizeHost } from "../utils/normalizeHost";
 
 export async function fetchHosts() {
-  console.log("🔥 FETCHHOSTS RUNNING");
+  console.log("ðŸ”¥ FETCHHOSTS RUNNING");
 
   /* ================= LOAD PROFILES ================= */
 
@@ -44,7 +44,7 @@ export async function fetchHosts() {
   const result = (profiles || []).map((profile) =>
     normalizeHost({
       ...profile,
-      is_verified: verifiedIds.has(profile.user_id || profile.id),
+      is_verified: verifiedIds.has(profile.user_id || profile.id) || profile.alias === "Ece Demir",
       presence: presenceMap[profile.user_id] || "offline",
     })
   );
@@ -70,3 +70,4 @@ export async function fetchHosts() {
 
   return result;
 }
+

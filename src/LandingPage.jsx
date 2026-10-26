@@ -3055,41 +3055,59 @@ break;
         )}
         </details>
 
-        <button
+        
+      </div>
+      
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "stretch",
+          gap: 8,
+          width: "100%",
+          boxSizing: "border-box",
+          marginTop: 10,
+        }}
+      >
+<button
         type="button"
         onClick={() => window.alert("Bank withdrawals are not available yet.")}
         style={{
-          marginTop: 10,
+          display: "block",
+          boxSizing: "border-box",
           width: "100%",
-          minHeight: 40,
-          borderRadius: 9,
+          height: 34,
+          borderRadius: 8,
+          padding: "0 12px",
           border: "1px solid rgba(34,197,94,.32)",
           background: "rgba(34,197,94,.09)",
           color: "#22c55e",
           fontSize: 10,
           fontWeight: 750,
-          cursor: "pointer",
-        }}
+          lineHeight: "normal",
+          cursor: "pointer",}}
       >Withdraw to Bank Account</button>
-      </div>
-      <button
+<button
         type="button"
         title="USDC on Solana coming soon"
         onClick={() => window.alert("USDC wallet connection on Solana is coming soon.")}
         style={{
-          marginTop: 8,
+          display: "block",
+          boxSizing: "border-box",
           width: "100%",
-          minHeight: 40,
-          borderRadius: 9,
+          height: 34,
+          borderRadius: 8,
+          padding: "0 12px",
           border: "1px solid rgba(34,197,94,.32)",
           background: "rgba(34,197,94,.09)",
           color: "#22c55e",
           fontSize: 10,
           fontWeight: 750,
-          cursor: "pointer",
-        }}
+          lineHeight: "normal",
+          cursor: "pointer",}}
       >Connect Wallet</button>
-
+      </div>
       <div
         style={{
           marginTop: 10,

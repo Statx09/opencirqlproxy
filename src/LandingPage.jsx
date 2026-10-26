@@ -3055,32 +3055,26 @@ break;
         </details>
 
         <div style={{ marginTop: 10, padding: "9px 10px", borderRadius: 8, border: `1px solid ${theme.border}`, fontSize: 9, lineHeight: 1.5, opacity: 0.8 }}>
-          <strong>Manual Capitec payouts</strong>
-          <div style={{ marginTop: 3 }}>
-            In-app withdrawals are not available yet. Contact the UpCall administrator to discuss a manual payout.
-          </div>
+          Earnings are paid directly to your bank account.
         </div>
       </div>
       <button
         type="button"
-        onClick={() => {
-          setActiveModal(null);
-          setShowNetwork(true);
-          setNetworkView("balance");
-        }}
+        disabled
         style={{
           marginTop: 8,
           width: "100%",
-          height: 31,
+          minHeight: 36,
           borderRadius: 8,
           border: `1px solid ${theme.border}`,
           background: "transparent",
           color: theme.text,
           fontSize: 9,
           fontWeight: 700,
-          cursor: "pointer",
+          cursor: "not-allowed",
+          opacity: 0.65,
         }}
-      >Connect Wallet</button>
+      >Connect USDC Wallet (Solana) — Coming Soon</button>
 
       <div
         style={{

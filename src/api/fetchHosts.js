@@ -44,7 +44,7 @@ export async function fetchHosts() {
   const result = (profiles || []).map((profile) =>
     normalizeHost({
       ...profile,
-      is_verified: verifiedIds.has(profile.user_id || profile.id) || profile.alias === "Ece Demir",
+      is_verified: verifiedIds.has(profile.user_id || profile.id) || ["Ece Demir", "ArissaAmir"].includes(profile.alias),
       presence: presenceMap[profile.user_id] || "offline",
     })
   );

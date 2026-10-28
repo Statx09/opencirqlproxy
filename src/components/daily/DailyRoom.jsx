@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import DailyIframe from "@daily-co/daily-js";
 import {
   Mic,
@@ -25,7 +25,7 @@ function getAudioTrack(participant) {
   return track?.readyState === "live" ? track : null;
 }
 
-function VideoTile({ participant, local = false }) {
+function VideoTile({ participant, local = false, cameraOff = false, joined = false }) {
   const videoRef = useRef(null);
   const track = getVideoTrack(participant);
 
@@ -64,7 +64,17 @@ function VideoTile({ participant, local = false }) {
               .charAt(0)
               .toUpperCase()}
           </div>
-          <span>{local ? "Your camera is off" : "Camera is off"}</span>
+          <span>
+            {local
+              ? cameraOff
+                ? "Your camera is off"
+                : joined
+                  ? "Starting your camera…"
+                  : "Connecting your camera…"
+              : participant?.tracks?.video?.state === "off"
+                ? "Camera is off"
+                : "Connecting camera…"}
+          </span>
         </div>
       )}
 
@@ -416,7 +426,7 @@ export default function DailyRoom({
         .upcall-call-controls {
           position: absolute;
           z-index: 10;
-          bottom: max(24px, env(safe-area-inset-bottom));
+          bottom: max(44px, env(safe-area-inset-bottom));
           left: 50%;
           display: flex;
           align-items: center;
@@ -468,7 +478,7 @@ export default function DailyRoom({
             border-radius: 13px;
           }
           .upcall-call-controls {
-            bottom: max(18px, env(safe-area-inset-bottom));
+            bottom: max(44px, env(safe-area-inset-bottom));
             gap: 9px;
             padding: 9px 11px;
             border-radius: 19px;
@@ -529,7 +539,7 @@ export default function DailyRoom({
 
       {localParticipant && (
         <div className="upcall-self-preview">
-          <VideoTile participant={localParticipant} local />
+          <VideoTile participant={localParticipant} local cameraOff={cameraOff} joined={joined} />
         </div>
       )}
 

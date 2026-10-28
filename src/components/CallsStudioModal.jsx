@@ -23,9 +23,38 @@ export default function CallsStudioModal({
   const [isCallHost, setIsCallHost] = useState(null);
   const [liveBilling, setLiveBilling] = useState({ host_credit: 0, caller_spent: 0, caller_balance: 0 });
   const [tipEarned, setTipEarned] = useState(0);
+  const [billingPulse, setBillingPulse] = useState(false);
+  const previousHudValuesRef = useRef(null);
   const [callEnded, setCallEnded] = useState(false);
   const [dailyConnected, setDailyConnected] = useState(false);
   const [billingStarted, setBillingStarted] = useState(false);
+  useEffect(() => {
+    const values = [
+      Number(liveBilling?.host_credit ?? 0),
+      Number(liveBilling?.caller_spent ?? 0),
+      Number(liveBilling?.caller_balance ?? 0),
+      Number(tipEarned ?? 0),
+    ];
+    const previous = previousHudValuesRef.current;
+    previousHudValuesRef.current = values;
+
+    if (
+      !billingStarted ||
+      !previous ||
+      values.every((value, index) => value === previous[index])
+    ) return;
+
+    setBillingPulse(true);
+    const timer = setTimeout(() => setBillingPulse(false), 850);
+    return () => clearTimeout(timer);
+  }, [
+    liveBilling?.host_credit,
+    liveBilling?.caller_spent,
+    liveBilling?.caller_balance,
+    tipEarned,
+    billingStarted,
+  ]);
+
   const callerRateRef = useRef(0);
   const hostRateRef = useRef(0);
   const callerStartingBalanceRef = useRef(null);
@@ -452,44 +481,7 @@ export default function CallsStudioModal({
     };
   }, [callId, user?.id, onClose, isCallHost, dailyConnected, billingStarted]);
 
-  useEffect(() => {
-    if (callEnded || !dailyConnected || !billingStarted || isCallHost === null) return;
 
-    const ticker = setInterval(() => {
-      setLiveBilling((current) => {
-        if (!current) return current;
-
-        // Host earnings come from call_earnings.
-        // Do not locally invent additional host earnings.
-        if (isCallHost) {
-          const rate = hostRateRef.current;
-          if (!rate) return current;
-
-          return {
-            ...current,
-            host_credit:
-              Number(current.host_credit ?? 0) + rate,
-          };
-        }
-
-        const rate = callerRateRef.current;
-
-        if (!rate) return current;
-
-        return {
-          ...current,
-          caller_spent:
-            Number(current.caller_spent ?? 0) + rate,
-          caller_balance: Math.max(
-            0,
-            Number(current.caller_balance ?? 0) - rate
-          ),
-        };
-      });
-    }, 1000);
-
-    return () => clearInterval(ticker);
-  }, [callEnded, dailyConnected, billingStarted, isCallHost]);
 
   if (!user?.id) return null;
 
@@ -504,23 +496,53 @@ export default function CallsStudioModal({
 
   return (
     <div style={overlay}>
+      <style>{`
+        @keyframes upcallBillingPulse {
+          0% { box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+          40% { box-shadow: 0 0 22px rgba(74,222,128,.28), 0 8px 24px rgba(0,0,0,.2); }
+          100% { box-shadow: 0 8px 24px rgba(0,0,0,.18); }
+        }
+        .upcall-billing-hud {
+          position: absolute;
+          top: calc(88px + min(40vh, 29.333vw, 360px) + 12px);
+          right: 18px;
+          z-index: 20;
+          max-width: 220px;
+          padding: 10px 14px;
+          border: 1px solid rgba(255,255,255,.14);
+          border-radius: 14px;
+          background: rgba(15,23,42,.78);
+          color: #fff;
+          font-size: 13px;
+          line-height: 1.65;
+          font-variant-numeric: tabular-nums;
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          box-shadow: 0 8px 24px rgba(0,0,0,.18);
+          pointer-events: none;
+        }
+        .upcall-billing-hud.is-pulsing {
+          animation: upcallBillingPulse 850ms ease-out;
+        }
+        @media (max-width: 600px) {
+          .upcall-billing-hud {
+            top: calc(76px + min(28vh, 45.333vw, 213px) + 10px);
+            right: 12px;
+            max-width: min(190px, calc(100vw - 24px));
+            padding: 8px 11px;
+            border-radius: 12px;
+            font-size: 12px;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .upcall-billing-hud.is-pulsing { animation: none; }
+        }
+      `}</style>
 
       {/* FINANCIAL HUD */}
       {isCallHost !== null && liveBilling && (
         <div
-          style={{
-            position: "absolute",
-            top: 80,
-            right: 16,
-            zIndex: 20,
-            padding: "8px 12px",
-            borderRadius: 10,
-            background: "rgba(0,0,0,0.65)",
-            color: "#fff",
-            fontSize: 13,
-            lineHeight: 1.5,
-            pointerEvents: "none",
-          }}
+          className={`upcall-billing-hud${billingPulse ? " is-pulsing" : ""}`}
         >
           {isCallHost ? (
             <>

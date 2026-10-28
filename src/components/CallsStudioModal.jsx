@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import DailyRoom from "./daily/DailyRoom";
-import ConnectionRequests from "./ConnectionRequests";
 import SayThanksModal from "./SayThanksModal";
 import { getConnectionStatus } from "../api/getConnectionStatus";
 import { supabase } from "../lib/supabaseClient";
@@ -683,9 +682,7 @@ export default function CallsStudioModal({
           </div>
 
           <div style={panelBody}>
-            <ConnectionRequests
-              user={user}
-            />
+            <AcceptedConnections user={user} onAction={onAction} disabled={!callEnded} />
           </div>
 
         </div>
@@ -913,6 +910,171 @@ const panelBody = {
   padding: 12,
 };
 
+function AcceptedConnections({ user, onAction, disabled }) {
+  const [contacts, setContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
+  useEffect(() => {
+    let cancelled = false;
 
+    async function loadConnections() {
+      if (!user?.id) {
+        setContacts([]);
+        setLoading(false);
+        return;
+      }
 
+      setLoading(true);
+      setLoadError("");
+
+      try {
+        const { data: connections, error: connectionError } = await supabase
+          .from("connections")
+          .select("user_a,user_b,status")
+          .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
+          .eq("status", "accepted");
+
+        if (connectionError) throw connectionError;
+
+        const partnerIds = [...new Set(
+          (connections || [])
+            .map((item) => item.user_a === user.id ? item.user_b : item.user_a)
+            .filter(Boolean)
+        )];
+
+        if (partnerIds.length === 0) {
+          if (!cancelled) setContacts([]);
+          return;
+        }
+
+        const { data: profiles, error: profileError } = await supabase
+          .from("profiles")
+          .select("user_id,alias,name,avatar_url")
+          .in("user_id", partnerIds);
+
+        if (profileError) throw profileError;
+
+        const profileMap = new Map(
+          (profiles || []).map((profile) => [profile.user_id, profile])
+        );
+
+        const result = partnerIds
+          .map((id) => profileMap.get(id))
+          .filter(Boolean)
+          .sort((a, b) =>
+            (a.alias || a.name || "").localeCompare(b.alias || b.name || "")
+          );
+
+        if (!cancelled) setContacts(result);
+      } catch (error) {
+        console.error("Failed to load call connections:", error);
+        if (!cancelled) {
+          setContacts([]);
+          setLoadError("Couldn't load connections. Please try again.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadConnections();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
+  const contactRow = {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "10px 4px",
+    borderBottom: "1px solid rgba(255,255,255,.07)",
+  };
+
+  const avatarStyle = {
+    width: 40,
+    height: 40,
+    borderRadius: "50%",
+    objectFit: "cover",
+    flexShrink: 0,
+    background: "rgba(255,255,255,.08)",
+  };
+
+  const callButtonStyle = {
+    marginLeft: "auto",
+    padding: "8px 13px",
+    borderRadius: 999,
+    border: "1px solid rgba(167,139,250,.4)",
+    background: "rgba(124,58,237,.28)",
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: 700,
+    cursor: disabled ? "not-allowed" : "pointer",
+    opacity: disabled ? 0.45 : 1,
+    flexShrink: 0,
+  };
+
+  if (loading) {
+    return <div style={{ color: "#cbd5e1", padding: 12, fontSize: 13 }}>Loading connections…</div>;
+  }
+
+  if (loadError) {
+    return <div style={{ color: "#fca5a5", padding: 12, fontSize: 13 }}>{loadError}</div>;
+  }
+
+  if (contacts.length === 0) {
+    return <div style={{ color: "#cbd5e1", padding: 12, fontSize: 13 }}>No accepted connections yet.</div>;
+  }
+
+  return (
+    <div>
+      {disabled && (
+        <div style={{
+          color: "#cbd5e1",
+          fontSize: 12,
+          lineHeight: 1.5,
+          padding: "2px 4px 10px",
+        }}>
+          End this call before starting another.
+        </div>
+      )}
+
+      {contacts.map((profile) => (
+        <div key={profile.user_id} style={contactRow}>
+          <img
+            src={profile.avatar_url || "https://placehold.co/100x100"}
+            alt=""
+            style={avatarStyle}
+            loading="lazy"
+          />
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 650,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
+              {profile.alias || profile.name || "UpCall member"}
+            </div>
+            <div style={{ color: "#94a3b8", fontSize: 11, marginTop: 3 }}>
+              Connected
+            </div>
+          </div>
+          <button
+            type="button"
+            style={callButtonStyle}
+            disabled={disabled}
+            onClick={() => onAction?.("call", profile)}
+            title={disabled ? "End your current call first" : `Call ${profile.alias || profile.name || "connection"}`}
+          >
+            Call
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}

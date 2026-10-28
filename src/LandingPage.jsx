@@ -3377,6 +3377,7 @@ break;
     host={selectedHost}
     callId={activeCallId}
     onClose={closeModal}
+    onAction={handleAction}
   />
 )}
 

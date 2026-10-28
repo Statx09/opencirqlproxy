@@ -30,7 +30,7 @@ export default function DailyRoom({
 
             showLeaveButton: true,
             showPrejoinUI: false,
-            showFullscreenButton: true,
+            showFullscreenButton: false,
 
             userName: displayName,
           }

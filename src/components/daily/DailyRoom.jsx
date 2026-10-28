@@ -30,7 +30,8 @@ export default function DailyRoom({
 
             showLeaveButton: true,
             showPrejoinUI: false,
-            showFullscreenButton: false,
+            activeSpeakerMode: true,
+            showFullscreenButton: true,
 
             userName: displayName,
           }

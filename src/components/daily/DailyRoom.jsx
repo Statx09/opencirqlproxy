@@ -69,11 +69,11 @@ function VideoTile({ participant, local = false, cameraOff = false, joined = fal
               ? cameraOff
                 ? "Your camera is off"
                 : joined
-                  ? "Starting your camera…"
-                  : "Connecting your camera…"
+                  ? "Starting your cameraâ€¦"
+                  : "Connecting your cameraâ€¦"
               : participant?.tracks?.video?.state === "off"
                 ? "Camera is off"
-                : "Connecting camera…"}
+                : "Connecting cameraâ€¦"}
           </span>
         </div>
       )}
@@ -378,7 +378,7 @@ export default function DailyRoom({
         .upcall-self-preview {
           position: absolute;
           z-index: 8;
-          top: 88px;
+          top: 80px;
           right: 18px;
           width: clamp(150px, 22vw, 270px);
           aspect-ratio: 3 / 4;
@@ -471,7 +471,7 @@ export default function DailyRoom({
         }
         @media (max-width: 600px) {
           .upcall-self-preview {
-            top: 76px;
+            top: 68px;
             right: 12px;
             width: clamp(112px, 34vw, 160px);
             max-height: 28vh;
@@ -526,7 +526,7 @@ export default function DailyRoom({
         ) : (
           <div className="upcall-waiting">
             <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 8 }}>
-              {joined ? "Waiting for the other person…" : "Connecting to your call…"}
+              {joined ? "Waiting for the other personâ€¦" : "Connecting to your callâ€¦"}
             </div>
             <div style={{ opacity: 0.75, lineHeight: 1.5 }}>
               {joined

@@ -14,6 +14,7 @@ export default function CallsStudioModal({
   host,
   callId,
   onClose,
+  onAction,
 }) {
   const [activePanel, setActivePanel] = useState(null);
   const [showThanks, setShowThanks] = useState(false);
@@ -504,7 +505,7 @@ export default function CallsStudioModal({
         }
         .upcall-billing-hud {
           position: absolute;
-          top: calc(88px + min(40vh, 29.333vw, 360px) + 12px);
+          top: calc(80px + min(40vh, 29.333vw, 360px) + 12px);
           right: 18px;
           z-index: 20;
           max-width: 220px;
@@ -526,7 +527,7 @@ export default function CallsStudioModal({
         }
         @media (max-width: 600px) {
           .upcall-billing-hud {
-            top: calc(76px + min(28vh, 45.333vw, 213px) + 10px);
+            top: calc(68px + min(28vh, 45.333vw, 213px) + 10px);
             right: 12px;
             max-width: min(190px, calc(100vw - 24px));
             padding: 8px 11px;
@@ -553,7 +554,7 @@ export default function CallsStudioModal({
               </div>
               {tipEarned > 0 && (
                 <div style={{ color: "#22c55e", fontWeight: 700 }}>
-                  +${Number(tipEarned).toFixed(2)} tip 🎉
+                  +${Number(tipEarned).toFixed(2)} tip ðŸŽ‰
                 </div>
               )}
             </>
@@ -661,26 +662,6 @@ export default function CallsStudioModal({
 
       </div>
 
-      {/* RANDOM CALL */}
-      <button
-        type="button"
-        style={randomCallButton}
-        onClick={() => {
-          console.log(
-            "RANDOM CALL ù MATCHING SYSTEM COMING SOON"
-          );
-        }}
-        aria-label="Random Call"
-        title="Random Call"
-      >
-        <span style={randomCallIcon}>
-          ?
-        </span>
-
-        <span>
-          Random Call
-        </span>
-      </button>
 
       {/* CONNECTIONS PANEL */}
       {activePanel === "connections" && (
@@ -824,61 +805,7 @@ const activeButton = {
     "0 4px 20px rgba(124,58,237,.30)",
 };
 
-const randomCallButton = {
-  position: "absolute",
-  right: 16,
-  top: "calc(50% + 68px)",
 
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 7,
-
-  padding: "9px 13px",
-
-  borderRadius: 999,
-
-  border: "1px solid rgba(255,255,255,.14)",
-
-  background: "rgba(20,20,25,.60)",
-
-  backdropFilter: "blur(18px)",
-  WebkitBackdropFilter: "blur(18px)",
-
-  color: "#fff",
-
-  fontSize: 12,
-  fontWeight: 600,
-
-  cursor: "pointer",
-
-  boxShadow:
-    "0 4px 18px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.05)",
-
-  transition: "all .2s ease",
-
-  zIndex: 35,
-};
-
-const randomCallIcon = {
-  width: 24,
-  height: 24,
-
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-
-  borderRadius: "50%",
-
-  background: "rgba(255,255,255,.08)",
-
-  color: "#fff",
-
-  fontSize: 17,
-  lineHeight: 1,
-
-  flexShrink: 0,
-};
 
 const panel = {
   position: "absolute",
@@ -1039,7 +966,7 @@ function AcceptedConnections({ user, onAction, disabled }) {
   };
 
   if (loading) {
-    return <div style={{ color: "#cbd5e1", padding: 12, fontSize: 13 }}>Loading connections…</div>;
+    return <div style={{ color: "#cbd5e1", padding: 12, fontSize: 13 }}>Loading connectionsâ€¦</div>;
   }
 
   if (loadError) {

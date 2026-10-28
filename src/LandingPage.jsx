@@ -1636,7 +1636,7 @@ useEffect(() => {
             }
           }
 
-          console.log("CONNECT RESULT: NO EXISTING RELATION ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ INSERTING PENDING");
+          console.log("CONNECT RESULT: NO EXISTING RELATION ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ INSERTING PENDING");
           const { error: insertError } = await supabase
             .from("connections")
             .insert({
@@ -1864,7 +1864,7 @@ break;
           setFeedHighlight(null);
         }}
         style={{ border: 0, background: "transparent", color: theme.text, fontSize: 20, cursor: "pointer" }}
-      >ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</button>
+      >ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â</button>
     </div>
   )}
   {tipPopup && (
@@ -1932,7 +1932,7 @@ break;
           alignSelf: "flex-start"
         }}
       >
-        ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â
+          ×
       </button>
     </div>
   )}
@@ -2494,7 +2494,7 @@ break;
             aria-label="Cancel call"
             title="Cancel call"
           >
-            ×
+            Ã—
           </button>
         </div>
       )}
@@ -3042,7 +3042,7 @@ break;
                     <div style={{ fontSize: 10, fontWeight: 650 }}>{label}</div>
                     <div style={{ marginTop: 3, fontSize: 8, opacity: 0.5 }}>
                       {transaction.created_at ? new Date(transaction.created_at).toLocaleDateString() : ""}
-                      {transaction.status && transaction.status !== "completed" ? ` Ã‚Â· ${transaction.status}` : ""}
+                      {transaction.status && transaction.status !== "completed" ? ` Ãƒâ€šÃ‚Â· ${transaction.status}` : ""}
                     </div>
                   </div>
                   <strong style={{ flexShrink: 0, fontSize: 11, color: incoming ? "#22c55e" : theme.text }}>

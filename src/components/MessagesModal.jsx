@@ -650,7 +650,7 @@ const sendMessage = async () => {
                 }}
                 style={composerMenuButton}
               >
-                ðŸ–¼ Picture
+                🖼️ Picture
               </button>
               <button
                 type="button"
@@ -661,7 +661,7 @@ const sendMessage = async () => {
                 }}
                 style={composerMenuButton}
               >
-                {recording ? "â¹ Stop recording" : "ðŸŽ™ Voice note"}
+                {recording ? "⏹️ Stop recording" : "🎙️ Voice note"}
               </button>
             </div>
           )}
@@ -681,7 +681,7 @@ const sendMessage = async () => {
               background: theme.surface,
               boxShadow: "0 4px 18px rgba(0,0,0,0.16)"
             }}>
-              {["ðŸ˜€", "ðŸ˜‚", "ðŸ˜", "ðŸ¥°", "ðŸ˜Ž", "ðŸ˜­", "ðŸ‘", "â¤ï¸", "ðŸ”¥", "ðŸŽ‰", "ðŸ™", "ðŸ˜‰"].map((emoji) => (
+              {["\u{1F600}", "\u{1F602}", "\u{1F970}", "\u{1F979}", "\u{1F60E}", "\u{1F62D}", "\u{1F44B}", "\u{2764}\u{FE0F}", "\u{1F525}", "\u{1F389}", "\u{1F64F}", "\u{1F609}"].map((emoji) => (
                 <button
                   key={emoji}
                   type="button"
@@ -716,7 +716,7 @@ const sendMessage = async () => {
             }}
             style={composerIconButton}
           >
-            ðŸ“Ž
+            📎
           </button>
 
           <input
@@ -755,7 +755,7 @@ const sendMessage = async () => {
             }}
             style={composerIconButton}
           >
-            ðŸ˜Š
+            😊
           </button>
 
           <button

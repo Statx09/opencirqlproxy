@@ -1,5 +1,5 @@
 import React, { memo, useMemo, useCallback, useState } from "react";
-import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video, X, BadgeCheck } from "lucide-react";
+import { MessageCircle, Phone, UserRound, Hand, Heart, CircleDollarSign, Image, Mic, Video, X, BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { normalizeArray } from "../utils/profileHelpers";
 import ExpressionBadges from "./expressions/ExpressionBadges";
 import ImageModal from "./ImageModal";
@@ -78,12 +78,14 @@ console.log("HOSTCARD normalized", expressions);
       )}
 {actionFeedback && (
         <div style={actionFeedbackStyle}>
-          <span style={actionFeedbackIcon}>
-            {actionFeedback === "wave"
-              ? "ðŸ‘‹"
-              : actionFeedback === "like"
-              ? "â¤ï¸"
-              : "ðŸ’°"}
+          <span style={actionFeedbackIcon} aria-hidden="true">
+            {actionFeedback === "wave" ? (
+              <Hand size={18} strokeWidth={1.8} />
+            ) : actionFeedback === "like" ? (
+              <Heart size={18} strokeWidth={1.8} />
+            ) : (
+              "âœ“"
+            )}
           </span>
 
           <span>
@@ -295,7 +297,7 @@ console.log("HOSTCARD normalized", expressions);
                 onPrev?.();
               }}
             >
-              â€¹
+              Ã¢â‚¬Â¹
             </button>
 
             <button
@@ -307,7 +309,7 @@ console.log("HOSTCARD normalized", expressions);
                 onNext?.();
               }}
             >
-              â€º
+              Ã¢â‚¬Âº
             </button>
 
           </div>
@@ -459,7 +461,7 @@ const rail = {
   display: "flex",
   flexDirection: "column",
   gap: 10,
-  zIndex: 9999,        // ðŸ”¥ ADD THIS
+  zIndex: 9999,        // Ã°Å¸â€Â¥ ADD THIS
   pointerEvents: "auto"
 };
 
@@ -680,6 +682,7 @@ const flagBubble = {
 
   color: "#fff",
 };
+
 
 
 

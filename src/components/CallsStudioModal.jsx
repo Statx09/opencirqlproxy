@@ -538,7 +538,7 @@ export default function CallsStudioModal({
         }
         .upcall-billing-hud {
           position: absolute;
-          top: 128px;
+          top: 176px;
           left: 18px;
           right: auto;
           z-index: 20;
@@ -561,7 +561,7 @@ export default function CallsStudioModal({
         }
         @media (max-width: 600px) {
           .upcall-billing-hud {
-            top: 108px;
+            top: 150px;
             left: 12px;
             right: auto;
             max-width: min(190px, calc(100vw - 24px));

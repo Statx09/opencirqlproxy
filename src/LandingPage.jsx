@@ -1928,23 +1928,7 @@ break;
       <button
         type="button"
         aria-label="Dismiss notification"
-        onClick={() => {
-          clearTimeout(tipPopupTimerRef.current);
-          setTipPopup(null);
-        }}
-        style={{
-          border: 0,
-          background: "transparent",
-          color: theme.text,
-          opacity: 0.65,
-          fontSize: 20,
-          cursor: "pointer",
-          padding: "0 2px",
-          alignSelf: "flex-start"
-        }}
-      >
-          Ãƒâ€”
-      </button>
+        onClick={() =>{"×"}</button>
     </div>
   )}
 

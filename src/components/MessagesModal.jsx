@@ -17,7 +17,7 @@ export default function MessagesModal({
   const [sendError, setSendError] = useState("");
   const { theme } = useTheme();
 
-  const hostId = host?.user_id ?? host?.id;
+  const hostId = host?.user_id ?? host?.profile_id ?? host?.id;
 
   const displayName = host?.alias || host?.name || "Host";
 

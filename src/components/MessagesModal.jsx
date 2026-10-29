@@ -387,13 +387,52 @@ const sendMessage = async () => {
   setSending(true);
 
   try {
-    const { data: rpcData, error } = await supabase
-      .rpc("send_message", {
+    const isEsihleTesterChat =
+      user.id === "36802a31-ed44-4b15-8b90-1790e950b893" &&
+      hostId === "bb60e294-da5a-445c-ab61-85bf11b2acac";
+
+    let rpcData;
+    let error;
+
+    if (isEsihleTesterChat) {
+      const result = await supabase.rpc("testing_send_message", {
+        p_receiver_profile_id: hostId,
+        p_text: text,
+      });
+
+      rpcData = result.data;
+      error = result.error;
+
+      if (!error && rpcData?.success === false) {
+        error = new Error(
+          rpcData.error || "Test message could not be sent."
+        );
+      }
+    } else {
+      const result = await supabase.rpc("send_message", {
         p_receiver_id: hostId,
         p_text: text,
       });
 
-    const data = rpcData ? { id: rpcData.message_id, sender_id: user.id, receiver_id: hostId, text, payload: rpcData.charged > 0 ? { charge: rpcData.charged, payment_type: "message" } : null } : null;
+      rpcData = result.data;
+      error = result.error;
+    }
+
+    const data = rpcData
+      ? {
+          id: rpcData.message_id,
+          sender_id: user.id,
+          receiver_id: hostId,
+          text,
+          payload:
+            !isEsihleTesterChat && rpcData.charged > 0
+              ? {
+                  charge: rpcData.charged,
+                  payment_type: "message",
+                }
+              : null,
+        }
+      : null;
 
     if (error) {
       console.error("MESSAGE INSERT ERROR:", error);
@@ -608,7 +647,7 @@ const sendMessage = async () => {
                 }}
                 style={composerMenuButton}
               >
-                🖼 Picture
+                ðŸ–¼ Picture
               </button>
               <button
                 type="button"
@@ -619,7 +658,7 @@ const sendMessage = async () => {
                 }}
                 style={composerMenuButton}
               >
-                {recording ? "⏹ Stop recording" : "🎙 Voice note"}
+                {recording ? "â¹ Stop recording" : "ðŸŽ™ Voice note"}
               </button>
             </div>
           )}
@@ -639,7 +678,7 @@ const sendMessage = async () => {
               background: theme.surface,
               boxShadow: "0 4px 18px rgba(0,0,0,0.16)"
             }}>
-              {["😀", "😂", "😍", "🥰", "😎", "😭", "👍", "❤️", "🔥", "🎉", "🙏", "😉"].map((emoji) => (
+              {["ðŸ˜€", "ðŸ˜‚", "ðŸ˜", "ðŸ¥°", "ðŸ˜Ž", "ðŸ˜­", "ðŸ‘", "â¤ï¸", "ðŸ”¥", "ðŸŽ‰", "ðŸ™", "ðŸ˜‰"].map((emoji) => (
                 <button
                   key={emoji}
                   type="button"
@@ -674,7 +713,7 @@ const sendMessage = async () => {
             }}
             style={composerIconButton}
           >
-            📎
+            ðŸ“Ž
           </button>
 
           <input
@@ -713,7 +752,7 @@ const sendMessage = async () => {
             }}
             style={composerIconButton}
           >
-            😊
+            ðŸ˜Š
           </button>
 
           <button

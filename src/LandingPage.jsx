@@ -1453,6 +1453,8 @@ useEffect(() => {
               payload: {
                 call_id: callId,
                 call_type: callTarget.callType || "video",
+                call_rate: callRate,
+                currency: callCurrency,
               },
               created_at: new Date().toISOString(),
             })
@@ -1491,6 +1493,8 @@ useEffect(() => {
             ...callTarget,
             callerName,
             call_id: callId,
+            call_rate: callRate,
+            currency: callCurrency,
           });
 
           console.log(
@@ -2459,6 +2463,9 @@ break;
               {outgoingCall.alias || outgoingCall.name || "Host"}
             </div>
             <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgba(255,255,255,.6)' }}>Calling... Waiting for answer</div>
+            <div style={{ marginTop: '4px', fontSize: '12px', color: 'rgba(255,255,255,.85)' }}>
+              {"Call charge: " + (outgoingCall.currency === "USD" ? "$" : (outgoingCall.currency || "USD") + " ") + (Number(outgoingCall.call_rate) + 0.10).toFixed(2) + "/min"}
+            </div>
           </div>
 
           <button
@@ -2494,7 +2501,7 @@ break;
             aria-label="Cancel call"
             title="Cancel call"
           >
-            Ã—
+            ×
           </button>
         </div>
       )}
@@ -2662,6 +2669,11 @@ break;
                   ? "Voice call"
                   : "Video call"}
               </div>
+              {Number.isFinite(Number(incomingCall.payload?.call_rate)) ? (
+                <div style={{ marginTop: "4px", fontSize: "12px", color: "rgba(255,255,255,.85)" }}>
+                  {"You earn: " + (incomingCall.payload?.currency === "USD" ? "$" : (incomingCall.payload?.currency || "USD") + " ") + Math.max(0, Number(incomingCall.payload.call_rate) - 0.10).toFixed(2) + "/min"}
+                </div>
+              ) : null}
             </div>
           </div>
 

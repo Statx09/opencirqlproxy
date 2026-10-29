@@ -378,7 +378,7 @@ export default function DailyRoom({
         .upcall-self-preview {
           position: absolute;
           z-index: 8;
-          top: 80px;
+          top: 24px;
           right: 18px;
           width: clamp(150px, 22vw, 270px);
           aspect-ratio: 3 / 4;
@@ -471,7 +471,7 @@ export default function DailyRoom({
         }
         @media (max-width: 600px) {
           .upcall-self-preview {
-            top: 68px;
+            top: 16px;
             right: 12px;
             width: clamp(112px, 34vw, 160px);
             max-height: 28vh;

@@ -484,6 +484,39 @@ export default function CallsStudioModal({
 
 
 
+  useEffect(() => {
+    if (callEnded || !dailyConnected || !billingStarted || isCallHost === null) return;
+
+    const ticker = setInterval(() => {
+      setLiveBilling((current) => {
+        if (!current) return current;
+
+        if (isCallHost) {
+          const rate = hostRateRef.current;
+          if (!rate) return current;
+
+          return {
+            ...current,
+            host_credit: Number(current.host_credit ?? 0) + rate,
+          };
+        }
+
+        const rate = callerRateRef.current;
+        if (!rate) return current;
+
+        return {
+          ...current,
+          caller_spent: Number(current.caller_spent ?? 0) + rate,
+          caller_balance: Math.max(
+            0,
+            Number(current.caller_balance ?? 0) - rate
+          ),
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(ticker);
+  }, [callEnded, dailyConnected, billingStarted, isCallHost]);
   if (!user?.id) return null;
 
   const togglePanel = (panelName) => {
@@ -505,8 +538,9 @@ export default function CallsStudioModal({
         }
         .upcall-billing-hud {
           position: absolute;
-          top: calc(80px + min(40vh, 29.333vw, 360px) + 12px);
-          right: 18px;
+          top: 128px;
+          left: 18px;
+          right: auto;
           z-index: 20;
           max-width: 220px;
           padding: 10px 14px;
@@ -527,8 +561,9 @@ export default function CallsStudioModal({
         }
         @media (max-width: 600px) {
           .upcall-billing-hud {
-            top: calc(68px + min(28vh, 45.333vw, 213px) + 10px);
-            right: 12px;
+            top: 108px;
+            left: 12px;
+            right: auto;
             max-width: min(190px, calc(100vw - 24px));
             padding: 8px 11px;
             border-radius: 12px;

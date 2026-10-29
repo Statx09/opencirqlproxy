@@ -297,7 +297,7 @@ console.log("HOSTCARD normalized", expressions);
                 onPrev?.();
               }}
             >
-              Ã¢â‚¬Â¹
+              <ChevronLeft size={22} strokeWidth={2} aria-hidden="true" />
             </button>
 
             <button
@@ -309,7 +309,7 @@ console.log("HOSTCARD normalized", expressions);
                 onNext?.();
               }}
             >
-              Ã¢â‚¬Âº
+              <ChevronRight size={22} strokeWidth={2} aria-hidden="true" />
             </button>
 
           </div>

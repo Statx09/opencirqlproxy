@@ -388,8 +388,11 @@ const sendMessage = async () => {
 
   try {
     const isEsihleTesterChat =
-      user.id === "36802a31-ed44-4b15-8b90-1790e950b893" &&
-      hostId === "bb60e294-da5a-445c-ab61-85bf11b2acac";
+      hostId === "bb60e294-da5a-445c-ab61-85bf11b2acac" &&
+      [
+        "36802a31-ed44-4b15-8b90-1790e950b893",
+        "f2bb2d6b-a203-4363-9087-01a4dfe0e984",
+      ].includes(user.id);
 
     let rpcData;
     let error;

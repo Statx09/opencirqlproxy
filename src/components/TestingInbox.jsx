@@ -149,6 +149,27 @@ export default function TestingInbox({ user }) {
     });
   }, []);
 
+  const loadUsers = useCallback(async () => {
+    const { data, error: rpcError } = await supabase.rpc(
+      "testing_host_users"
+    );
+
+    if (rpcError) throw rpcError;
+
+    const safeUsers = (data || []).filter(
+      (item) => item.user_id
+    );
+
+    setUsers(safeUsers);
+
+    setSelectedUserId((current) => {
+      if (current && safeUsers.some((item) => item.user_id === current)) {
+        return current;
+      }
+
+      return safeUsers[0]?.user_id || "";
+    });
+  }, []);
   const loadMessages = useCallback(async (hostId) => {
     if (!hostId) {
       setMessages([]);
@@ -186,7 +207,10 @@ export default function TestingInbox({ user }) {
       setError("");
 
       try {
-        await loadHosts();
+        await Promise.all([
+          loadHosts(),
+          loadUsers(),
+        ]);
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load synthetic hosts.");
       } finally {
@@ -198,7 +222,7 @@ export default function TestingInbox({ user }) {
     return () => {
       cancelled = true;
     };
-  }, [loadHosts, user?.id]);
+  }, [loadHosts, loadUsers, user?.id]);
 
   useEffect(() => {
     let cancelled = false;
@@ -219,34 +243,43 @@ export default function TestingInbox({ user }) {
     };
   }, [loadMessages, selectedHostId]);
 
-  const conversations = messages.reduce((list, message) => {
-    const key = conversationKey(message);
-    if (!list.some((item) => item.key === key)) {
-      list.push({
-        key,
-        otherUserId: message.other_user_id,
-        otherUserName: message.other_user_name || "User",
-        avatar: message.other_user_avatar_url,
-        latest: message.created_at,
-      });
-    } else {
-      const item = list.find((entry) => entry.key === key);
-      if (new Date(message.created_at || 0) > new Date(item.latest || 0)) {
-        item.latest = message.created_at;
+  const conversations = users.map((item) => {
+    const userMessages = messages.filter(
+      (message) => message.other_user_id === item.user_id
+    );
+
+    const latestMessage = userMessages.reduce((latest, message) => {
+      if (
+        !latest ||
+        new Date(message.created_at || 0) >
+          new Date(latest.created_at || 0)
+      ) {
+        return message;
       }
-    }
-    return list;
-  }, []);
+
+      return latest;
+    }, null);
+
+    return {
+      key: `${selectedHostId}:${item.user_id}`,
+      otherUserId: item.user_id,
+      otherUserName: item.display_name || "User",
+      avatar: item.avatar_url,
+      latest: latestMessage?.created_at || null,
+      messages: userMessages,
+    };
+  });
 
   const activeConversation = conversations.find(
-    (conversation) => conversation.key === selectedConversation
+    (conversation) => conversation.otherUserId === selectedUserId
   );
 
-  const activeMessages = messages
-    .filter((message) => conversationKey(message) === selectedConversation)
+  const activeMessages = (activeConversation?.messages || [])
     .slice()
-    .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
-
+    .sort(
+      (a, b) =>
+        new Date(a.created_at || 0) - new Date(b.created_at || 0)
+    );
   async function sendReply(event) {
     event.preventDefault();
     if (!selectedHostId || !activeConversation || !draft.trim() || sending) return;
@@ -335,11 +368,11 @@ export default function TestingInbox({ user }) {
                 key={conversation.key}
                 style={{
                   ...styles.conversation,
-                  ...(selectedConversation === conversation.key
+                  ...(selectedUserId === conversation.otherUserId
                     ? styles.conversationActive
                     : {}),
                 }}
-                onClick={() => setSelectedConversation(conversation.key)}
+                onClick={() => setSelectedUserId(conversation.otherUserId)}
               >
                 <strong>{conversation.otherUserName}</strong>
                 <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>
@@ -396,13 +429,13 @@ export default function TestingInbox({ user }) {
                 }
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
-                disabled={!activeConversation || sending}
+                disabled={!selectedHostId || !selectedUserId || sending}
                 maxLength={5000}
               />
               <button
                 type="submit"
                 style={styles.button}
-                disabled={!activeConversation || !draft.trim() || sending}
+                disabled={!selectedHostId || !selectedUserId || !draft.trim() || sending}
               >
                 {sending ? "Sending…" : "Send"}
               </button>

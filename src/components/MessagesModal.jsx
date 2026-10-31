@@ -387,17 +387,40 @@ const sendMessage = async () => {
   setSending(true);
 
   try {
-    const isEsihleTesterChat =
-      hostId === "bb60e294-da5a-445c-ab61-85bf11b2acac" &&
+    const isSyntheticHostTesterChat =
+      [
+        "22a4bcf5-fba0-48e7-8169-e71fea257694",
+        "97503b63-0d21-47dd-a1b3-1265db546808",
+        "44ab76c1-bc23-4d45-82f5-96d39b263952",
+        "7e46e0fd-b09e-469f-9814-ea728ac003d9",
+        "03ebee39-0443-45e5-b7af-47b9c4ef3b30",
+        "cb373ea0-7203-4647-8e18-4f41facd29fd",
+        "bb60e294-da5a-445c-ab61-85bf11b2acac",
+        "e492f25f-738b-47fe-97d5-5981aec4db53",
+        "1af1885d-5fd9-452f-9f19-f166b0307677",
+        "4384e63a-0d95-4f9d-862d-714349ef71fd",
+        "a8a1e277-6262-4acf-9271-8f184e98f86e",
+      ].includes(hostId) &&
+      host?.is_ai !== true &&
       [
         "36802a31-ed44-4b15-8b90-1790e950b893",
         "f2bb2d6b-a203-4363-9087-01a4dfe0e984",
       ].includes(user.id);
 
+    console.log("MESSAGE ROUTING CHECK", {
+      senderId: user?.id,
+      hostName: host?.alias || host?.name,
+      hostId: host?.id,
+      hostProfileId: host?.profile_id,
+      hostUserId: host?.user_id,
+      isAi: host?.is_ai,
+      resolvedHostId: hostId,
+      syntheticTesterRoute: isSyntheticHostTesterChat,
+    });
     let rpcData;
     let error;
 
-    if (isEsihleTesterChat) {
+    if (isSyntheticHostTesterChat) {
       const result = await supabase.rpc("testing_send_message", {
         p_receiver_profile_id: hostId,
         p_text: text,
@@ -428,7 +451,7 @@ const sendMessage = async () => {
           receiver_id: hostId,
           text,
           payload:
-            !isEsihleTesterChat && rpcData.charged > 0
+            !isSyntheticHostTesterChat && rpcData.charged > 0
               ? {
                   charge: rpcData.charged,
                   payment_type: "message",
@@ -650,7 +673,7 @@ const sendMessage = async () => {
                 }}
                 style={composerMenuButton}
               >
-                🖼️ Picture
+                {"\u{1F5BC}\u{FE0F} Picture"}
               </button>
               <button
                 type="button"
@@ -661,7 +684,7 @@ const sendMessage = async () => {
                 }}
                 style={composerMenuButton}
               >
-                {recording ? "⏹️ Stop recording" : "🎙️ Voice note"}
+                {recording ? "\u{23F9}\u{FE0F} Stop recording" : "\u{1F399}\u{FE0F} Voice note"}
               </button>
             </div>
           )}
@@ -716,7 +739,7 @@ const sendMessage = async () => {
             }}
             style={composerIconButton}
           >
-            📎
+            {"\u{1F4CE}"}
           </button>
 
           <input
@@ -755,7 +778,7 @@ const sendMessage = async () => {
             }}
             style={composerIconButton}
           >
-            😊
+            {"\u{1F60A}"}
           </button>
 
           <button

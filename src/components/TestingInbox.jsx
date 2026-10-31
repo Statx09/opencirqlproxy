@@ -1,5 +1,5 @@
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 const styles = {
@@ -126,6 +126,8 @@ function formatTime(value) {
 export default function TestingInbox({ user }) {
   const [hosts, setHosts] = useState([]);
   const [selectedHostId, setSelectedHostId] = useState("");
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [messages, setMessages] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState("");
   const [draft, setDraft] = useState("");
@@ -133,6 +135,10 @@ export default function TestingInbox({ user }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const fileInputRef = useRef(null);
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [mediaUrls, setMediaUrls] = useState({});
 
   const loadHosts = useCallback(async () => {
     const { data, error: rpcError } = await supabase.rpc("testing_host_list");
@@ -308,6 +314,73 @@ export default function TestingInbox({ user }) {
     }
   }
 
+  async function sendPicture(file) {
+    if (!selectedHostId || !activeConversation || !file || sending) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Media must be 10 MB or smaller.");
+      return;
+    }
+
+    setSending(true);
+    setError("");
+    setNotice("");
+
+    let storagePath;
+
+    try {
+      const extension = (file.name?.split(".").pop() || "jpg")
+        .replace(/[^a-zA-Z0-9]/g, "")
+        .slice(0, 10);
+
+      storagePath = `${user.id}/${crypto.randomUUID()}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("chat-media")
+        .upload(storagePath, file, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data, error: rpcError } = await supabase.rpc(
+        "testing_host_send_picture",
+        {
+          p_host_user_id: selectedHostId,
+          p_receiver_id: activeConversation.otherUserId,
+          p_storage_path: storagePath,
+        }
+      );
+
+      if (rpcError) throw rpcError;
+      if (!data?.success || !data?.message_id) {
+        throw new Error("Picture message was not confirmed.");
+      }
+
+      setNotice("Picture sent as the selected synthetic host.");
+      await loadMessages(selectedHostId);
+    } catch (err) {
+      if (storagePath) {
+        await supabase.storage.from("chat-media").remove([storagePath]);
+      }
+      setError(err.message || "Could not send picture.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function handlePictureSelected(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (file) await sendPicture(file);
+  }
+
   if (user?.id !== "36802a31-ed44-4b15-8b90-1790e950b893") {
     return <div style={{ padding: 20 }}>Testing inbox access is not enabled for this account.</div>;
   }
@@ -411,7 +484,7 @@ export default function TestingInbox({ user }) {
                   >
                     <div>{message.message_text}</div>
                     <div style={{ marginTop: 5, fontSize: 10, opacity: 0.65 }}>
-                      {isHostMessage ? "Host" : "User"} · {formatTime(message.created_at)}
+                      {isHostMessage ? "Host" : "User"} Â· {formatTime(message.created_at)}
                     </div>
                   </div>
                 );
@@ -419,6 +492,117 @@ export default function TestingInbox({ user }) {
             </div>
 
             <form style={styles.composer} onSubmit={sendReply}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handlePictureSelected}
+              />
+
+              <div style={{ display: "flex", gap: 6, position: "relative" }}>
+                <button
+                  type="button"
+                  aria-label="Attach picture"
+                  title="Attach picture"
+                  disabled={!activeConversation || sending}
+                  onClick={() => {
+                    setShowAttachmentMenu((value) => !value);
+                    setShowEmojiPicker(false);
+                  }}
+                  style={{
+                    ...styles.button,
+                    padding: "10px 13px",
+                    background: "#263449",
+                  }}
+                >
+                  📎
+                </button>
+
+                <button
+                  type="button"
+                  aria-label="Choose emoji"
+                  title="Choose emoji"
+                  disabled={!activeConversation || sending}
+                  onClick={() => {
+                    setShowEmojiPicker((value) => !value);
+                    setShowAttachmentMenu(false);
+                  }}
+                  style={{
+                    ...styles.button,
+                    padding: "10px 13px",
+                    background: "#263449",
+                  }}
+                >
+                  ☺
+                </button>
+
+                {showAttachmentMenu && (
+                  <div style={{
+                    position: "absolute",
+                    bottom: "48px",
+                    left: 0,
+                    zIndex: 20,
+                    padding: 8,
+                    background: "#1e293b",
+                    border: "1px solid #475569",
+                    borderRadius: 8,
+                    minWidth: 140,
+                  }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAttachmentMenu(false);
+                        fileInputRef.current?.click();
+                      }}
+                      style={{
+                        ...styles.button,
+                        width: "100%",
+                      }}
+                    >
+                      📷 Attach picture
+                    </button>
+                  </div>
+                )}
+
+                {showEmojiPicker && (
+                  <div style={{
+                    position: "absolute",
+                    bottom: "48px",
+                    left: 0,
+                    zIndex: 20,
+                    display: "grid",
+                    gridTemplateColumns: "repeat(4, 40px)",
+                    gap: 4,
+                    padding: 8,
+                    background: "#1e293b",
+                    border: "1px solid #475569",
+                    borderRadius: 8,
+                  }}>
+                    {["😀", "😂", "😍", "🥰", "😊", "😉", "❤️", "👍", "🔥", "🙏", "😘", "🎉"].map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          setDraft((value) => value + emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                        style={{
+                          border: 0,
+                          borderRadius: 6,
+                          background: "#334155",
+                          padding: 7,
+                          fontSize: 20,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <textarea
                 style={styles.textarea}
                 aria-label="Reply message"
@@ -432,6 +616,7 @@ export default function TestingInbox({ user }) {
                 disabled={!selectedHostId || !selectedUserId || sending}
                 maxLength={5000}
               />
+
               <button
                 type="submit"
                 style={styles.button}

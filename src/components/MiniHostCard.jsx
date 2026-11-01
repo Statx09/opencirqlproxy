@@ -124,7 +124,7 @@ console.log("BANNER:", h.banner);
 
   {h.presence === "in_studio" && (
     <div style={studioBadge}>
-      📹
+      &#x1F4F9;
     </div>
   )}
 </div>
@@ -159,10 +159,10 @@ console.log("BANNER:", h.banner);
     </div>
   </div>
   <div style={rateColumn}>
-    {voiceRate > 0 && <span style={rateItem}><Phone size={12} strokeWidth={2.2} />${voiceRate.toFixed(2)}/min</span>}
-    {videoRate > 0 && <span style={rateItem}><Video size={12} strokeWidth={2.2} />${videoRate.toFixed(2)}/min</span>}
+    {voiceRate > 0 && <span style={{ ...rateItem, color: "#22c55e", textShadow: "0 0 5px rgba(34,197,94,.55), 0 0 10px rgba(34,197,94,.25)" }}><Phone size={13} strokeWidth={2.2} />${voiceRate.toFixed(2)}/min</span>}
+    {videoRate > 0 && <span style={{ ...rateItem, color: "#22c55e", textShadow: "0 0 5px rgba(34,197,94,.55), 0 0 10px rgba(34,197,94,.25)" }}><Video size={13} strokeWidth={2.2} />${videoRate.toFixed(2)}/min</span>}
   </div>
-  <div style={interactionHint}><span style={gestureArrows}>‹  ›</span><span style={gestureExpand}>⤢</span></div>
+  <div style={interactionHint}><span style={gestureArrows}>&#x2039;&nbsp;&nbsp;&#x203A;</span><span style={gestureExpand}>&#x2922;</span></div>
 </div>
 
  {/* EXPRESSIONS */}
@@ -414,13 +414,13 @@ const headline = {
 
 /* TAGS */
 const topInfoRow = { display: "flex", alignItems: "flex-start", gap: 8, minWidth: 0, width: "100%", boxSizing: "border-box" };
-const rateColumn = { position: "absolute", top: 10, right: 54, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, zIndex: 2 };
+const rateColumn = { position: "absolute", top: 10, right: 64, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, zIndex: 2 };
 const interactionHint = { position: "absolute", top: 8, right: 10, display: "flex", alignItems: "center", gap: 5, zIndex: 2, opacity: 0.95 };
 const gestureArrows = { fontSize: 19, fontWeight: 800, lineHeight: 1, color: "#22c55e", textShadow: "0 0 6px rgba(34,197,94,.9), 0 0 14px rgba(34,197,94,.45)" };
 
 
 const gestureExpand = { fontSize: 13, fontWeight: 800, lineHeight: 1, color: "#22c55e", opacity: 0.85, textShadow: "0 0 7px rgba(34,197,94,.65)" };
-const rateItem = { color: "rgba(255,255,255,0.95)", fontSize: 9, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5 };
+const rateItem = { color: "rgba(255,255,255,0.95)", fontSize: 10, fontWeight: 800, whiteSpace: "nowrap", display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 5 };
 
 const chipRow = {
   display: "flex",

@@ -10,7 +10,7 @@ export default function SayThanksModal({ host, onClose, onTipSent, theme }) {
   const [error, setError] = useState("");
 
   const name = host?.alias || host?.name || "creator";
-  const hostUserId = host?.user_id;
+  const hostUserId = host?.user_id || host?.id;
 
   const remainingBalance = useMemo(() => {
     if (balance == null) return null;

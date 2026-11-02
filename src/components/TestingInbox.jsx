@@ -129,6 +129,9 @@ export default function TestingInbox({ user }) {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [messages, setMessages] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
+  const [transactionsError, setTransactionsError] = useState("");
   const [selectedConversation, setSelectedConversation] = useState("");
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
@@ -203,6 +206,39 @@ export default function TestingInbox({ user }) {
       }
       return safeMessages[0] ? conversationKey(safeMessages[0]) : "";
     });
+  }, []);
+
+  const loadTransactions = useCallback(async (hostId, otherUserId) => {
+    if (!hostId || !otherUserId) {
+      setTransactions([]);
+      setTransactionsError("");
+      return;
+    }
+
+    setTransactionsLoading(true);
+    setTransactionsError("");
+
+    try {
+      const { data, error: rpcError } = await supabase.rpc(
+        "testing_host_transactions",
+        {
+          p_host_user_id: hostId,
+          p_other_user_id: otherUserId,
+        }
+      );
+
+      if (rpcError) throw rpcError;
+
+      setTransactions(data || []);
+    } catch (err) {
+      setTransactions([]);
+      setTransactionsError(
+        err.message || "Could not load transaction history."
+      );
+      throw err;
+    } finally {
+      setTransactionsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -286,6 +322,19 @@ export default function TestingInbox({ user }) {
       (a, b) =>
         new Date(a.created_at || 0) - new Date(b.created_at || 0)
     );
+
+  useEffect(() => {
+    loadTransactions(selectedHostId, selectedUserId).catch(() => {});
+  }, [loadTransactions, selectedHostId, selectedUserId]);
+
+  const spentTotal = transactions
+    .filter((item) => item.transaction_type === "message_sent")
+    .reduce((total, item) => total + Number(item.amount || 0), 0);
+
+  const earnedTotal = transactions
+    .filter((item) => item.transaction_type === "message_received")
+    .reduce((total, item) => total + Number(item.amount || 0), 0);
+
   async function sendReply(event) {
     event.preventDefault();
     if (!selectedHostId || !activeConversation || !draft.trim() || sending) return;
@@ -411,7 +460,10 @@ export default function TestingInbox({ user }) {
           disabled={loading}
           onClick={() => {
             loadHosts()
-              .then(() => loadMessages(selectedHostId))
+              .then(async () => {
+                await loadMessages(selectedHostId);
+                await loadTransactions(selectedHostId, selectedUserId);
+              })
               .catch((err) => setError(err.message || "Refresh failed."));
           }}
         >
@@ -469,6 +521,87 @@ export default function TestingInbox({ user }) {
                     {hosts.find((host) => host.host_user_id === selectedHostId)?.host_name || "host"}
                   </strong>{" "}
                   to <strong>{activeConversation.otherUserName}</strong>
+                </div>
+              )}
+
+              {activeConversation && (
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 10,
+                    padding: 12,
+                    marginBottom: 14,
+                    borderRadius: 10,
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 115 }}>
+                    <div style={{ fontSize: 11, opacity: 0.7 }}>
+                      Spent by you
+                    </div>
+                    <strong style={{ color: "#ffb3b3" }}>
+                      ${spentTotal.toFixed(2)}
+                    </strong>
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 115 }}>
+                    <div style={{ fontSize: 11, opacity: 0.7 }}>
+                      Earned by host
+                    </div>
+                    <strong style={{ color: "#a9e6ba" }}>
+                      ${earnedTotal.toFixed(2)}
+                    </strong>
+                  </div>
+
+                  <div style={{ width: "100%" }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>
+                      Paid-message transactions
+                    </div>
+
+                    {transactionsLoading && (
+                      <div style={{ fontSize: 11, opacity: 0.7 }}>
+                        Loading transactions…
+                      </div>
+                    )}
+
+                    {transactionsError && (
+                      <div style={{ fontSize: 11, color: "#ffaaaa" }}>
+                        {transactionsError}
+                      </div>
+                    )}
+
+                    {!transactionsLoading && !transactionsError &&
+                      transactions.length === 0 && (
+                        <div style={{ fontSize: 11, opacity: 0.65 }}>
+                          No paid-message transactions in this conversation.
+                        </div>
+                      )}
+
+                    {transactions.map((transaction) => (
+                      <div
+                        key={transaction.transaction_id}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 8,
+                          paddingTop: 5,
+                          fontSize: 11,
+                          opacity: 0.85,
+                        }}
+                      >
+                        <span>
+                          {transaction.transaction_type === "message_sent"
+                            ? "You spent"
+                            : "Host earned"}{" "}
+                          {transaction.currency || "USD"}{" "}
+                          {Number(transaction.amount || 0).toFixed(2)}
+                        </span>
+                        <span>{formatTime(transaction.created_at)}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

@@ -279,18 +279,45 @@ export default function TestingInbox({ user }) {
     let cancelled = false;
 
     async function refresh() {
+      if (cancelled) return;
+
       setError("");
+
       try {
         await loadMessages(selectedHostId);
       } catch (err) {
-        if (!cancelled) setError(err.message || "Could not load conversations.");
+        if (!cancelled) {
+          setError(err.message || "Could not load conversations.");
+        }
       }
     }
 
     refresh();
 
+    if (!selectedHostId) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const channel = supabase
+      .channel(`testing-inbox-${selectedHostId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+        },
+        () => {
+          refresh();
+        }
+      )
+      .subscribe();
+
     return () => {
       cancelled = true;
+      supabase.removeChannel(channel);
     };
   }, [loadMessages, selectedHostId]);
 

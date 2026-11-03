@@ -139,6 +139,7 @@ export default function TestingInbox({ user }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const fileInputRef = useRef(null);
+  const transactionsRequestRef = useRef(0);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [mediaUrls, setMediaUrls] = useState({});
@@ -208,14 +209,18 @@ export default function TestingInbox({ user }) {
     });
   }, []);
 
-  const loadTransactions = useCallback(async (hostId, otherUserId) => {
+  const loadTransactions = useCallback(async (hostId, otherUserId, options = {}) => {
+    const requestId = ++transactionsRequestRef.current;
+    const silent = options.silent === true;
+
     if (!hostId || !otherUserId) {
       setTransactions([]);
       setTransactionsError("");
+      setTransactionsLoading(false);
       return;
     }
 
-    setTransactionsLoading(true);
+    if (!silent) setTransactionsLoading(true);
     setTransactionsError("");
 
     try {
@@ -228,16 +233,20 @@ export default function TestingInbox({ user }) {
       );
 
       if (rpcError) throw rpcError;
+      if (requestId !== transactionsRequestRef.current) return;
 
       setTransactions(data || []);
     } catch (err) {
-      setTransactions([]);
+      if (requestId !== transactionsRequestRef.current) return;
+
       setTransactionsError(
         err.message || "Could not load transaction history."
       );
       throw err;
     } finally {
-      setTransactionsLoading(false);
+      if (requestId === transactionsRequestRef.current) {
+        setTransactionsLoading(false);
+      }
     }
   }, []);
 
@@ -324,15 +333,39 @@ export default function TestingInbox({ user }) {
     );
 
   useEffect(() => {
-    loadTransactions(selectedHostId, selectedUserId).catch(() => {});
+    let cancelled = false;
+
+    const refreshTransactions = (silent = false) => {
+      loadTransactions(selectedHostId, selectedUserId, { silent }).catch(() => {});
+    };
+
+    refreshTransactions();
+
+    const intervalId = window.setInterval(() => {
+      if (!cancelled) refreshTransactions(true);
+    }, 5000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      transactionsRequestRef.current += 1;
+    };
   }, [loadTransactions, selectedHostId, selectedUserId]);
 
   const spentTotal = transactions
-    .filter((item) => item.transaction_type === "message_sent")
+    .filter(
+      (item) =>
+        ["message_sent", "media_sent"].includes(item.transaction_type) &&
+        item.status === "completed"
+    )
     .reduce((total, item) => total + Number(item.amount || 0), 0);
 
   const earnedTotal = transactions
-    .filter((item) => item.transaction_type === "message_received")
+    .filter(
+      (item) =>
+        ["message_received", "media_received"].includes(item.transaction_type) &&
+        item.status === "completed"
+    )
     .reduce((total, item) => total + Number(item.amount || 0), 0);
 
   async function sendReply(event) {
@@ -414,6 +447,7 @@ export default function TestingInbox({ user }) {
 
       setNotice("Picture sent as the selected synthetic host.");
       await loadMessages(selectedHostId);
+      loadTransactions(selectedHostId, selectedUserId, { silent: true }).catch(() => {});
     } catch (err) {
       if (storagePath) {
         await supabase.storage.from("chat-media").remove([storagePath]);
@@ -539,7 +573,7 @@ export default function TestingInbox({ user }) {
                 >
                   <div style={{ flex: 1, minWidth: 115 }}>
                     <div style={{ fontSize: 11, opacity: 0.7 }}>
-                      Spent by you
+                      {activeConversation?.otherUserName || "User"} spent
                     </div>
                     <strong style={{ color: "#ffb3b3" }}>
                       ${spentTotal.toFixed(2)}
@@ -548,7 +582,7 @@ export default function TestingInbox({ user }) {
 
                   <div style={{ flex: 1, minWidth: 115 }}>
                     <div style={{ fontSize: 11, opacity: 0.7 }}>
-                      Earned by host
+                      {hosts.find((host) => host.host_user_id === selectedHostId)?.host_name || "Host"} earned
                     </div>
                     <strong style={{ color: "#a9e6ba" }}>
                       ${earnedTotal.toFixed(2)}
@@ -592,9 +626,9 @@ export default function TestingInbox({ user }) {
                         }}
                       >
                         <span>
-                          {transaction.transaction_type === "message_sent"
-                            ? "You spent"
-                            : "Host earned"}{" "}
+                          {["message_sent", "media_sent"].includes(transaction.transaction_type)
+                            ? `${activeConversation?.otherUserName || "User"} spent`
+                            : `${hosts.find((host) => host.host_user_id === selectedHostId)?.host_name || "Host"} earned`}{" "}
                           {transaction.currency || "USD"}{" "}
                           {Number(transaction.amount || 0).toFixed(2)}
                         </span>

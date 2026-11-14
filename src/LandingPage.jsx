@@ -2978,7 +2978,7 @@ break;
             <div style={{ fontSize: 9, opacity: 0.6 }}>Total earned</div>
             <strong style={{ display: "block", marginTop: 3, fontSize: 15, color: "#22c55e" }}>
               +${walletTransactions
-                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_earning", "message_received", "tip_received"].includes(t.type))
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_earning", "message_received", "media_received", "tip_received"].includes(t.type))
                 .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0)
                 .toFixed(2)}
             </strong>
@@ -2987,7 +2987,7 @@ break;
             <div style={{ fontSize: 9, opacity: 0.6 }}>Total spent</div>
             <strong style={{ display: "block", marginTop: 3, fontSize: 15 }}>
               -${walletTransactions
-                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_charge", "tip_sent"].includes(t.type))
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_charge", "message_sent", "media_sent", "tip_sent"].includes(t.type))
                 .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0)
                 .toFixed(2)}
             </strong>
@@ -2999,10 +2999,10 @@ break;
           <strong style={{ fontSize: 12 }}>
             {(() => {
               const earned = walletTransactions
-                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_earning", "message_received", "tip_received"].includes(t.type))
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_earning", "message_received", "media_received", "tip_received"].includes(t.type))
                 .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0);
               const spent = walletTransactions
-                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_charge", "tip_sent"].includes(t.type))
+                .filter((t) => t.currency === "USD" && t.status === "completed" && ["call_charge", "message_sent", "media_sent", "tip_sent"].includes(t.type))
                 .reduce((sum, t) => sum + Math.abs(Number(t.amount || 0)), 0);
               return `${earned - spent >= 0 ? "+" : "-"}$${Math.abs(earned - spent).toFixed(2)}`;
             })()}
@@ -3022,11 +3022,14 @@ break;
         ) : (
           <div style={{ maxHeight: 220, overflowY: "auto" }}>
             {walletTransactions.filter((t) => t.currency === "USD").slice(0, 20).map((transaction) => {
-              const incoming = ["call_earning", "message_received", "tip_received"].includes(transaction.type);
+              const incoming = ["call_earning", "message_received", "media_received", "tip_received"].includes(transaction.type);
               const labels = {
                 call_earning: "Call earnings",
                 call_charge: "Call charge",
-                message_received: "Paid message",
+                message_sent: "Paid message sent",
+                message_received: "Paid message received",
+                media_sent: "Paid media sent",
+                media_received: "Paid media received",
                 tip_received: "Tip received",
                 tip_sent: "Tip sent",
               };

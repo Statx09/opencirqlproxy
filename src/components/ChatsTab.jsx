@@ -9,16 +9,41 @@ export default function ChatsTab({
 }) {
   const [conversations, setConversations] = useState([]);
 
+  const getHostIds = (host) =>
+    [host?.user_id, host?.profile_id, host?.id].filter(Boolean);
+
+  const findHost = (id) =>
+    hosts.find((host) => getHostIds(host).includes(id));
+
+  const getCurrentUserIds = () => {
+    const currentProfile = hosts.find(
+      (host) => host.user_id === user?.id || host.id === user?.id
+    );
+
+    return [
+      user?.id,
+      currentProfile?.id,
+      currentProfile?.user_id,
+    ].filter(Boolean);
+  };
+
   const loadChats = useCallback(async () => {
     if (!user?.id) {
       setConversations([]);
       return;
     }
 
+    const userIds = getCurrentUserIds();
+
+    const filters = userIds.flatMap((id) => [
+      `sender_id.eq.${id}`,
+      `receiver_id.eq.${id}`,
+    ]);
+
     const { data, error } = await supabase
       .from("messages")
       .select("*")
-      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .or(filters.join(","))
       .is("event", null)
       .order("created_at", { ascending: false });
 
@@ -30,35 +55,39 @@ export default function ChatsTab({
     const map = new Map();
 
     for (const msg of data || []) {
-      const otherId =
-        msg.sender_id === user.id
-          ? msg.receiver_id
-          : msg.sender_id;
+      const senderIsUser = userIds.includes(msg.sender_id);
+      const otherId = senderIsUser
+        ? msg.receiver_id
+        : msg.sender_id;
 
-      if (map.has(otherId)) continue;
-
-      const host = hosts.find(
-        (h) =>
-          h.user_id === otherId ||
-          h.profile_id === otherId ||
-          h.id === otherId
-      );
+      const host = findHost(otherId);
 
       if (!host) continue;
 
-      map.set(otherId, {
-        host,
-        preview: msg.text || "",
-      });
+      const hostKey = getHostIds(host).sort()[0];
+
+      if (!map.has(hostKey)) {
+        map.set(hostKey, {
+          host,
+          hostKey,
+          preview: msg.text || "",
+          created_at: msg.created_at,
+        });
+      }
     }
-  setConversations(Array.from(map.values()));
+
+    setConversations(
+      Array.from(map.values()).sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime()
+      )
+    );
   }, [user?.id, hosts]);
 
   useEffect(() => {
     loadChats();
   }, [loadChats, refreshKey]);
-
-  /* ================= CHAT REALTIME ================= */
 
   useEffect(() => {
     if (!user?.id) return;
@@ -75,55 +104,50 @@ export default function ChatsTab({
         (payload) => {
           const message = payload.new;
 
-          if (message.event !== null) {
-            return;
-          }
+          if (message.event != null) return;
 
-          const belongsToUser =
-            message.sender_id === user.id ||
-            message.receiver_id === user.id;
+          const userIds = getCurrentUserIds();
 
-          if (!belongsToUser) {
-            return;
-          }
+          const senderIsUser = userIds.includes(message.sender_id);
+          const receiverIsUser = userIds.includes(message.receiver_id);
 
-          const otherId =
-            message.sender_id === user.id
-              ? message.receiver_id
-              : message.sender_id;
+          if (!senderIsUser && !receiverIsUser) return;
 
-          const host = hosts.find((h) => h.user_id === otherId);
+          const otherId = senderIsUser
+            ? message.receiver_id
+            : message.sender_id;
+
+          const host = findHost(otherId);
 
           if (!host) {
+            console.warn("CHAT REALTIME HOST NOT FOUND:", otherId);
             return;
           }
+
+          const hostKey = getHostIds(host).sort()[0];
 
           setConversations((previous) => {
             const existing = previous.find(
-              (conversation) =>
-                conversation.host.user_id === otherId
+              (conversation) => conversation.hostKey === hostKey
             );
 
-            if (existing) {
-              return [
-                {
-                  ...existing,
-                  preview: message.text || "",
-                },
-                ...previous.filter(
-                  (conversation) =>
-                    conversation.host.user_id !== otherId
-                ),
-              ];
-            }
+            const updated = {
+              host,
+              hostKey,
+              preview: message.text || "",
+              created_at: message.created_at,
+            };
 
             return [
-              {
-                host,
-                preview: message.text || "",
-              },
-              ...previous,
-            ];
+              updated,
+              ...previous.filter(
+                (conversation) => conversation.hostKey !== hostKey
+              ),
+            ].sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            );
           });
         }
       )
@@ -134,7 +158,7 @@ export default function ChatsTab({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, loadChats]);
+  }, [user?.id, hosts]);
 
   return (
     <div
@@ -154,9 +178,9 @@ export default function ChatsTab({
           No conversations yet.
         </div>
       ) : (
-        conversations.map(({ host, preview }) => (
+        conversations.map(({ host, hostKey, preview }) => (
           <div
-            key={host.user_id}
+            key={hostKey}
             onClick={() => onOpenChat(host)}
             style={{
               display: "flex",
@@ -164,8 +188,7 @@ export default function ChatsTab({
               alignItems: "center",
               padding: 12,
               cursor: "pointer",
-              borderBottom:
-                "1px solid rgba(255,255,255,.08)",
+              borderBottom: "1px solid rgba(255,255,255,.08)",
             }}
           >
             <img
@@ -179,16 +202,8 @@ export default function ChatsTab({
               }}
             />
 
-            <div
-              style={{
-                flex: 1,
-              }}
-            >
-              <div
-                style={{
-                  fontWeight: 700,
-                }}
-              >
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 700 }}>
                 {host.alias || host.name}
               </div>
 
@@ -208,9 +223,6 @@ export default function ChatsTab({
     </div>
   );
 }
-
-
-
 
 
 

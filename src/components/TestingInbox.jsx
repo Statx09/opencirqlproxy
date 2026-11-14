@@ -301,16 +301,21 @@ export default function TestingInbox({ user }) {
     }
 
     const channel = supabase
-      .channel(`testing-inbox-${selectedHostId}`)
-      .on(
-        "postgres_changes",
+      .channel(
+        "testing-inbox:36802a31-ed44-4b15-8b90-1790e950b893",
         {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        () => {
-          refresh();
+          config: { private: true },
+        }
+      )
+      .on(
+        "broadcast",
+        { event: "testing_inbox_message" },
+        (payload) => {
+          const hostUserId = payload?.payload?.host_user_id;
+
+          if (!cancelled && hostUserId === selectedHostId) {
+            refresh();
+          }
         }
       )
       .subscribe();

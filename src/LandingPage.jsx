@@ -2385,122 +2385,89 @@ break;
 />
 )}
 {/* OUTGOING CALL */}
-      {outgoingCall && (
-        <div
-          style={{
-            position: "fixed",
-            top: "68px",
-            right: "18px",
-            zIndex: 100009,
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "10px 14px 10px 10px",
-            borderRadius: "999px",
-            background: "rgba(15,23,42,.94)",
-            border: "1px solid rgba(34,197,94,.35)",
-            boxShadow: "0 12px 40px rgba(0,0,0,.35)",
-            backdropFilter: "blur(18px)",
-            WebkitBackdropFilter: "blur(18px)",
-            color: "#fff",
-          }}
-        >
-          <div
-            style={{
-              width: "42px",
-              height: "42px",
-              borderRadius: "50%",
-              overflow: "hidden",
-              background: "rgba(255,255,255,.08)",
-              border: "2px solid #22c55e",
-              boxShadow: "0 0 0 4px rgba(34,197,94,.12)",
-              flexShrink: 0,
-            }}
-          >
-            {outgoingCall.avatar_url || outgoingCall.avatar ? (
-              <img
-                src={outgoingCall.avatar_url || outgoingCall.avatar}
-                alt=""
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "18px",
-                }}
-              >
-
-              </div>
-            )}
-          </div>
-
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: "13px",
-                fontWeight: 700,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                maxWidth: "180px",
-              }}
-            >
-              {outgoingCall.alias || outgoingCall.name || "Host"}
-            </div>
-            <div style={{ marginTop: '4px', fontSize: '11px', color: 'rgba(255,255,255,.6)' }}>Calling... Waiting for answer</div>
-            <div style={{ marginTop: '4px', fontSize: '12px', color: 'rgba(255,255,255,.85)' }}>
-              {"Call charge: " + (outgoingCall.currency === "USD" ? "$" : (outgoingCall.currency || "USD") + " ") + (Number(outgoingCall.call_rate) + 0.10).toFixed(2) + "/min"}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={async () => {
-              console.log("OUTGOING CALL CANCELLED", outgoingCall.call_id);
-
-              if (outgoingCall.call_id) {
-                const { error } = await supabase
-                  .from("calls")
-                  .update({ status: "cancelled" })
-                  .eq("id", outgoingCall.call_id)
-                  .eq("status", "ringing");
-
-                if (error) {
-                  console.error("CALL CANCELLATION ERROR:", error);
-                }
-              }
-
-              setOutgoingCall(null);
-              setSelectedHost(null);
-            }}
-            style={{
-              width: "34px",
-              height: "34px",
-              borderRadius: "50%",
-              border: "1px solid rgba(255,255,255,.12)",
-              background: "rgba(255,255,255,.07)",
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: "15px",
-            }}
-            aria-label="Cancel call"
-            title="Cancel call"
-          >
-            ÃƒÆ’Ã¢â‚¬â€
-          </button>
+{outgoingCall && (
+  <div
+    style={{
+      position: "fixed",
+      top: "68px",
+      right: "18px",
+      zIndex: 100009,
+      width: "min(340px, calc(100vw - 32px))",
+      padding: "14px",
+      borderRadius: "18px",
+      background: "rgba(15,23,42,.96)",
+      border: "1px solid rgba(34,197,94,.28)",
+      boxShadow: "0 18px 55px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.04)",
+      color: "#fff",
+      overflow: "hidden",
+    }}
+  >
+    <div style={{ position: "absolute", inset: 0, borderRadius: "18px", pointerEvents: "none", boxShadow: "inset 0 0 0 1px rgba(34,197,94,.08)" }} />
+    <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ position: "relative", width: 58, height: 58, flex: "0 0 58px", borderRadius: "50%" }}>
+        <div style={{ position: "absolute", inset: -4, borderRadius: "50%", border: "2px solid #22c55e", animation: "upcallIncomingPulse 1.5s ease-out infinite" }} />
+        <div style={{ position: "relative", width: 58, height: 58, borderRadius: "50%", overflow: "hidden", background: "rgba(255,255,255,.08)", border: "2px solid #22c55e", boxShadow: "0 0 18px rgba(34,197,94,.28)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {(outgoingCall.avatar_url || outgoingCall.avatar) ? (
+            <img src={outgoingCall.avatar_url || outgoingCall.avatar} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <span style={{ fontSize: 22, fontWeight: 800 }}>{(outgoingCall.alias || outgoingCall.name || "H").charAt(0).toUpperCase()}</span>
+          )}
         </div>
-      )}
+      </div>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 3 }}>
+          <span style={{ width: 7, height: 7, flex: "0 0 7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 10px rgba(34,197,94,.8)", animation: "upcallIncomingDot 1s ease-in-out infinite" }} />
+          <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase", color: "#4ade80" }}>CALLING</span>
+        </div>
+        <div style={{ fontSize: 16, fontWeight: 800, lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {outgoingCall.alias || outgoingCall.name || "Host"}
+        </div>
+        <div style={{ fontSize: 11, marginTop: 3, color: "rgba(255,255,255,.52)" }}>
+          {outgoingCall.callType === "audio" ? "Voice call - Waiting for answer" : "Video call - Waiting for answer"}
+        </div>
+        <div style={{ fontSize: 11, marginTop: 5, color: "rgba(255,255,255,.72)" }}>
+          {"Call charge: " + (outgoingCall.currency === "USD" ? "$" : (outgoingCall.currency || "USD") + " ") + (Number(outgoingCall.call_rate) + 0.10).toFixed(2) + "/min"}
+        </div>
+      </div>
+    </div>
+    <div style={{ position: "relative", display: "flex", gap: 9, marginTop: 13 }}>
+      <button
+        onClick={async () => {
+          console.log("OUTGOING CALL CANCELLED", outgoingCall.call_id);
 
-      {incomingCall && (
+          if (outgoingCall.call_id) {
+            const { error } = await supabase
+              .from("calls")
+              .update({ status: "cancelled" })
+              .eq("id", outgoingCall.call_id)
+              .eq("status", "ringing");
+
+            if (error) {
+              console.error("CALL CANCELLATION ERROR:", error);
+            }
+          }
+
+          setOutgoingCall(null);
+          setSelectedHost(null);
+        }}
+        style={{
+          width: "100%",
+          background: "rgba(239,68,68,.1)",
+          border: "1px solid rgba(239,68,68,.3)",
+          color: "#f87171",
+          fontSize: 12,
+          fontWeight: 700,
+          height: 38,
+          borderRadius: 10,
+          cursor: "pointer",
+        }}
+      >
+        Cancel call
+      </button>
+    </div>
+  </div>
+)}
+{incomingCall && (
         <div
           style={{
             position: "fixed",

@@ -69,11 +69,11 @@ function VideoTile({ participant, local = false, cameraOff = false, joined = fal
               ? cameraOff
                 ? "Your camera is off"
                 : joined
-                  ? "Starting your cameraÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"
-                  : "Connecting your cameraÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"
+                  ? "Starting your camera..."
+                  : "Connecting your camera..."
               : participant?.tracks?.video?.state === "off"
                 ? "Camera is off"
-                : "Connecting cameraÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"}
+                : "Connecting camera..."}
           </span>
         </div>
       )}

@@ -69,11 +69,11 @@ function VideoTile({ participant, local = false, cameraOff = false, joined = fal
               ? cameraOff
                 ? "Your camera is off"
                 : joined
-                  ? "Starting your cameraÃ¢â‚¬Â¦"
-                  : "Connecting your cameraÃ¢â‚¬Â¦"
+                  ? "Starting your cameraÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"
+                  : "Connecting your cameraÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"
               : participant?.tracks?.video?.state === "off"
                 ? "Camera is off"
-                : "Connecting cameraÃ¢â‚¬Â¦"}
+                : "Connecting cameraÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦"}
           </span>
         </div>
       )}
@@ -136,7 +136,9 @@ export default function DailyRoom({
 
   const refreshParticipants = useCallback((call) => {
     const current = call.participants();
-    setParticipants(Object.values(current || {}));
+    const list = Object.values(current || {});
+    setParticipants(list);
+    return list;
   }, []);
 
   useEffect(() => {
@@ -152,7 +154,22 @@ export default function DailyRoom({
         call = DailyIframe.createCallObject();
         callRef.current = call;
 
-        const syncParticipants = () => refreshParticipants(call);
+        const syncParticipants = () => {
+          if (cancelled) return;
+
+          const currentParticipants = refreshParticipants(call);
+          const remoteMediaReady = currentParticipants.some(
+            (participant) =>
+              !participant.local &&
+              (getAudioTrack(participant) || getVideoTrack(participant))
+          );
+
+          if (remoteMediaReady && !joinedNotifiedRef.current) {
+            joinedNotifiedRef.current = true;
+            console.log("DAILY REMOTE MEDIA READY");
+            callbacksRef.current.onJoined?.();
+          }
+        };
 
         const handleJoined = () => {
           if (cancelled) return;
@@ -161,10 +178,6 @@ export default function DailyRoom({
           setErrorMessage("");
           syncParticipants();
 
-          if (!joinedNotifiedRef.current) {
-            joinedNotifiedRef.current = true;
-            callbacksRef.current.onJoined?.();
-          }
         };
 
         const handleLeft = () => {
@@ -593,3 +606,4 @@ export default function DailyRoom({
     </div>
   );
 }
+

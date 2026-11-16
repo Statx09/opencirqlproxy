@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+﻿import React, { useEffect, useRef, useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { supabase } from "../lib/supabaseClient";
@@ -18,6 +18,27 @@ export default function MessagesModal({
   const { theme } = useTheme();
 
   const hostId = host?.user_id ?? host?.profile_id ?? host?.id;
+  const hostProfileId = host?.profile_id ?? host?.id;
+  const hostAuthId = host?.user_id;
+  const [currentProfileId, setCurrentProfileId] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadCurrentProfile() {
+      if (!user?.id) { setCurrentProfileId(null); return; }
+      const { data, error } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
+      if (cancelled) return;
+      if (error || !data?.id) {
+        console.error("CURRENT PROFILE LOOKUP ERROR:", error);
+        setCurrentProfileId(null);
+        setLoading(false);
+        return;
+      }
+      setCurrentProfileId(data.id);
+    }
+    loadCurrentProfile();
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   const displayName = host?.alias || host?.name || "Host";
 
@@ -257,105 +278,77 @@ const scrollToBottom = () => {
   /* ================= LOAD MESSAGES ================= */
 
   const loadMessages = useCallback(async () => {
-    if (!user?.id || !hostId) return;
-
+    if (!user?.id || !hostProfileId || !currentProfileId) return;
     setLoading(true);
-
-    const { data, error } = await supabase
-      .from("messages")
-      .select("*")
-      .or(
-        `and(sender_id.eq.${user.id},receiver_id.eq.${hostId}),and(sender_id.eq.${hostId},receiver_id.eq.${user.id})`
-      )
-      .order("created_at", { ascending: true });
-
-    if (error) console.error(error);
-
+    const pairs = [
+      `and(sender_id.eq.${user.id},receiver_id.eq.${hostProfileId})`,
+      `and(sender_id.eq.${hostProfileId},receiver_id.eq.${user.id})`,
+      `and(sender_id.eq.${hostProfileId},receiver_id.eq.${currentProfileId})`,
+    ];
+    pairs.push(`and(sender_id.eq.${currentProfileId},receiver_id.eq.${hostProfileId})`);
+    if (hostAuthId) {
+      pairs.push(
+        `and(sender_id.eq.${hostAuthId},receiver_id.eq.${currentProfileId})`,
+        `and(sender_id.eq.${hostAuthId},receiver_id.eq.${user.id})`,
+        `and(sender_id.eq.${user.id},receiver_id.eq.${hostAuthId})`
+      );
+    }
+    const { data, error } = await supabase.from("messages").select("*").is("event", null).or(pairs.join(",")).order("created_at", { ascending: true });
+    if (error) console.error("LOAD MESSAGES ERROR:", error);
     setMessages(data || []);
     setLoading(false);
-
     scrollToBottom();
-
-  }, [user?.id, hostId]);
+  }, [user?.id, hostProfileId, hostAuthId, currentProfileId]);
 
   /* ================= MARK MESSAGES READ ================= */
 
   const markMessagesRead = useCallback(async () => {
-    if (!user?.id || !hostId) return;
-
-    const { error } = await supabase
-      .from("messages")
-      .update({ read_at: new Date().toISOString() })
-      .eq("receiver_id", user.id)
-      .eq("sender_id", hostId)
-      .is("event", null)
-      .is("read_at", null);
-
-    if (error) {
-      console.error("MARK MESSAGES READ ERROR:", error);
-      return;
+    if (!user?.id || !hostProfileId || !currentProfileId) return;
+    const incomingPairs = [
+      `and(sender_id.eq.${hostProfileId},receiver_id.eq.${user.id})`,
+      `and(sender_id.eq.${hostProfileId},receiver_id.eq.${currentProfileId})`,
+    ];
+    pairs.push(`and(sender_id.eq.${currentProfileId},receiver_id.eq.${hostProfileId})`);
+    if (hostAuthId) {
+      incomingPairs.push(
+        `and(sender_id.eq.${hostAuthId},receiver_id.eq.${currentProfileId})`,
+        `and(sender_id.eq.${hostAuthId},receiver_id.eq.${user.id})`
+      );
     }
-
+    const { error } = await supabase.from("messages").update({ read_at: new Date().toISOString() }).or(incomingPairs.join(",")).is("event", null).is("read_at", null);
+    if (error) { console.error("MARK MESSAGES READ ERROR:", error); return; }
     console.log("MESSAGES MARKED READ");
-
-    if (onMessagesRead) {
-      onMessagesRead();
-    }
-  }, [user?.id, hostId]);
+    onMessagesRead?.();
+  }, [user?.id, hostProfileId, hostAuthId, currentProfileId, onMessagesRead]);
 
   useEffect(() => {
+    if (!currentProfileId) return;
     loadMessages();
     markMessagesRead();
-  }, [loadMessages, markMessagesRead]);
+  }, [loadMessages, markMessagesRead, currentProfileId]);
 
   /* ================= REALTIME MESSAGES ================= */
 
   useEffect(() => {
-    if (!user?.id || !hostId) return;
-
-    const channel = supabase
-      .channel(`messages-${user.id}-${hostId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        (payload) => {
-          const newMessage = payload.new;
-
-          const belongsToChat =
-            (newMessage.sender_id === user.id &&
-              newMessage.receiver_id === hostId) ||
-            (newMessage.sender_id === hostId &&
-              newMessage.receiver_id === user.id);
-
-          if (!belongsToChat) return;
-
-          setMessages((current) => {
-            if (current.some((msg) => msg.id === newMessage.id)) {
-              return current;
-            }
-
-            return [...current, newMessage];
-          });
-
-          requestAnimationFrame(() => {
-            if (chatRef.current) {
-              chatRef.current.scrollTop =
-                chatRef.current.scrollHeight;
-            }
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id, hostId]);
-
+    if (!user?.id || !hostProfileId || !currentProfileId) return;
+    const channel = supabase.channel(`messages-${user.id}-${hostProfileId}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+      const newMessage = payload.new;
+      if (newMessage.event !== null) return;
+      const belongsToChat =
+        (newMessage.sender_id === user.id && newMessage.receiver_id === hostProfileId) ||
+        (newMessage.sender_id === hostProfileId && newMessage.receiver_id === user.id) ||
+        (newMessage.sender_id === hostProfileId && newMessage.receiver_id === currentProfileId) ||
+        (newMessage.sender_id === currentProfileId && newMessage.receiver_id === hostProfileId) ||
+        (hostAuthId && newMessage.sender_id === hostAuthId && newMessage.receiver_id === currentProfileId) ||
+        (hostAuthId && newMessage.sender_id === hostAuthId && newMessage.receiver_id === user.id) ||
+        (hostAuthId && newMessage.sender_id === user.id && newMessage.receiver_id === hostAuthId);
+      if (!belongsToChat) return;
+      setMessages((current) => current.some((msg) => msg.id === newMessage.id) ? current : [...current, newMessage]);
+      if (newMessage.sender_id !== user.id) markMessagesRead();
+      requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
+    }).subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, hostProfileId, hostAuthId, currentProfileId, markMessagesRead]);
 /* ================= SEND MESSAGE ================= */
 
 const sendMessage = async () => {

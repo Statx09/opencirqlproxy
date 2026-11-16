@@ -50,22 +50,23 @@ export default function ConnectionsTab({ user, onOpenProfile }) {
     setProfiles(profileMap);
     setConnections(data);
 
-    const msgMap = {};
-
-    for (const id of partnerIds) {
-      const { data: lastMsg } = await supabase
-        .from("messages")
-        .select("*")
-        .or(
-          `and(sender_id.eq.${user.id},receiver_id.eq.${id}),and(sender_id.eq.${id},receiver_id.eq.${user.id})`
-        )
-        .order("created_at", { ascending: false })
-        .limit(1);
-
-      msgMap[id] = lastMsg?.[0] || null;
-    }
-
-    setMessages(msgMap);
+    const { data: ownProfile } = await supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle();
+const msgMap = {};
+for (const id of partnerIds) {
+  const partnerProfile = profileMap[id];
+  const pairs = [`and(sender_id.eq.${user.id},receiver_id.eq.${id})`, `and(sender_id.eq.${id},receiver_id.eq.${user.id})`];
+  if (partnerProfile?.id) {
+    if (ownProfile?.id) pairs.push(`and(sender_id.eq.${ownProfile.id},receiver_id.eq.${partnerProfile.id})`);
+    pairs.push(`and(sender_id.eq.${user.id},receiver_id.eq.${partnerProfile.id})`);
+    if (ownProfile?.id) pairs.push(`and(sender_id.eq.${id},receiver_id.eq.${ownProfile.id})`);
+    pairs.push(`and(sender_id.eq.${partnerProfile.id},receiver_id.eq.${user.id})`);
+    if (ownProfile?.id) pairs.push(`and(sender_id.eq.${partnerProfile.id},receiver_id.eq.${ownProfile.id})`);
+  }
+  const { data: lastMsg, error: messageError } = await supabase.from("messages").select("*").is("event", null).or(pairs.join(",")).order("created_at", { ascending: false }).limit(1);
+  if (messageError) console.error("CONNECTION MESSAGE PREVIEW ERROR:", id, messageError);
+  msgMap[id] = lastMsg?.[0] || null;
+}
+setMessages(msgMap);
   };
 
   useEffect(() => {

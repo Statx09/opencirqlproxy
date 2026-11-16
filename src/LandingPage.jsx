@@ -233,6 +233,17 @@ React.useEffect(() => {
 }, []);
   const tipPopupTimerRef = React.useRef(null);
 const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+const [currentProfileId, setCurrentProfileId] = useState(null);
+useEffect(() => {
+  let cancelled = false;
+  if (!user?.id) { setCurrentProfileId(null); return; }
+  supabase.from("profiles").select("id").eq("user_id", user.id).maybeSingle().then(({ data, error }) => {
+    if (cancelled) return;
+    if (error) { console.error("CURRENT PROFILE ID LOAD ERROR:", error); return; }
+    setCurrentProfileId(data?.id || null);
+  });
+  return () => { cancelled = true; };
+}, [user?.id]);
 const [unreadConnectionRequestCount, setUnreadConnectionRequestCount] = useState(0);
 const [pushOnboardingOpen, setPushOnboardingOpen] = useState(false);
 const [pushOnboardingBusy, setPushOnboardingBusy] = useState(false);
@@ -583,25 +594,13 @@ useEffect(() => {
 /* ================= UNREAD MESSAGES ================= */
 
 const loadUnreadMessages = useCallback(async () => {
-  if (!user?.id) {
-    setUnreadMessageCount(0);
-    return;
-  }
-
-  const { count, error } = await supabase
-    .from("messages")
-    .select("id", { count: "exact", head: true })
-    .eq("receiver_id", user.id)
-    .is("event", null)
-    .is("read_at", null);
-
-  if (error) {
-    console.error("UNREAD MESSAGES LOAD ERROR:", error);
-    return;
-  }
-
+  if (!user?.id) { setUnreadMessageCount(0); return; }
+  let query = supabase.from("messages").select("id", { count: "exact", head: true }).is("event", null).is("read_at", null);
+  query = currentProfileId ? query.or(`receiver_id.eq.${user.id},receiver_id.eq.${currentProfileId}`) : query.eq("receiver_id", user.id);
+  const { count, error } = await query;
+  if (error) { console.error("UNREAD MESSAGES LOAD ERROR:", error); return; }
   setUnreadMessageCount(count || 0);
-}, [user?.id]);
+}, [user?.id, currentProfileId]);
 
 useEffect(() => {
   loadUnreadMessages();
@@ -933,42 +932,17 @@ console.log(
 
   useEffect(() => {
     if (!user?.id) return;
-
-    const channel = supabase
-      .channel(`messages-unread-${user.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `receiver_id=eq.${user.id}`,
-        },
-        (payload) => {
-          const message = payload.new;
-
-          // Only normal chat messages affect the message badge.
-          if (message.event !== null || message.read_at) {
-            return;
-          }
-
-          // Keep the unread badge accurate.
-          loadUnreadMessages();
-
-          clearTimeout(tipPopupTimerRef.current);
-          setTipPopup("\u{1F4AC} New message received");
-          tipPopupTimerRef.current = setTimeout(() => {
-            setTipPopup(null);
-          }, 4500);}
-      )
-      .subscribe((status) => {
-        console.log("MESSAGES REALTIME:", status);
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
+    const recipientIds = [...new Set([user.id, currentProfileId].filter(Boolean))];
+    const channels = recipientIds.map((recipientId) => supabase.channel(`messages-unread-${user.id}-${recipientId}`).on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `receiver_id=eq.${recipientId}` }, (payload) => {
+      const message = payload.new;
+      if (message.event !== null || message.read_at) return;
+      loadUnreadMessages();
+      clearTimeout(tipPopupTimerRef.current);
+      setTipPopup("💬 New message received");
+      tipPopupTimerRef.current = setTimeout(() => setTipPopup(null), 4500);
+    }).subscribe((status) => console.log("MESSAGES REALTIME:", recipientId, status)));
+    return () => channels.forEach((channel) => supabase.removeChannel(channel));
+  }, [user?.id, currentProfileId, loadUnreadMessages]);
   const markNotificationsRead = useCallback(async () => {
     if (!user?.id) return;
 
@@ -995,27 +969,17 @@ console.log(
   }, [user?.id]);
 const [networkView, setNetworkView] = useState("main");
 
-  const markMessagesRead = useCallback(
-    async (otherUserId) => {
-      if (!user?.id || !otherUserId) return;
-
-      const { error } = await supabase
-        .from("messages")
-        .update({ read_at: new Date().toISOString() })
-        .eq("receiver_id", user.id)
-        .eq("sender_id", otherUserId)
-        .is("event", null)
-        .is("read_at", null);
-
-      if (error) {
-        console.error("MESSAGES READ ERROR:", error);
-        return;
-      }
-
-      await loadUnreadMessages();
-    },
-    [user?.id, loadUnreadMessages]
-  );
+  const markMessagesRead = useCallback(async (hostOrId) => {
+  if (!user?.id || !hostOrId) return;
+  const hostAuthId = typeof hostOrId === "object" ? hostOrId?.user_id : hostOrId;
+  const hostProfileId = typeof hostOrId === "object" ? (hostOrId?.profile_id ?? hostOrId?.id) : null;
+  const senderIds = [...new Set([hostAuthId, hostProfileId].filter(Boolean))];
+  const receiverIds = [...new Set([user.id, currentProfileId].filter(Boolean))];
+  if (!senderIds.length || !receiverIds.length) return;
+  const { error } = await supabase.from("messages").update({ read_at: new Date().toISOString() }).in("sender_id", senderIds).in("receiver_id", receiverIds).is("event", null).is("read_at", null);
+  if (error) { console.error("MESSAGES READ ERROR:", error); return; }
+  await loadUnreadMessages();
+}, [user?.id, currentProfileId, loadUnreadMessages]);
 
   const [activeModal, setActiveModal] = useState(null);
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -1303,7 +1267,7 @@ useEffect(() => {
 
         case "messages":
   setSelectedHost(host);
-  await markMessagesRead(host?.user_id ?? host?.profile_id ?? host?.id);
+  await markMessagesRead(host);
   setActiveModal("messages");
   break;
 

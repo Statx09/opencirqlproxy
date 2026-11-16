@@ -589,7 +589,7 @@ export default function CallsStudioModal({
               </div>
               {tipEarned > 0 && (
                 <div style={{ color: "#22c55e", fontWeight: 700 }}>
-                  +${Number(tipEarned).toFixed(2)} tip ðŸŽ‰
+                  +${Number(tipEarned).toFixed(2)} tip !
                 </div>
               )}
             </>

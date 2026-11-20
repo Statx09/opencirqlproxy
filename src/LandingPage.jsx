@@ -36,6 +36,7 @@ export default function LandingPage({ user }) {
   });
 
   const [hosts, setHosts] = useState([]);
+  const [pendingCiriWelcome, setPendingCiriWelcome] = useState(false);
   const [mode, setMode] = useState("grid");
   const [index, setIndex] = useState(0);
 const [swipeSearchQuery, setSwipeSearchQuery] = useState("");
@@ -1231,12 +1232,14 @@ useEffect(() => {
         });
 
         const result = await response.json();
+        if (cancelled) return;
         if (!response.ok) {
           console.error("CIRI WELCOME ERROR:", result);
           return;
         }
 
         console.log("CIRI WELCOME RESULT:", result);
+        if (result?.ai_message) setPendingCiriWelcome(true);
       } catch (error) {
         console.error("CIRI WELCOME REQUEST FAILED:", error);
       }
@@ -1245,6 +1248,24 @@ useEffect(() => {
     requestCiriWelcome();
     return () => { cancelled = true; };
   }, [user?.id]);
+  useEffect(() => {
+    if (!pendingCiriWelcome || !hosts?.length) return;
+
+    const ciriId = "15281081-5bab-46a6-9a54-db8683c5cd75";
+    const ciriHost = hosts.find(
+      (host) => host?.user_id === ciriId || host?.id === ciriId
+    );
+
+    if (!ciriHost) {
+      console.warn("CIRI WELCOME: Ciri profile not found in loaded hosts.");
+      return;
+    }
+
+    setSelectedHost(ciriHost);
+    setSelectedProfile(null);
+    setActiveModal("messages");
+    setPendingCiriWelcome(false);
+  }, [pendingCiriWelcome, hosts]);
   /* ================= ACTION ROUTER ================= */
 
   const handleAction = useCallback(
